@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.escolaconectada.com/api',
+  apiUrl: 'https://escola-conectada-api.techminds.net.br/api',
 };
