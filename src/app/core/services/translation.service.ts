@@ -1,7 +1,7 @@
-import { Injectable, signal, computed } from '@angular/core';
+﻿import { Injectable, signal, computed } from '@angular/core';
 import { TRANSLATIONS } from '../data/translations';
 
-type Lang = 'pt' | 'es';
+type Lang = 'pt' | 'es' | 'en';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +20,7 @@ export class TranslationService {
   constructor() {
     // Try to detect browser lang or load from storage
     const saved = localStorage.getItem('app_lang') as Lang;
-    if (saved && ['pt', 'es'].includes(saved)) {
+    if (saved && ['pt', 'es', 'en'].includes(saved)) {
       this.currentLang.set(saved);
     }
   }
@@ -71,3 +71,4 @@ export class TranslationService {
     return new Intl.DateTimeFormat(locale).format(d);
   }
 }
+

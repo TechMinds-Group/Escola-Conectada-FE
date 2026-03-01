@@ -118,7 +118,7 @@ export class PublicView implements OnInit, OnDestroy {
   ): string {
     const d = new Date(date);
     const lang = this.translationService.lang(); // 'pt', 'es'
-    const localeMap = { pt: 'pt-BR', es: 'es-ES' };
+    const localeMap: Record<string, string> = { pt: 'pt-BR', es: 'es-ES' };
     const locale = localeMap[lang] || 'pt-BR';
 
     if (format === 'time') {

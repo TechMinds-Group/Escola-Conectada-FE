@@ -1,8 +1,9 @@
-import { Component, inject, signal, computed } from '@angular/core';
+﻿import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ThemeService } from '../../core/services/theme.service';
 import { TranslationService } from '../../core/services/translation.service';
+import { TRANSLATIONS } from '../../core/data/translations';
 import { SearchService, SearchResult } from '../../core/services/search.service';
 import { FormsModule } from '@angular/forms';
 
@@ -19,14 +20,26 @@ export class Topbar {
   private searchService = inject(SearchService);
   private router = inject(Router);
 
-  isLanguageSheetOpen = false;
-  searchQuery = signal('');
+  // Dynamic language configuration based on available translations
+  availableLanguages = Object.keys(TRANSLATIONS).map(code => ({
+    code: code as 'pt' | 'es' | 'en',
+    flag: this.getFlagForLanguage(code as 'pt' | 'es' | 'en'),
+    name: code // Will be translated dynamically
+  }));
 
-  searchResults = computed(() => {
+  getFlagForLanguage(lang: 'pt' | 'es' | 'en'): string {
+    const flagMap = { pt: 'br', es: 'es', en: 'us' };
+    return 'assets/flags/' + flagMap[lang] + '.svg';
+  }
+
+  public isLanguageSheetOpen = false;
+  public searchQuery = signal('');
+
+  public searchResults = computed(() => {
     return this.searchService.search(this.searchQuery());
   });
 
-  showSearchResults = false;
+  public showSearchResults = false;
 
   onSearchFocus() {
     this.showSearchResults = true;
@@ -53,7 +66,7 @@ export class Topbar {
     this.isLanguageSheetOpen = false;
   }
 
-  selectLanguageMobile(lang: 'pt' | 'es') {
+  selectLanguageMobile(lang: 'pt' | 'es' | 'en') {
     this.translation.setLang(lang);
     this.closeLanguageSheet();
   }
