@@ -4,9 +4,16 @@
   "outputDirectory": "dist/escola-conectada",
   "installCommand": "npm install",
   "framework": null,
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/dashboard",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!.*\\.).)*",
       "destination": "/index.html"
     }
   ]
