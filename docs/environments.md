@@ -1,0 +1,101 @@
+# Estrutura de Environments - Escola Conectada
+
+## Como Funciona
+
+O projeto usa um **arquivo único** `environment.ts` que se adapta dinamicamente baseado em **variáveis de ambiente** injetadas em build time.
+
+```typescript
+// src/environments/environment.ts
+export const environment = {
+  production: import.meta.env.NG_APP_PRODUCTION === 'true',
+  apiUrl: `${import.meta.env.NG_APP_API_URL}/api` || '/api',
+};
+```
+
+## Arquivos de Environment
+
+| Arquivo           | Ambiente    | API URL                                                 | Production |
+| ----------------- | ----------- | ------------------------------------------------------- | ---------- |
+| `.env`            | Development | `http://localhost:5231`                                 | `false`    |
+| `.env.staging`    | Staging     | `https://escola-conectada-api-staging.techminds.net.br` | `false`    |
+| `.env.production` | Production  | `https://escola-conectada-api.techminds.net.br`         | `true`     |
+
+## Comandos
+
+```bash
+# Development (com proxy)
+npm start
+
+# Staging
+npm run start:staging
+npm run build:staging
+
+# Production
+npm run start:prod
+npm run build:prod
+```
+
+## Uso no Código
+
+```typescript
+import { environment } from '../../../environments/environment';
+
+// Usar API
+private apiUrl = `${environment.apiUrl}/meu-endpoint`;
+
+// Verificar ambiente
+if (environment.production) {
+  // Lógica de produção
+}
+```
+
+## Proxy (Development)
+
+O arquivo `proxy.conf.json` redireciona `/api` para `localhost:5231` apenas durante `npm start`:
+
+```json
+{
+  "/api": {
+    "target": "https://localhost:5231",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
+```
+
+**Como funciona:**
+
+- **Development:** `/api/users` → `https://localhost:5231/api/users` (via proxy)
+- **Staging/Production:** Usa URL direta do `.env` correspondente
+
+## Docker
+
+### Dockerfile (Production/Staging)
+
+O Dockerfile suporta builds em diferentes ambientes via `ARG`:
+
+```bash
+# Build para production (padrão)
+docker build -t frontend-prod .
+
+# Build para staging
+docker build --build-arg BUILD_CONFIGURATION=staging -t frontend-staging .
+
+# Build para development
+docker build --build-arg BUILD_CONFIGURATION=development -t frontend-dev .
+```
+
+### Dockerfile.dev (Development)
+
+Para desenvolvimento local com hot-reload:
+
+```bash
+docker build -f Dockerfile.dev -t frontend-dev .
+docker run -p 4200:4200 -v $(pwd):/app frontend-dev
+```
+
+## Dependências
+
+Este projeto utiliza `@ngx-env/builder` para injeção de variáveis de ambiente em build time:
+
+- **@ngx-env/builder**: ^21.0.1
