@@ -1,0 +1,264 @@
+<div class="container-fluid py-4 pb-5">
+  <!-- Header -->
+  <div
+    class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
+  >
+    <div>
+      <h2 class="fw-bold mb-0 text-primary">Turmas</h2>
+      <p class="text-muted mb-0 small">Gerencie as turmas da sua escola</p>
+    </div>
+
+    <!-- Desktop New Button -->
+    <div class="d-flex align-items-center gap-3">
+      <button
+        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold transition-hover"
+        [routerLink]="['/classes/new']"
+      >
+        <i class="bi bi-plus-lg fs-5"></i>
+        Nova Turma
+      </button>
+    </div>
+
+    <!-- Mobile FAB -->
+    <div
+      class="d-md-none position-fixed bottom-0 end-0 m-4 z-3"
+      style="margin-bottom: 5rem !important"
+    >
+      <button
+        class="btn btn-primary rounded-circle shadow-lg p-0 d-flex align-items-center justify-content-center transition-hover"
+        style="width: 56px; height: 56px"
+        [routerLink]="['/classes/new']"
+      >
+        <i class="bi bi-plus-lg fs-3 text-white"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="d-flex flex-wrap gap-3 mb-4 align-items-end">
+    <!-- Search -->
+    <div class="flex-grow-1" style="min-width: 200px; max-width: 340px">
+      <label class="form-label small fw-bold text-muted text-uppercase">Buscar</label>
+      <div class="input-group shadow-sm">
+        <span class="input-group-text">
+          <i class="bi bi-search text-muted"></i>
+        </span>
+        <input
+          type="text"
+          class="form-control ps-2"
+          placeholder="Nome ou matriz..."
+          [ngModel]="searchText()"
+          (ngModelChange)="searchText.set($event)"
+        />
+      </div>
+    </div>
+
+    <!-- Ano -->
+    <div style="min-width: 130px">
+      <label class="form-label small fw-bold text-muted text-uppercase">Ano</label>
+      <select
+        class="form-select shadow-sm"
+        [ngModel]="filterAno()"
+        (ngModelChange)="filterAno.set(+$event)"
+      >
+        @for (ano of anoOptions; track ano) {
+          <option [ngValue]="ano">{{ ano }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Turno -->
+    <div style="min-width: 140px">
+      <label class="form-label small fw-bold text-muted text-uppercase">Turno</label>
+      <select
+        class="form-select shadow-sm"
+        [ngModel]="filterTurno()"
+        (ngModelChange)="filterTurno.set($event)"
+      >
+        @for (turno of turnoOptions; track turno) {
+          <option [value]="turno">{{ turno }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="text-muted mt-2 small">Carregando turmas...</p>
+    </div>
+  } @else {
+    <!-- WEB: Premium Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden d-none d-md-block bg-white">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th
+                class="border-0 ps-4 py-3 text-muted small fw-bold text-uppercase"
+                style="width: 30%"
+              >
+                Turma
+              </th>
+              <th class="border-0 py-3 text-muted small fw-bold text-uppercase" style="width: 20%">
+                Turno
+              </th>
+              <th class="border-0 py-3 text-muted small fw-bold text-uppercase" style="width: 25%">
+                Matriz
+              </th>
+              <th class="border-0 py-3 text-muted small fw-bold text-uppercase" style="width: 15%">
+                Capacidade
+              </th>
+              <th
+                class="border-0 py-3 text-muted small fw-bold text-uppercase text-center"
+                style="width: 10%"
+              >
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody class="border-top-0">
+            @for (turma of filteredTurmas(); track turma.id) {
+              <tr
+                class="transition-hover cursor-pointer border-bottom-light"
+                [routerLink]="['/classes/edit', turma.id]"
+              >
+                <!-- Col 1: Name + Year -->
+                <td class="ps-4 py-3">
+                  <div class="d-flex align-items-center gap-3">
+                    <div
+                      class="turma-icon d-flex align-items-center justify-content-center rounded-3"
+                      style="width: 40px; height: 40px; flex-shrink: 0"
+                    >
+                      <i class="bi bi-people-fill fs-5"></i>
+                    </div>
+                    <div>
+                      <div class="fw-bold text-dark">{{ turma.nome }}</div>
+                      <div class="xx-small text-muted text-uppercase fw-semibold">
+                        {{ turma.ano }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <!-- Col 2: Turno -->
+                <td class="py-3">
+                  <span
+                    class="badge rounded-pill px-3 py-2 border-0"
+                    [ngClass]="getTurnoBadgeClass(turma.turno)"
+                  >
+                    {{ turma.turno }}
+                  </span>
+                </td>
+                <!-- Col 3: Matrix -->
+                <td class="py-3">
+                  <div class="d-flex flex-column gap-1">
+                    <span class="badge rounded-pill bg-light text-dark border-0 px-3 py-2">
+                      {{ turma.matrizNome || 'Sem matriz' }}
+                    </span>
+                    @if (turma.gradeHorariaNome) {
+                      <span
+                        class="badge rounded-pill border-0 px-3 py-1 xx-small d-inline-flex align-items-center gap-1 schedule-badge"
+                        style="width: fit-content"
+                      >
+                        <i class="bi bi-alarm"></i>
+                        {{ turma.gradeHorariaNome }}
+                      </span>
+                    }
+                  </div>
+                </td>
+                <!-- Col 4: Capacity -->
+                <td class="py-3">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-person-fill text-muted small"></i>
+                    <span class="small fw-bold">{{ turma.capacidadeMaxima }}</span>
+                    <span class="xx-small text-muted">alunos</span>
+                  </div>
+                </td>
+                <!-- Col 5: Status -->
+                <td class="text-center py-3">
+                  <span
+                    class="badge rounded-pill px-3 py-2 border"
+                    [ngClass]="getStatusBadgeClass(turma.statusCronograma)"
+                  >
+                    {{ turma.statusCronograma }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="text-center py-5 text-muted">
+                  <i class="bi bi-people fs-1 d-block mb-2 opacity-50"></i>
+                  <span class="d-block fw-medium">Nenhuma turma encontrada.</span>
+                  <span class="small">Crie uma nova turma para começar.</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MOBILE: Cards -->
+    <div class="d-md-none d-flex flex-column gap-3">
+      @for (turma of filteredTurmas(); track turma.id) {
+        <div
+          class="card border-0 shadow-sm rounded-4 p-3 bg-white transition-hover"
+          [routerLink]="['/cadastro-turma', turma.id]"
+        >
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <div
+              class="turma-icon flex-shrink-0 d-flex align-items-center justify-content-center rounded-3"
+              style="width: 48px; height: 48px"
+            >
+              <i class="bi bi-people-fill fs-4"></i>
+            </div>
+            <div class="flex-grow-1 min-w-0">
+              <div class="d-flex justify-content-between align-items-start">
+                <h6 class="fw-bold text-dark mb-0 text-truncate">{{ turma.nome }}</h6>
+              </div>
+              <div class="xx-small text-muted text-uppercase fw-semibold mt-1">
+                {{ turma.ano }} •
+                <span
+                  [ngClass]="getTurnoBadgeClass(turma.turno)"
+                  class="badge rounded-pill px-2 py-1 border-0 small"
+                  >{{ turma.turno }}</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="d-flex align-items-center justify-content-between pt-2 border-top border-light gap-2"
+          >
+            <div class="d-flex flex-column gap-1">
+              <span class="badge rounded-pill bg-light text-dark border-0 px-3 py-1 small">
+                {{ turma.matrizNome || 'Sem matriz' }}
+              </span>
+              @if (turma.gradeHorariaNome) {
+                <span
+                  class="badge rounded-pill border-0 px-3 py-1 xx-small d-inline-flex align-items-center gap-1 schedule-badge"
+                  style="width: fit-content"
+                >
+                  <i class="bi bi-alarm"></i>
+                  {{ turma.gradeHorariaNome }}
+                </span>
+              }
+            </div>
+            <span
+              class="badge rounded-pill border"
+              [ngClass]="getStatusBadgeClass(turma.statusCronograma)"
+            >
+              {{ turma.statusCronograma }}
+            </span>
+          </div>
+        </div>
+      } @empty {
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-people fs-2 d-block mb-2 opacity-50"></i>
+          Nenhuma turma encontrada.
+        </div>
+      }
+    </div>
+  }
+</div>

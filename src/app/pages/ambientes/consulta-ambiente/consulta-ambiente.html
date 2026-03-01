@@ -1,0 +1,193 @@
+<div class="container-fluid py-4 pb-5">
+  <!-- Header -->
+  <div
+    class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
+  >
+    <div>
+      <h2 class="fw-bold mb-0 text-primary">{{ t().admin.rooms.title }}</h2>
+      <p class="text-muted mb-0 small">{{ t().admin.rooms.subtitle }}</p>
+    </div>
+
+    <!-- Actions -->
+    <button
+      class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold"
+      (click)="navigateToNew()"
+      id="rooms-new-btn"
+      tourAnchor="roomsNewBtnDesktop"
+    >
+      <i class="bi bi-plus-lg fs-5"></i>
+      {{ t().admin.rooms.buttons.new }}
+    </button>
+
+    <!-- Mobile FAB -->
+    <div
+      class="d-md-none position-fixed bottom-0 end-0 m-4 z-3"
+      style="margin-bottom: 5rem !important"
+    >
+      <button
+        class="btn btn-primary rounded-circle shadow-lg p-0 d-flex align-items-center justify-content-center"
+        style="width: 56px; height: 56px"
+        (click)="navigateToNew()"
+        tourAnchor="roomsNewBtnMobile"
+      >
+        <i class="bi bi-plus-lg fs-3 text-white"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="d-flex flex-wrap gap-3 mb-4">
+    <div style="min-width: 200px">
+      <label class="form-label small fw-bold text-muted text-uppercase">{{
+        t().admin.rooms.filters.type
+      }}</label>
+      <select
+        class="form-select bg-white border-0 shadow-sm"
+        [ngModel]="filterType()"
+        (ngModelChange)="filterType.set($event)"
+      >
+        <option value="Todos">{{ t().admin.rooms.filters.options.all }}</option>
+        @for (type of schoolData.roomTypes(); track type.id) {
+          <option [value]="type.name">{{ type.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- WEB VIEW: FRAMELESS TABLE -->
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden d-none d-md-block">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th
+              class="border-0 ps-4 py-3 text-secondary small fw-bold text-uppercase letter-spacing-1"
+              style="width: 35%"
+            >
+              <span tourAnchor="roomTableColName" class="d-inline-block px-2 py-1 rounded">
+                {{ t().admin.rooms.table.spot }}
+              </span>
+            </th>
+            <th
+              class="border-0 py-3 text-secondary small fw-bold text-uppercase letter-spacing-1"
+              style="width: 25%"
+            >
+              <span tourAnchor="roomTableColLocation" class="d-inline-block px-2 py-1 rounded">
+                {{ t().admin.rooms.table.location }}
+              </span>
+            </th>
+            <th
+              class="border-0 py-3 text-secondary small fw-bold text-uppercase letter-spacing-1"
+              style="width: 15%"
+            >
+              <span tourAnchor="roomTableColCapacity" class="d-inline-block px-2 py-1 rounded">
+                {{ t().admin.rooms.table.capacity }}
+              </span>
+            </th>
+            <th
+              class="border-0 py-3 text-secondary small fw-bold text-uppercase letter-spacing-1"
+              style="width: 25%"
+            >
+              <span tourAnchor="roomTableColResources" class="d-inline-block px-2 py-1 rounded">
+                {{ t().admin.rooms.table.resources }}
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (room of rooms(); track room.id) {
+            <tr class="cursor-pointer" (click)="navigateToEdit(room.id)">
+              <td class="ps-4">
+                <div class="d-flex align-items-center gap-3">
+                  <div
+                    class="room-icon bg-primary-subtle text-primary rounded-3 p-2 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px"
+                  >
+                    <i class="bi bi-building"></i>
+                  </div>
+                  <div>
+                    <div class="fw-bold text-primary">{{ room.name }}</div>
+                    <span
+                      class="badge rounded-pill border fw-normal py-1 px-2 small bg-light text-dark"
+                    >
+                      {{ room.type }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td class="text-muted fw-medium">{{ room.block }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2 text-muted">
+                  <i class="bi bi-people-fill"></i>
+                  <span class="fw-bold">{{ room.capacity }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="d-flex gap-1 align-items-center flex-wrap">
+                  @for (res of room.resources.slice(0, 3); track res) {
+                    <span class="badge bg-light text-muted border fw-normal">{{
+                      getResourceLabel(res)
+                    }}</span>
+                  }
+                  @if (room.resources.length > 3) {
+                    <span class="small text-muted">+{{ room.resources.length - 3 }}</span>
+                  }
+                  @if (room.resources.length === 0) {
+                    <span class="text-muted small">-</span>
+                  }
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="text-center py-5 text-muted">
+                <i class="bi bi-building-slash fs-1 d-block mb-3"></i>
+                {{ t().admin.rooms.table.empty }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MOBILE VIEW: CARDS -->
+  <div class="d-md-none d-flex flex-column gap-3">
+    @for (room of rooms(); track room.id) {
+      <div class="card border-0 shadow-sm p-3" (click)="navigateToEdit(room.id)">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex align-items-center gap-3">
+            <div
+              class="room-icon bg-primary-subtle text-primary rounded-3 p-2 d-flex align-items-center justify-content-center flex-shrink-0"
+              style="width: 48px; height: 48px"
+            >
+              <i class="bi bi-building fs-5"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold text-primary mb-0">{{ room.name }}</h6>
+              <div class="small text-muted">{{ room.block }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-light"
+        >
+          <div class="d-flex align-items-center gap-2 text-muted small">
+            <i class="bi bi-people-fill"></i>
+            <span class="fw-bold">{{ room.capacity }} {{ t().admin.rooms.table.places }}</span>
+          </div>
+
+          <span class="badge rounded-pill border fw-normal small bg-light text-dark">
+            {{ room.type }}
+          </span>
+        </div>
+      </div>
+    } @empty {
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-building-slash fs-1 d-block mb-3"></i>
+        <p>{{ t().admin.rooms.table.empty }}</p>
+      </div>
+    }
+  </div>
+</div>

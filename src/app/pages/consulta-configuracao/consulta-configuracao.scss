@@ -1,0 +1,40 @@
+/* Shared Styles */
+.page-container {
+  padding-bottom: 80px;
+}
+
+.help-trigger-btn {
+  background-color: transparent !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  border-radius: 50%; /* Make it circular */
+  transition: all 0.2s ease;
+
+  /* Reduced size for better baseline alignment */
+  width: 24px;
+  height: 24px;
+  padding: 0 !important;
+
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &:hover {
+    background-color: var(--hover-bg) !important;
+    border-color: var(--bs-primary) !important;
+    color: var(--bs-primary) !important;
+  }
+}
+
+.border-dashed {
+  border-style: dashed !important;
+}

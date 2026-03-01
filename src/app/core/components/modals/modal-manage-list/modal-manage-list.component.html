@@ -1,0 +1,100 @@
+<div [class.d-none]="!isOpen" [class.d-block]="isOpen">
+  <div
+    class="modal fade modal-overlay"
+    [class.show]="isOpen"
+    [class.d-block]="isOpen"
+    tabindex="-1"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <!-- Header -->
+        <div class="modal-header bg-light border-0 p-4">
+          <div>
+            <h5 class="modal-title fw-extrabold text-dark mb-0">{{ title }}</h5>
+            <small class="text-muted">{{ subtitle }}</small>
+          </div>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+
+        <div class="modal-body p-4">
+          <!-- Input Area -->
+          <div class="mb-4">
+            <label class="form-label small fw-bold text-muted text-uppercase mb-2">
+              {{ editingItem() ? labelEdit : labelNew }}
+            </label>
+            <div class="input-group shadow-xs rounded-3 overflow-hidden">
+              <input
+                type="text"
+                class="form-control py-2 px-3 fw-bold"
+                [placeholder]="inputPlaceholder"
+                [ngModel]="newItemName()"
+                (ngModelChange)="newItemName.set($any($event))"
+                (keyup.enter)="saveItem()"
+                [attr.tourAnchor]="tourAnchorInput || null"
+              />
+              @if (editingItem()) {
+                <button class="btn btn-light border px-3 fw-bold" (click)="cancelEdit()">
+                  Cancelar
+                </button>
+              }
+              <button
+                class="btn btn-primary px-4 fw-bold"
+                (click)="saveItem()"
+                [disabled]="!newItemName().trim()"
+                [attr.tourAnchor]="tourAnchorSave || null"
+              >
+                {{ editingItem() ? 'Salvar' : 'Adicionar' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- List Area -->
+          <div class="list-group list-group-flush rounded-4 border overflow-hidden shadow-xs">
+            @for (item of items; track item.id) {
+              <div
+                class="list-group-item d-flex justify-content-between align-items-center p-3 border-bottom transition-hover"
+              >
+                <div class="d-flex align-items-center gap-3">
+                  <div class="icon-dot bg-primary rounded-circle"></div>
+                  <span class="fw-bold text-dark">{{ item.name }}</span>
+                </div>
+                <div class="d-flex gap-2">
+                  <button
+                    class="btn modal-edit-btn btn-outline-primary rounded-3 d-inline-flex align-items-center justify-content-center"
+                    (click)="startEdit(item)"
+                    title="Editar"
+                  >
+                    <i class="bi bi-pencil-fill"></i>
+                  </button>
+                  <button
+                    class="btn modal-edit-btn btn-outline-danger rounded-3 d-inline-flex align-items-center justify-content-center"
+                    (click)="deleteItem(item.id)"
+                    title="Excluir"
+                  >
+                    <i class="bi bi-trash fs-6"></i>
+                  </button>
+                </div>
+              </div>
+            } @empty {
+              <div class="text-center py-5 text-muted small bg-light bg-opacity-50">
+                <i class="bi fs-2 opacity-25 d-block mb-2" [class]="emptyIcon"></i>
+                {{ emptyMessage }}
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer border-0 p-4 pt-0">
+          <button
+            type="button"
+            class="btn btn-light border w-100 fw-bold py-2 rounded-3 shadow-sm"
+            (click)="closeModal()"
+          >
+            Concluído
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

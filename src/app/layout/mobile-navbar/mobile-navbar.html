@@ -1,0 +1,250 @@
+<nav
+  class="mobile-navbar fixed-bottom w-100 d-block d-lg-none"
+  (click)="closeMenu()"
+  [class.navbar-priority-top]="isCadastrosOpen || isConfigOpen || isProfileOpen"
+>
+  <!-- PANEL 1: REGISTROS -->
+  <div
+    class="registration-panel shadow-lg"
+    [class.show]="isCadastrosOpen"
+    (click)="$event.stopPropagation()"
+    id="mobileRegistrosPanel"
+  >
+    <div class="panel-header px-3 py-2 border-bottom d-flex align-items-center">
+      <span class="fw-bold text-main">{{ t().admin.sidebar.records }}</span>
+      <button class="btn-close ms-auto" style="font-size: 0.8rem" (click)="closeMenu()"></button>
+    </div>
+    <div class="panel-body p-2">
+      <div class="row g-2 text-center">
+        <!-- Professores -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/professores"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-person-badge fs-3 mb-1 text-primary"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.teachers }}</span>
+          </a>
+        </div>
+        <!-- Turmas -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/classes"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-people fs-3 mb-1 text-success"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.classes }}</span>
+          </a>
+        </div>
+        <!-- Salas (Ambientes) -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/ambientes"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-building fs-3 mb-1 text-warning"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.rooms }}</span>
+          </a>
+        </div>
+        <!-- Matriz -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/consulta-matriz-escolar"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-grid-3x3 fs-3 mb-1 text-danger"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.matrix }}</span>
+          </a>
+        </div>
+        <!-- Matérias -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/subjects"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-journal-text fs-3 mb-1 text-secondary"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.subjects }}</span>
+          </a>
+        </div>
+        <!-- Calendário -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/calendar"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-calendar-event fs-3 mb-1 text-info"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.calendar }}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 2: CONFIGURAÇÕES -->
+  <div
+    class="registration-panel shadow-lg"
+    [class.show]="isConfigOpen"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="panel-header px-3 py-2 border-bottom d-flex align-items-center">
+      <span class="fw-bold text-main">{{ t().admin.sidebar.settings }}</span>
+      <button class="btn-close ms-auto" style="font-size: 0.8rem" (click)="closeMenu()"></button>
+    </div>
+    <div class="panel-body p-2">
+      <div class="row g-2 text-center">
+        <!-- Grade -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/time-grids"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-clock-history fs-3 mb-1 text-primary"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.timeGrids }}</span>
+          </a>
+        </div>
+        <!-- TV Settings -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/tv-settings"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-display fs-3 mb-1 text-dark"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.tvSettings }}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 3: PERFIL -->
+  <div
+    class="registration-panel shadow-lg"
+    [class.show]="isProfileOpen"
+    (click)="$event.stopPropagation()"
+    id="mobileProfilePanel"
+  >
+    <div class="panel-header px-3 py-2 border-bottom d-flex align-items-center">
+      <span class="fw-bold text-main">{{ t().admin.sidebar.profile }}</span>
+      <button class="btn-close ms-auto" style="font-size: 0.8rem" (click)="closeMenu()"></button>
+    </div>
+    <div class="panel-body p-2">
+      <!-- User Info Mini Header -->
+      <div class="d-flex align-items-center gap-3 p-3 mb-2 bg-light-alpha rounded-3 border-theme">
+        <img
+          src="https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff"
+          class="rounded-circle border border-theme"
+          width="48"
+          height="48"
+        />
+        <div>
+          <div class="fw-bold text-main">Admin User</div>
+          <div class="small text-muted">admin@escola.com.br</div>
+        </div>
+      </div>
+
+      <!-- Action Grid -->
+      <div class="row g-2 text-center">
+        <!-- Minha Conta -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/profile"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-person-circle fs-3 mb-1 text-primary"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.profile }}</span>
+          </a>
+        </div>
+
+        <!-- Config Escola -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/school-settings"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-building-gear fs-3 mb-1 text-secondary"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.schoolSettings }}</span>
+          </a>
+        </div>
+
+        <!-- Gestão Usuários -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/users"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-people-fill fs-3 mb-1 text-info"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.users }}</span>
+          </a>
+        </div>
+
+        <!-- Sair -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            href="#"
+            class="panel-item text-decoration-none text-danger d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-box-arrow-right fs-3 mb-1"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.logout }}</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM SBAR NAV -->
+  <div
+    class="nav-bar-container d-flex align-items-center justify-content-around pb-2 pt-2 bg-surface border-top border-theme"
+  >
+    <!-- 1. Home -->
+    <a
+      routerLink="/dashboard"
+      routerLinkActive="active"
+      class="nav-item text-decoration-none d-flex flex-column align-items-center text-muted"
+    >
+      <i class="bi bi-house-door fs-4"></i>
+      <span class="xx-small mt-1">{{ t().admin.sidebar.dashboard }}</span>
+    </a>
+
+    <!-- 2. Registros (Toggle) -->
+    <button
+      class="nav-item border-0 bg-transparent text-decoration-none d-flex flex-column align-items-center text-muted"
+      (click)="toggleCadastros($event)"
+      [class.active]="isCadastrosOpen"
+    >
+      <i class="bi bi-folder2-open fs-4"></i>
+      <span class="xx-small mt-1">{{ t().admin.sidebar.records }}</span>
+    </button>
+
+    <!-- 3. Config (Toggle) -->
+    <button
+      class="nav-item border-0 bg-transparent text-decoration-none d-flex flex-column align-items-center text-muted"
+      (click)="toggleConfig($event)"
+      [class.active]="isConfigOpen"
+    >
+      <i class="bi bi-gear fs-4"></i>
+      <span class="xx-small mt-1">{{ t().admin.sidebar.settings }}</span>
+    </button>
+
+    <!-- 4. Perfil (Toggle) -->
+    <button
+      class="nav-item border-0 bg-transparent text-decoration-none d-flex flex-column align-items-center text-muted"
+      (click)="toggleProfile($event)"
+      [class.active]="isProfileOpen"
+    >
+      <i class="bi bi-person-circle fs-4"></i>
+      <span class="xx-small mt-1">{{ t().admin.sidebar.profile }}</span>
+    </button>
+  </div>
+</nav>

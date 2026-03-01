@@ -1,0 +1,212 @@
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4 animate-slide-down">
+    <div>
+      <h2 class="fw-bold text-main mb-1">Gestão de Usuários</h2>
+      <p class="text-muted mb-0 small">Controle de acesso e permissões da equipe.</p>
+    </div>
+    <!-- Desktop Button -->
+    <button
+      (click)="openModal()"
+      class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold"
+    >
+      <i class="bi bi-person-plus-fill fs-5"></i>
+      <span>Convidar Usuário</span>
+    </button>
+    <!-- Mobile FAB -->
+    <div
+      class="d-md-none position-fixed bottom-0 end-0 m-4 z-3"
+      style="margin-bottom: 5rem !important"
+    >
+      <button
+        class="btn btn-primary rounded-circle shadow-lg p-0 d-flex align-items-center justify-content-center"
+        style="width: 56px; height: 56px"
+        (click)="openModal()"
+      >
+        <i class="bi bi-person-plus-fill fs-3 text-dark"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- WEB VIEW: TABLE -->
+  <div
+    class="d-none d-md-block card bg-surface border-theme shadow-sm rounded-4 overflow-hidden animate-fade-in-up"
+  >
+    <div class="table-responsive">
+      <table
+        class="table table-hover align-middle mb-0"
+        style="border-collapse: separate; border-spacing: 0"
+      >
+        <thead class="bg-light-alpha">
+          <tr>
+            <th
+              class="py-3 px-4 text-muted small text-uppercase fw-bold border-bottom border-theme"
+            >
+              Usuário
+            </th>
+            <th
+              class="py-3 px-4 text-muted small text-uppercase fw-bold border-bottom border-theme"
+            >
+              E-mail
+            </th>
+            <th
+              class="py-3 px-4 text-muted small text-uppercase fw-bold border-bottom border-theme"
+            >
+              Nível de Acesso
+            </th>
+            <th
+              class="py-3 px-4 text-muted small text-uppercase fw-bold border-bottom border-theme"
+            >
+              Último Acesso
+            </th>
+            <th
+              class="py-3 px-4 text-end text-muted small text-uppercase fw-bold border-bottom border-theme"
+            >
+              Ações
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr class="group-hover-light">
+              <td class="py-3 px-4 border-bottom border-theme">
+                <div class="d-flex align-items-center gap-3">
+                  <img
+                    [src]="user.avatar"
+                    class="rounded-circle border border-2 border-theme"
+                    width="40"
+                    height="40"
+                  />
+                  <span class="fw-bold text-main">{{ user.name }}</span>
+                </div>
+              </td>
+              <td class="py-3 px-4 text-muted border-bottom border-theme font-monospace small">
+                {{ user.email }}
+              </td>
+              <td class="py-3 px-4 border-bottom border-theme">
+                <span
+                  class="badge rounded-pill fw-medium px-3 py-2"
+                  [ngClass]="getBadgeClass(user.role)"
+                >
+                  {{ user.role }}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-muted border-bottom border-theme small">
+                {{ user.lastAccess }}
+              </td>
+              <td class="py-3 px-4 text-end border-bottom border-theme">
+                <button class="btn btn-sm btn-icon btn-ghost text-muted hover-primary">
+                  <i class="bi bi-three-dots-vertical"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MOBILE VIEW: CARDS -->
+  <div class="d-md-none d-flex flex-column gap-3 pb-5">
+    @for (user of users(); track user.id) {
+      <div class="mobile-card-item shadow-sm position-relative py-4 px-3">
+        <!-- Action Button (Absolute Top Right) -->
+        <div class="position-absolute top-0 end-0 p-2">
+          <button class="btn btn-icon text-muted">
+            <i class="bi bi-three-dots-vertical"></i>
+          </button>
+        </div>
+
+        <!-- Centered Content -->
+        <div class="d-flex flex-column align-items-center text-center">
+          <img
+            [src]="user.avatar"
+            class="rounded-circle border border-theme shadow-sm mb-3"
+            width="72"
+            height="72"
+          />
+
+          <h6 class="fw-bold text-main mb-1">{{ user.name }}</h6>
+          <div
+            class="text-muted small font-monospace mb-3 text-truncate w-100"
+            style="max-width: 250px"
+          >
+            {{ user.email }}
+          </div>
+
+          <span
+            class="badge rounded-pill fw-medium px-4 py-2 mb-3"
+            [ngClass]="getBadgeClass(user.role)"
+          >
+            {{ user.role }}
+          </span>
+
+          <div class="border-top border-theme pt-3 w-100 text-muted x-small text-uppercase fw-bold">
+            <i class="bi bi-clock-history me-1"></i> Último acesso: {{ user.lastAccess }}
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Invite Modal -->
+@if (showModal()) {
+  <div
+    class="modal fade show d-block"
+    tabindex="-1"
+    style="background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px)"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-surface border-theme rounded-4 shadow-lg animate-fade-in-up">
+        <div class="modal-header border-bottom border-theme p-4">
+          <h5 class="modal-title fw-bold text-main">Convidar Novo Usuário</h5>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form [formGroup]="userForm" class="d-flex flex-column gap-3">
+            <div>
+              <label class="form-label text-muted small fw-bold">Nome Completo</label>
+              <input
+                formControlName="name"
+                type="text"
+                class="form-control bg-light-alpha border-theme text-main"
+                placeholder="Ex: Maria Silva"
+                [class.is-invalid]="userForm.get('name')?.invalid && saveAttempted()"
+              />
+            </div>
+            <div>
+              <label class="form-label text-muted small fw-bold">E-mail Corporativo</label>
+              <input
+                formControlName="email"
+                type="email"
+                class="form-control bg-light-alpha border-theme text-main"
+                placeholder="nome@escola.com.br"
+                [class.is-invalid]="userForm.get('email')?.invalid && saveAttempted()"
+              />
+            </div>
+            <div>
+              <label class="form-label text-muted small fw-bold">Nível de Acesso</label>
+              <select
+                formControlName="role"
+                class="form-select bg-light-alpha border-theme text-main"
+              >
+                <option value="Administrador">Administrador (Total)</option>
+                <option value="Coordenador">Coordenador (Pedagógico)</option>
+                <option value="Secretaria">Secretaria (Operacional)</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-top border-theme p-4">
+          <button type="button" class="btn btn-ghost text-muted" (click)="closeModal()">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-primary px-4" (click)="saveUser()">
+            Enviar Convite
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

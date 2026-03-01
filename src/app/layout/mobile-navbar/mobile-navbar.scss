@@ -1,0 +1,179 @@
+.mobile-navbar {
+  z-index: 2000;
+  pointer-events: none;
+  background: transparent;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+
+  @media (min-width: 768px) {
+    display: none !important;
+  }
+}
+
+.nav-bar-container {
+  height: 70px;
+  background: var(--modal-footer-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border-color);
+  padding-bottom: env(safe-area-inset-bottom);
+  width: 100%;
+  position: relative;
+  pointer-events: auto;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.65rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding-top: 4px;
+
+  i {
+    margin-bottom: 2px;
+    transition: transform 0.2s ease;
+  }
+
+  &.active {
+    color: #0d6efd; /* Blue for active state */
+
+    i {
+      transform: translateY(-2px);
+    }
+  }
+
+  &:active {
+    background: rgba(0, 0, 0, 0.03);
+  }
+}
+
+/* Botão Central de Destaque */
+.action-button-center {
+  position: relative;
+  top: -25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0;
+  margin: 0;
+  z-index: 2001;
+  pointer-events: auto;
+  box-shadow: none !important;
+
+  .circle-btn {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(
+      135deg,
+      var(--bs-primary) 0%,
+      rgba(var(--bs-primary-rgb), 0.8) 100%
+    );
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid var(--surface-color);
+    box-shadow:
+      0 8px 16px rgba(var(--bs-primary-rgb), 0.3),
+      0 4px 8px rgba(0, 0, 0, 0.1);
+    transition:
+      transform 0.2s cubic-bezier(0.12, 0.4, 0.29, 1.46),
+      border-color 0.3s ease;
+
+    i {
+      color: white;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+  }
+
+  .btn-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #0d6efd; /* Blue label */
+    margin-top: 8px;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
+    background: transparent !important;
+  }
+}
+
+/* Painel de Registro Flutuante - Themed */
+.registration-panel {
+  position: absolute;
+  bottom: 80px;
+  left: 10px;
+  right: 10px;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  overflow: hidden;
+  transform: translateY(20px);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: auto;
+  z-index: 100;
+
+  &.show {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    background: var(--bg-color);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .panel-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px;
+    border-radius: 12px;
+    transition: background 0.2s;
+    text-align: center;
+    color: var(--text-primary) !important;
+
+    i {
+      color: var(--bs-primary);
+    }
+
+    span {
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+[data-theme='dark'] {
+  .registration-panel .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+  }
+
+  .panel-item:active {
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .nav-bar-container {
+    box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.2);
+  }
+}

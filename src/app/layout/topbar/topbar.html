@@ -1,0 +1,165 @@
+<nav class="navbar navbar-expand bg-surface px-4 py-3 border-bottom shadow-sm">
+  <div class="container-fluid p-0">
+    <!-- Right Side -->
+    <div class="d-flex align-items-center ms-auto gap-3">
+      <!-- Breadcrumb or Context for Mobile -->
+      <div class="d-md-none d-flex align-items-center gap-2">
+        <div style="width: 28px; height: 28px">
+          <i class="bi bi-mortarboard-fill text-white xx-small"></i>
+        </div>
+        <span class="fw-bold text-main small">Escola Conectada</span>
+      </div>
+      <!-- Search -->
+      <div class="d-none d-md-block position-relative search-container">
+        <input
+          type="text"
+          class="form-control rounded-pill ps-5 bg-page border-0"
+          [placeholder]="translation.dictionary().public.search.placeholder"
+          style="width: 250px"
+          [(ngModel)]="searchQuery"
+          (focus)="onSearchFocus()"
+          (blur)="onSearchBlur()"
+          autocomplete="off"
+        />
+        <i
+          class="bi bi-search position-absolute text-muted"
+          style="top: 50%; transform: translateY(-50%); left: 1rem"
+        ></i>
+
+        <!-- Search Results Dropdown -->
+        @if (showSearchResults && searchQuery().length >= 2) {
+          <div class="search-results-dropdown glass-dropdown shadow-lg border-0 py-2">
+            @if (searchResults().length > 0) {
+              @for (result of searchResults(); track result.route) {
+                <button
+                  class="dropdown-item d-flex align-items-center gap-3 py-2 px-3"
+                  (click)="navigateToResult(result)"
+                >
+                  <i class="bi" [class]="result.icon"></i>
+                  <div class="d-flex flex-column">
+                    <span class="fw-medium text-main">{{ result.label }}</span>
+                    <small class="text-muted xx-small">{{ result.category }}</small>
+                  </div>
+                </button>
+              }
+            } @else {
+              <div class="px-3 py-2 text-muted small">
+                {{ translation.dictionary().public.search.noResults }}
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Notifications -->
+      <button class="btn btn-header-action position-relative">
+        <i class="bi bi-bell"></i>
+        <span class="notification-badge bg-danger border border-light rounded-circle">
+          <span class="visually-hidden">New alerts</span>
+        </span>
+      </button>
+
+      <!-- Theme Toggle -->
+      <button class="btn btn-header-action" (click)="theme.toggleTheme()">
+        <i
+          class="bi"
+          [class.bi-moon-stars-fill]="!theme.isDarkMode()"
+          [class.bi-sun-fill]="theme.isDarkMode()"
+        ></i>
+      </button>
+
+      <!-- Language Selector (Desktop) -->
+      <div class="dropdown d-none d-md-block">
+        <button class="btn btn-header-action" data-bs-toggle="dropdown" aria-expanded="false">
+          <span class="d-flex align-items-center justify-content-center">
+            @if (translation.lang() === 'pt') {
+              <img src="assets/flags/br.svg" alt="Português" width="22" class="rounded-1" />
+            } @else {
+              <img src="assets/flags/es.svg" alt="Español" width="22" class="rounded-1" />
+            }
+          </span>
+        </button>
+        <ul
+          class="dropdown-menu dropdown-menu-end glass-dropdown language-dropdown border-0 shadow-lg py-2 mt-2"
+        >
+          <li>
+            <button
+              class="dropdown-item d-flex align-items-center justify-content-center py-2 px-3 position-relative"
+              (click)="translation.setLang('pt')"
+              [class.active-lang]="translation.lang() === 'pt'"
+            >
+              <img src="assets/flags/br.svg" alt="Português" width="24" class="rounded-1" />
+            </button>
+          </li>
+
+          <li>
+            <button
+              class="dropdown-item d-flex align-items-center justify-content-center py-2 px-3 position-relative"
+              (click)="translation.setLang('es')"
+              [class.active-lang]="translation.lang() === 'es'"
+            >
+              <img src="assets/flags/es.svg" alt="Español" width="24" class="rounded-1" />
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Language Selector (Mobile Trigger) -->
+      <div class="d-md-none">
+        <button class="btn btn-header-action bg-white border-0" (click)="openLanguageSheet()">
+          <span class="d-flex align-items-center justify-content-center">
+            @if (translation.lang() === 'pt') {
+              <img src="assets/flags/br.svg" alt="Português" width="22" class="rounded-1" />
+            } @else {
+              <img src="assets/flags/es.svg" alt="Español" width="22" class="rounded-1" />
+            }
+          </span>
+        </button>
+      </div>
+
+      <!-- Mobile Search Icon (optional) -->
+      <button class="btn btn-light rounded-circle d-md-none text-muted">
+        <i class="bi bi-search fs-5"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Language Bottom Sheet -->
+@if (isLanguageSheetOpen) {
+  <div class="mobile-sheet-backdrop" (click)="closeLanguageSheet()"></div>
+  <div class="mobile-sheet bg-surface rounded-top-4 p-4 shadow-lg animate-slide-up">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h5 class="fw-bold text-main mb-0">Selecionar Idioma</h5>
+      <button
+        class="btn btn-icon btn-sm rounded-circle bg-light-alpha"
+        (click)="closeLanguageSheet()"
+      >
+        <i class="bi bi-x fs-5 text-muted"></i>
+      </button>
+    </div>
+    <div class="d-flex justify-content-center gap-4">
+      <!-- Português -->
+      <button
+        class="btn d-flex flex-column align-items-center justify-content-center p-3 rounded-4 border-theme"
+        style="width: 80px; height: 80px"
+        [class.bg-lavender-subtle]="translation.lang() === 'pt'"
+        [class.border-lavender]="translation.lang() === 'pt'"
+        (click)="selectLanguageMobile('pt')"
+      >
+        <img src="assets/flags/br.svg" alt="Português" width="48" class="rounded-1" />
+      </button>
+
+      <!-- Español -->
+      <button
+        class="btn d-flex flex-column align-items-center justify-content-center p-3 rounded-4 border-theme"
+        style="width: 80px; height: 80px"
+        [class.bg-lavender-subtle]="translation.lang() === 'es'"
+        [class.border-lavender]="translation.lang() === 'es'"
+        (click)="selectLanguageMobile('es')"
+      >
+        <img src="assets/flags/es.svg" alt="Español" width="48" class="rounded-1" />
+      </button>
+    </div>
+  </div>
+}
