@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -11,7 +11,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { TurmaService, TurmaDto, AlocacaoDto } from '../../../core/services/turma.service';
 import { AmbienteService } from '../../../core/services/ambiente.service';
-import { SchoolDataService, SchoolRoom } from '../../../core/services/school-data';
+import {
+  SchoolDataService,
+  SchoolRoom,
+  SchoolTimeGrid,
+  TimeSlot,
+} from '../../../core/services/school-data';
 import { TranslationService } from '../../../core/services/translation.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ButtonSaveComponent } from '../../../core/components/buttons/button-save';
@@ -21,6 +26,9 @@ import { ButtonEditComponent } from '../../../core/components/buttons/button-edi
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ProfessorService, Professor } from '../../../core/services/professor.service';
+import { ModalManageTimeGridComponent } from '../../../core/components/modals/modal-manage-time-grid/modal-manage-time-grid.component';
+import { ModalManageRoomComponent } from '../../../core/components/modals/modal-manage-room/modal-manage-room.component';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 @Component({
   selector: 'app-cadastro-turma',
@@ -35,6 +43,8 @@ import { ProfessorService, Professor } from '../../../core/services/professor.se
     ButtonCancelComponent,
     ButtonDeleteComponent,
     ButtonEditComponent,
+    ModalManageTimeGridComponent,
+    ModalManageRoomComponent,
   ],
   templateUrl: './cadastro-turma.html',
   styleUrl: './cadastro-turma.scss',
@@ -45,9 +55,10 @@ export class CadastroTurma implements OnInit {
   private router = inject(Router);
   private turmaService = inject(TurmaService);
   private ambienteService = inject(AmbienteService);
-  private schoolData = inject(SchoolDataService);
+  public schoolData = inject(SchoolDataService);
   private notification = inject(NotificationService);
   private professorService = inject(ProfessorService);
+  private confirmation = inject(ConfirmationService);
   public translation = inject(TranslationService);
   t = this.translation.dictionary;
 
@@ -67,6 +78,14 @@ export class CadastroTurma implements OnInit {
   matrices = this.schoolData.schoolMatrices;
   rooms = signal<SchoolRoom[]>([]);
   teachers = signal<Professor[]>([]);
+
+  // Grade Modal State
+  @ViewChild('gradeModal') gradeModal!: ModalManageTimeGridComponent;
+  showGradeManager = signal(false);
+
+  // Room Modal State
+  @ViewChild('roomModal') roomModal!: ModalManageRoomComponent;
+  showRoomManager = signal(false);
 
   // Timetable Config
   days = [
@@ -180,9 +199,6 @@ export class CadastroTurma implements OnInit {
   }
 
   setActiveTab(tab: string) {
-    if (tab === 'allocation' && !this.selectedMatrixId()) {
-      return;
-    }
     this.activeTab.set(tab);
   }
 
@@ -552,5 +568,41 @@ export class CadastroTurma implements OnInit {
 
   get f() {
     return this.classForm.controls;
+  }
+
+  // Grade Modal Logic
+  openGradeManager() {
+    this.showGradeManager.set(true);
+  }
+
+  closeGradeManager() {
+    this.showGradeManager.set(false);
+    this.gradeModal?.reset();
+  }
+
+  onGridSaved(newGridId: string) {
+    this.classForm.patchValue({ gradeHorariaId: newGridId });
+    this.closeGradeManager();
+  }
+
+  // Room Modal Logic
+  openRoomManager() {
+    this.showRoomManager.set(true);
+  }
+
+  closeRoomManager() {
+    this.showRoomManager.set(false);
+    this.roomModal?.reset();
+  }
+
+  onRoomSaved(newRoomId: string) {
+    // Refresh rooms list
+    this.ambienteService.list().subscribe({
+      next: (data) => {
+        this.rooms.set(data);
+        this.classForm.patchValue({ salaId: newRoomId });
+        this.closeRoomManager();
+      },
+    });
   }
 }
