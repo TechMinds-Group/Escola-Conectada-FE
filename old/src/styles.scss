@@ -1,0 +1,1097 @@
+﻿// 1. Define Theme Colors (Tech Blue & Deep Navy)
+$primary: #0d6efd; // Tech Blue
+$dark: #0b0f1a; // Deep Navy
+
+// 2. Map colors to Bootstrap theme-colors
+$theme-colors: (
+  'primary': $primary,
+  'dark': $dark,
+  'success': #16a34a,
+  'danger': #dc2626,
+  'warning': #f59e0b,
+  'info': #3b82f6,
+);
+
+// 3. Import Bootstrap using modern @use
+@use 'bootstrap/scss/bootstrap' with (
+  $primary: $primary,
+  $dark: $dark,
+  $theme-colors: $theme-colors
+);
+
+@use '@angular/material/prebuilt-themes/indigo-pink.css';
+@use 'bootstrap-icons/font/bootstrap-icons.css';
+
+/* Global Contrast & Accessibility Rules */
+.bg-primary,
+.bg-primary-subtle,
+.btn-primary {
+  color: #ffffff !important; /* Force White text on blue backgrounds */
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.bg-warning,
+.bg-warning-subtle,
+.btn-warning {
+  color: #0b0f1a !important; /* Keep dark text for warning (yellow/orange) */
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-primary {
+  &:hover,
+  &:focus,
+  &:active {
+    color: #ffffff !important;
+    background-color: #0b5ed7 !important; /* Darker blue for hover */
+    border-color: rgba(255, 255, 255, 0.15) !important;
+  }
+}
+
+.btn-warning {
+  &:hover,
+  &:focus,
+  &:active {
+    color: #0b0f1a !important;
+    background-color: #fab005 !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+/* Informative Text Contrast (BS 5.3 Utility) */
+.text-primary-emphasis {
+  color: #0a58ca !important; /* Darker blue for readability on white */
+}
+
+/* Global Styles */
+
+:root {
+  --font-family-sans-serif: 'Inter', sans-serif;
+
+  /* Modern Palette (Professional Blue Style) */
+  --bs-primary: #0d6efd;
+  --bs-primary-rgb: 13, 110, 253;
+
+  --bs-border-radius: 12px;
+  --bs-border-radius-lg: 16px;
+  --bs-border-radius-xl: 20px;
+
+  /* Light Theme (Soft Grey) */
+  --bg-color: #f8fafc;
+  --surface-color: #ffffff;
+  --text-primary: #0f172a; /* Slate 900 */
+  --text-secondary: #64748b; /* Slate 500 */
+  --border-color: #e2e8f0; /* Slate 200 */
+  --input-bg: #f1f5f9; /* Slate 100 */
+  --hover-table-bg: #f8fafc;
+
+  /* Structural items */
+  --hover-bg: rgba(13, 110, 253, 0.08); /* Primary tint */
+  --modal-footer-bg: #ffffff;
+  --btn-cancel-bg: #e2e8f0;
+  --btn-cancel-text: #475569;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 70px;
+  --sidebar-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --tooltip-bg: #333333;
+}
+
+/* Global Form Controls Styling */
+.form-control,
+.form-select {
+  background-color: #ffffff !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease-in-out !important;
+
+  &:focus {
+    background-color: #ffffff !important;
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1) !important;
+    outline: none !important;
+  }
+
+  &:disabled,
+  &[readonly] {
+    background-color: var(--input-bg) !important; /* Grey background when locked */
+    cursor: not-allowed;
+    opacity: 0.8;
+  }
+}
+
+/* Unified Input Groups (Integrated Icons) */
+.input-group {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background-color: #ffffff;
+  transition: all 0.2s ease-in-out;
+  overflow: hidden;
+
+  &:has(.form-control:focus),
+  &:has(.form-select:focus) {
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1) !important;
+  }
+
+  &:has(.form-control:disabled),
+  &:has(.form-control[readonly]) {
+    background-color: var(--input-bg) !important;
+  }
+
+  .form-control,
+  .form-select,
+  .input-group-text {
+    border: none !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .input-group-text {
+    color: var(--text-secondary);
+    padding-right: 0.5rem;
+  }
+}
+
+[data-theme='dark'] {
+  .form-control:not(.input-group .form-control),
+  .form-select:not(.input-group .form-select),
+  .input-group {
+    background-color: var(--input-bg) !important;
+    &:focus, &:has(.form-control:focus) {
+      background-color: var(--surface-color) !important;
+    }
+  }
+}
+
+
+
+/* Light Mode Placeholders (Global Default) */
+::placeholder {
+  color: rgba(0, 0, 0, 0.493) !important;
+  opacity: 1;
+}
+
+/* Dark Theme (Deep Night) */
+[data-theme='dark'] {
+  --bg-color: #0b0f1a;
+  --surface-color: #161b22; /* User requested #161B22 for depth */
+
+  /* Text Hierarchy */
+  --text-primary: #f8fafc; /* Body: Very Light Grey */
+  --text-secondary: #cbd5e1; /* Slated 300: High contrast for secondary text */
+
+  /* Professional High-Contrast Placeholders */
+  .form-control,
+  .form-select {
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.45) !important; // Increased visibility for parity with light mode
+      opacity: 1;
+    }
+  }
+
+  /* Borders & Dividers */
+  --border-color: rgba(255, 255, 255, 0.05); /* Minimal opacity but visible */
+
+  --input-bg: #0d1117;
+  --hover-table-bg: rgba(255, 255, 255, 0.03);
+  --hover-bg: rgba(13, 110, 253, 0.15); /* Primary Blue Tint */
+
+  --modal-footer-bg: #161b22;
+  --btn-cancel-bg: #21262d;
+  --btn-cancel-text: #e1e4e8;
+  --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  --tooltip-bg: #2d333b;
+
+  /* High Contrast / Glow Palette */
+  --bs-primary: #0d6efd;
+  --bs-primary-rgb: 13, 110, 253;
+
+  --bs-success: #03dac6; /* Mint */
+  --bs-success-rgb: 3, 218, 198;
+
+  --bs-danger: #cf6679; /* Coral */
+  --bs-danger-rgb: 207, 102, 121;
+
+  --bs-info: #79c0ff; /* Light Blue */
+  --bs-warning: #ffd166; /* Soft Gold */
+
+  /* Title Hierarchy Overrides */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .text-main,
+  .fw-bold {
+    color: #ffffff !important;
+  }
+
+  /* Link/Action Colors */
+  .text-primary,
+  .btn-link {
+    color: #3b82f6 !important; /* Lighter blue for effective contrast on dark */
+  }
+
+  /* Success/Danger Text Overrides */
+  .text-success {
+    color: #03dac6 !important;
+  }
+  .text-danger {
+    color: #cf6679 !important;
+  }
+
+  /* Fix Text Contrast on Glow Elements - UPDATED */
+  /* Remove .badge.* from the previous "Dark Text" rule because we want Bright Text on Soft BG for badges now. */
+  /* Keep buttons as they are (Solid BG + White Text for Primary) */
+  .btn-success,
+  .btn-warning {
+    color: #ffffff !important;
+    font-weight: 700;
+  }
+
+  .nav-pills .nav-link.active {
+    color: #ffffff !important;
+    font-weight: 700;
+    background-color: var(--bs-primary);
+  }
+
+  .btn-info {
+    color: #ffffff !important;
+    font-weight: 700;
+  }
+
+  /* SOFT COLOR BADGE VARIABLES (Dark Mode Overrides) */
+  /* Re-mapping Bootstrap Subtle Variables to our Glow Palette */
+
+  /* Primary (Blue) */
+  --bs-primary-bg-subtle: rgba(13, 110, 253, 0.15) !important;
+  --bs-primary-border-subtle: rgba(13, 110, 253, 0.2) !important;
+  --bs-primary-text-emphasis: #6ea8fe !important; /* Lighter blue for text */
+
+  /* Success (Mint) */
+  --bs-success-bg-subtle: rgba(3, 218, 198, 0.15) !important;
+  --bs-success-border-subtle: rgba(3, 218, 198, 0.2) !important;
+  --bs-success-text-emphasis: #03dac6 !important;
+
+  /* Danger (Coral) */
+  --bs-danger-bg-subtle: rgba(207, 102, 121, 0.15) !important;
+  --bs-danger-border-subtle: rgba(207, 102, 121, 0.2) !important;
+  --bs-danger-text-emphasis: #cf6679 !important;
+
+  /* Warning (Gold/Amber) */
+  --bs-warning-bg-subtle: rgba(255, 209, 102, 0.15) !important;
+  --bs-warning-border-subtle: rgba(255, 209, 102, 0.2) !important;
+  --bs-warning-text-emphasis: #ffd166 !important;
+
+  /* Info (Light Blue) */
+  --bs-info-bg-subtle: rgba(121, 192, 255, 0.15) !important;
+  --bs-info-border-subtle: rgba(121, 192, 255, 0.2) !important;
+  --bs-info-text-emphasis: #79c0ff !important;
+
+  /* Secondary/Light (Grey) */
+  --bs-secondary-bg-subtle: rgba(148, 163, 184, 0.15) !important;
+  --bs-secondary-border-subtle: rgba(148, 163, 184, 0.2) !important;
+  --bs-secondary-text-emphasis: #94a3b8 !important;
+
+  /* Ensure badges use these borders */
+  .badge {
+    border-color: currentColor !important; /* This is tricky, usually border-color should be set explicitly */
+  }
+
+  /* Force the subtle classes to use the variables immediately if BS doesn't pick them up dynamically in all contexts */
+  .bg-primary-subtle {
+    background-color: var(--bs-primary-bg-subtle) !important;
+    color: var(--bs-primary-text-emphasis) !important;
+    border-color: var(--bs-primary-border-subtle) !important;
+  }
+  .bg-success-subtle {
+    background-color: var(--bs-success-bg-subtle) !important;
+    color: var(--bs-success-text-emphasis) !important;
+    border-color: var(--bs-success-border-subtle) !important;
+  }
+  .bg-danger-subtle {
+    background-color: var(--bs-danger-bg-subtle) !important;
+    color: var(--bs-danger-text-emphasis) !important;
+    border-color: var(--bs-danger-border-subtle) !important;
+  }
+  .bg-warning-subtle {
+    background-color: var(--bs-warning-bg-subtle) !important;
+    color: var(--bs-warning-text-emphasis) !important;
+    border-color: var(--bs-warning-border-subtle) !important;
+  }
+  .bg-info-subtle {
+    background-color: var(--bs-info-bg-subtle) !important;
+    color: var(--bs-info-text-emphasis) !important;
+    border-color: var(--bs-info-border-subtle) !important;
+  }
+  .bg-light {
+    background-color: var(--bs-secondary-bg-subtle) !important;
+    color: var(--bs-secondary-text-emphasis) !important;
+    border: 1px solid var(--bs-secondary-border-subtle) !important;
+  }
+
+  /* Special Override for Creation Action Buttons in Dark Mode */
+  /* User specifically requested White Text for these buttons */
+  .btn-action-primary,
+  .btn-fab-primary {
+    color: #ffffff !important;
+    background-color: var(--bs-primary) !important;
+  }
+
+  /* Focus State Glow */
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #004dc7 !important;
+    box-shadow: 0 0 0 3px rgba(0, 77, 199, 0.15) !important;
+  }
+
+  /* Bootstrap Global Overrides for Dark Mode */
+  .bg-white {
+    background-color: var(--surface-color) !important;
+  }
+
+  .bg-light {
+    background-color: var(--input-bg) !important;
+  }
+
+  .text-dark,
+  .text-body {
+    color: var(--text-primary) !important;
+  }
+
+  .text-muted,
+  .text-secondary {
+    color: var(--text-secondary) !important;
+  }
+
+  .border,
+  .border-bottom,
+  .border-top,
+  .border-start,
+  .border-end {
+    border-color: var(--border-color) !important;
+  }
+
+  .navbar {
+    background-color: var(--surface-color) !important;
+  }
+
+  .breadcrumb-item.active {
+    color: var(--text-secondary);
+  }
+
+  .breadcrumb-item + .breadcrumb-item::before {
+    color: var(--text-secondary);
+  }
+
+  /* Bootstrap Components Dark Mode Fixes */
+  .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+  }
+
+  .btn-light {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: white;
+    border: none;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+  }
+
+  /* Form Controls Specificity Boost for Dark Mode */
+  .form-control,
+  .form-select {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+
+    &:focus {
+      background-color: var(--surface-color) !important;
+      border-color: var(--bs-primary) !important;
+    }
+  }
+
+  .mobile-card-item {
+    background: var(--surface-color);
+    border: 1px solid rgba(255, 255, 255, 0.08); /* Deep Night Border */
+    border-radius: 1rem;
+    padding: 1rem;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    /* Click feedback */
+    transition:
+      transform 0.2s,
+      background-color 0.2s;
+    &:active {
+      transform: scale(0.98);
+      background-color: var(--hover-bg);
+    }
+  }
+
+  /* 3. Mobile Cards (Table Transformation) */
+  /* Modal Dark Mode */
+  .modal-content {
+    background-color: var(--surface-color) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+  }
+
+  .modal-body {
+    background-color: var(--surface-color) !important;
+  }
+
+  .modal-header {
+    background-color: var(--input-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .modal-footer {
+    background-color: var(--surface-color) !important;
+    border-color: var(--border-color) !important;
+  }
+
+  .list-group-item {
+    background-color: var(--surface-color) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+  }
+
+  /* Global Card Correction */
+  .card {
+    background-color: var(--surface-color) !important;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-shadow) !important;
+    color: var(--text-primary) !important;
+
+    &.border-0 {
+      border: 0 !important;
+    }
+  }
+
+  /* Force white color for the back button icon in header and center it */
+  .btn-back-header {
+    color: #ffffff !important;
+    padding: 0 !important;
+    line-height: 0 !important;
+
+    i {
+      color: #ffffff !important;
+      line-height: 1 !important;
+    }
+  }
+
+  /* Excluir Matriz (header): fundo sólido vermelho no dark mode */
+  .action-bar-buttons app-button-delete button {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+
+    i {
+      color: #ffffff !important;
+    }
+
+    &:hover {
+      background-color: #dc2626 !important;
+    }
+  }
+}
+
+/* Global UX Refinements - Escola Conectada */
+body {
+  font-family: var(--font-family-sans-serif);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  transition:
+    background-color 0.4s ease,
+    color 0.4s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile Input Auto-Zoom Prevention */
+@media (max-width: 767.98px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+    /* Prevents auto-zoom on focus in iOS */
+  }
+}
+
+/* Global Utilities for Theming */
+.text-main {
+  color: var(--text-primary) !important;
+}
+
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+.bg-surface {
+  background-color: var(--surface-color) !important;
+}
+
+.bg-page {
+  background-color: var(--bg-color) !important;
+}
+
+/* Global touch feedback */
+.btn:active,
+.nav-link:active,
+.subject-card-mobile:active,
+.teacher-card-mobile:active,
+.action-button-center:active {
+  transform: scale(0.96);
+  transition: transform 0.1s ease;
+  opacity: 0.8 !important;
+}
+
+/* Expanded Hit Area for Icons & Better Touchability */
+.btn-icon {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Utility to hide scrollbars (for horizontal carousels) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  /* IE/Edge */
+  scrollbar-width: none;
+
+  /* Firefox */
+  &::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+  }
+}
+
+/* Utility for extra small text (dense info) */
+.xx-small {
+  font-size: 0.65rem;
+}
+
+
+
+// =========================================
+// PREMIUM UI DNA (Shared across modules)
+// =========================================
+
+.sticky-header {
+  top: 0;
+  background-color: transparent !important;
+  backdrop-filter: blur(12px);
+  z-index: 1020;
+}
+
+.btn-back-header {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: var(--surface-color) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  padding: 0 !important;
+  transition: all 0.2s ease-in-out !important;
+
+  &:hover {
+    background-color: var(--hover-bg) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  i {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+}
+
+.transition-hover {
+  transition: all 0.2s ease-in-out !important;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  }
+}
+
+/* Custom Scrollbar for sleek look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Custom Contextual Help Tooltip */
+.help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 0.85em;
+  margin-left: 0.5rem;
+  cursor: help;
+  position: relative;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--bs-primary);
+  }
+
+  /* Tooltip text */
+  &::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 150%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background-color: var(--tooltip-bg);
+    color: #fff;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    white-space: normal;
+    min-width: 200px;
+    max-width: 250px;
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 1050; /* Above modals/offcanvas */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  /* Arrow */
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 140%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    border: 6px solid transparent;
+    border-top-color: var(--tooltip-bg);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 1050;
+  }
+
+  /* Show state */
+  &:hover::after,
+  &:hover::before,
+  &:focus::after,
+  &:focus::before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Typography for Badges */
+.badge {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5em 0.8em;
+}
+
+/* =========================================
+   VISUAL DNA UNIFICATION (Reflected from Teachers)
+   ========================================= */
+
+/* Premium Frameless Tables */
+.table {
+  color: var(--text-primary);
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: transparent !important;
+  --bs-table-bg: transparent !important;
+  --bs-table-hover-bg: var(--hover-table-bg) !important;
+  --bs-table-color: var(--text-primary) !important;
+
+  thead th {
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--border-color);
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    background-color: transparent !important;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--hover-bg) !important;
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  td {
+    background-color: transparent !important;
+    color: var(--text-primary) !important;
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    border: none;
+  }
+}
+
+/* New Standardized Action Buttons */
+.btn-action-primary {
+  height: 48px;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  border-radius: var(--bs-border-radius);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+
+  i {
+    font-size: 1.1rem;
+  }
+}
+
+.btn-fab-primary {
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 1.5rem;
+  }
+}
+
+/* Entity Cards for Mobile (Generalized from Teachers) */
+.entity-card-mobile {
+  background: var(--surface-color);
+  color: var(--text-main);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-left: 6px solid #ccc; /* Default accent */
+  transition: all 0.2s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Minimalist Theme-Aware Buttons */
+.btn-minimal {
+  height: 44px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: -0.01em;
+  border-radius: 10px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &.btn-confirm {
+    background: #0d6efd;
+    color: white;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+
+    &:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 6px rgba(13, 110, 253, 0.1);
+    }
+  }
+
+  &.btn-cancel-themed {
+    background: var(--btn-cancel-bg);
+    color: var(--btn-cancel-text);
+
+    &:active {
+      transform: scale(0.97);
+      opacity: 0.9;
+    }
+  }
+}
+
+/* Uniform Offcanvas/Modal Structures */
+.offcanvas-header,
+.modal-header {
+  background-color: var(--surface-color);
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text-primary);
+}
+
+.modal-footer {
+  background-color: var(--modal-footer-bg);
+  border-top: 1px solid var(--border-color) !important;
+  color: var(--text-primary);
+}
+
+/* Slot Indicators */
+.slot {
+  width: 24px;
+  height: 8px;
+  background-color: var(--border-color);
+  transition: all 0.2s;
+  border-radius: 2px; /* Slight round */
+
+  &.available {
+    background-color: #10b981;
+  }
+  &.busy {
+    background-color: #ef4444; /* Add error color */
+  }
+}
+/* =========================================
+   GLOBAL THEME HELPERS (Promoted from Dashboard)
+   ========================================= */
+
+/* Backgrounds */
+.bg-light-alpha {
+  background-color: var(--input-bg) !important;
+}
+
+.border-theme {
+  border-color: var(--border-color) !important;
+}
+
+/* Explicit Colors (Independent of Theme Primary) */
+.text-mint {
+  color: #10b981 !important;
+}
+.bg-mint-subtle {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #10b981 !important;
+}
+
+.text-lavender {
+  color: #8b5cf6 !important;
+}
+.bg-lavender-subtle {
+  background-color: rgba(139, 92, 246, 0.15) !important;
+  color: #8b5cf6 !important;
+}
+
+/* Dark Mode Overrides for these specifics if needed */
+[data-theme='dark'] {
+  .text-lavender {
+    color: #bb86fc !important;
+    background-color: rgba(187, 134, 252, 0.15) !important;
+  }
+  .bg-lavender-subtle {
+    background-color: rgba(187, 134, 252, 0.15) !important;
+    color: #bb86fc !important;
+  }
+}
+
+/* =========================================
+   Icon Box Utility
+   ========================================= */
+.icon-box {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+}
+/* UI Refinement Utilities */
+.shadow-sm-hover {
+  transition: box-shadow 0.2s ease-in-out;
+  &:hover {
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+.hover-primary-subtle {
+  transition: all 0.2s ease-in-out;
+  &:hover {
+    background-color: var(--bs-primary-bg-subtle, rgba(13, 110, 253, 0.1)) !important;
+    color: var(--bs-primary) !important;
+  }
+}
+
+.transition-all {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.workload-hours-label {
+  background-color: #f1f5f9 !important; /* Matches --input-bg slate-100 for light mode */
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme='dark'] .workload-hours-label {
+  background-color: #0d1117 !important; /* Matches --input-bg for dark mode */
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 
+   =========================================
+   GLOBAL UTILITIES: HIDE NUMBER SPINNERS
+   =========================================
+*/
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Fix Modal Positioning and Centering (Global) */
+.modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1060 !important; /* Ensure it's above Sidebar (1000-1003) */
+  outline: 0;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem !important; /* Padding ensures the modal doesn't touch the edges */
+
+  /* Sidebar-Aware Centering (Desktop Only) */
+  @media (min-width: 768px) {
+    padding-left: calc(260px + 1rem) !important; /* Default Expanded Sidebar Width */
+    transition: padding-left 0.3s ease; /* Smooth transition matching sidebar */
+  }
+}
+
+/* Modal adjustment when sidebar is collapsed */
+body.sidebar-collapsed .modal {
+  @media (min-width: 768px) {
+    padding-left: calc(70px + 1rem) !important; /* Collapsed Sidebar Width */
+  }
+}
+
+/* Override Bootstrap Dialog Positioning */
+.modal-dialog {
+  margin: 0 !important;
+  width: 100% !important;
+  max-width: 500px !important;
+  pointer-events: auto !important;
+  
+  /* Flex direction to fill height without overflowing container */
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 100% !important; 
+}
+
+.modal-dialog-centered {
+  display: flex !important;
+  align-items: center !important;
+  min-height: auto !important; /* Disable bootstrap min-height calculation */
+  justify-content: center !important;
+}
+
+/* Ensure modal content is responsive */
+.modal-content {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-height: 100% !important; /* Take up to 100% of dialog */
+  pointer-events: auto !important;
+  background-color: var(--surface-card, #fff); /* Fallback to white */
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0.8rem !important; /* Modern rounded corners */
+  outline: 0;
+  overflow: hidden !important; /* Manage scroll inside body */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+
+  .modal-body {
+    overflow-y: auto !important;
+    flex: 1 1 auto !important; /* Takes remaining height and triggers scrolling */
+  }
+}
+
+/* =========================================
+   FORCED HELP POPOVER STYLES (ALWAYS LIGHT)
+   Targeting with high specificity to override dark theme !important rules
+   ========================================= */
+div.modern-help-popover.mat-mdc-menu-panel {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 12px !important;
+
+  .mat-mdc-menu-content {
+    background-color: #ffffff !important;
+    padding: 0 !important;
+  }
+
+  /* Force every single text-bearing element to be dark slate */
+  &, 
+  & *, 
+  span, 
+  h1, h2, h3, h4, h5, h6, 
+  div, 
+  p, 
+  i, 
+  .workload-description, 
+  .text-muted,
+  .text-primary {
+    color: #0f172a !important; /* Slate 900 (Very Dark Slate) */
+    background-color: transparent !important;
+  }
+
+  /* Specific fix for the header which might be primary blue */
+  .text-primary {
+    color: #0d6efd !important; /* Keep primary blue for title if requested, but ensure it's the light-mode blue */
+  }
+}

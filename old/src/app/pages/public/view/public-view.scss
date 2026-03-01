@@ -1,0 +1,175 @@
+// Public View: Unified SCSS for Standalone TV and Integrated Mobile
+
+.public-container {
+  // Common
+  font-family: 'Inter', sans-serif;
+
+  // Desktop/TV Specific: Standalone Look
+  &:not(.is-mobile) {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #0f172a; // Deep Night Theme
+    overflow: hidden;
+  }
+
+  // Mobile Specific: Integrated Look
+  &.is-mobile {
+    background-color: transparent; // Let MainLayout handle it
+    min-height: auto;
+  }
+}
+
+// TV Header & Clock (Exactly as before)
+.public-header {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 1) 0%, rgba(15, 23, 42, 0) 100%);
+  padding: 2rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 20;
+
+  @media (max-width: 991px) {
+    display: none;
+  }
+}
+
+.tv-clock-badge {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+// Mobile Integrated Styling
+.mobile-integrated-view {
+  .nav-pills {
+    background: #f1f5f9;
+    .nav-link {
+      color: #64748b;
+      &.active {
+        background-color: var(--bs-primary);
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.3);
+      }
+    }
+  }
+
+  .card {
+    background: white;
+    border: none;
+  }
+}
+
+// Shared Utility for TV Look
+.bg-surface {
+  background-color: #1e293b !important;
+}
+
+.tv-card-xl {
+  .card-header h3 {
+    font-size: clamp(1.2rem, 2.5vw, 2.5rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-body {
+    .display-6 {
+      font-size: clamp(1.5rem, 4vw, 3.5rem);
+    }
+    .h4 {
+      font-size: clamp(1rem, 3vw, 2.5rem);
+    }
+  }
+}
+
+.progress-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s;
+  &.active {
+    background-color: #fff;
+    transform: scale(1.2);
+  }
+}
+
+// Animations (Identical to Original)
+.animate-zoom-in {
+  animation: zoomIn 0.5s ease-out;
+}
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-right {
+  animation: slideRight 0.5s ease-out;
+}
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+.xx-small {
+  font-size: 0.65rem !important;
+}
+.text-white-50 {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+.border-white-5 {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+.border-white-10 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.bg-white-5 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}

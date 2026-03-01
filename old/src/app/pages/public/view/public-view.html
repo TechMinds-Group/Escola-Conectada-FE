@@ -1,0 +1,357 @@
+<div class="min-vh-100 bg-page text-main position-relative overflow-x-hidden">
+  <!-- Header (Shared) -->
+  <header
+    class="p-4 p-md-5 d-none d-lg-block bg-dark bg-gradient position-absolute top-0 start-0 w-100 shadow-sm z-3 animate-slide-down"
+  >
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <i class="bi bi-grid-1x2-fill text-primary fs-3"></i>
+      <h1 class="h4 fw-bold mb-0 text-white">{{ t().common.appName }}</h1>
+    </div>
+    <p class="text-white-50 small mb-0">
+      {{ t().public.headers.infoPanel }}
+    </p>
+
+    <!-- TV Clock (Refined Premium) -->
+    @if (!isMobile()) {
+      <div class="d-flex align-items-center gap-3 position-absolute top-0 end-0 m-4">
+        <div
+          class="tv-clock-badge shadow-lg d-flex flex-column align-items-end justify-content-center px-4 py-3 rounded-4"
+        >
+          <div
+            class="small text-uppercase tracking-wider fw-bold text-black"
+            style="font-size: 0.65rem; letter-spacing: 2px"
+          >
+            {{ t().public.headers.brasiliaTime }}
+          </div>
+          <div class="d-flex align-items-center gap-2 mt-1">
+            <i class="bi bi-clock text-secondary animate-pulse fs-5"></i>
+            <div class="h3 mb-0 fw-bold font-monospace tracking-tight text-black lh-1">
+              {{ formatDate(currentTime(), 'time')
+              }}<span class="fs-6 text-secondary ms-1" style="vertical-align: 2px"
+                >:{{ currentTime() | date: 'ss' }}</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </header>
+
+  <!-- MOBILE LAYOUT (Tabs & Content) -->
+  @if (isMobile()) {
+    <div class="mobile-content container-fluid px-3 pb-5 mb-5">
+      <!-- Tabbed Sections -->
+
+      <!-- 1. TIMETABLE TAB -->
+      @if (activeTab() === 'timetable') {
+        <div class="animate-fade-in pt-3">
+          <!-- Search Box (only here) -->
+          <div
+            class="search-box-wrapper mb-4 sticky-top pb-2"
+            style="top: 0; z-index: 10; background: var(--bg-color)"
+          >
+            <div class="input-group input-group-lg shadow-sm">
+              <span class="input-group-text text-muted">
+                <i class="bi bi-search"></i>
+              </span>
+              <input
+                type="text"
+                [formControl]="searchControl"
+                class="form-control text-white ps-2"
+                [placeholder]="t().public.search.placeholder"
+              />
+            </div>
+          </div>
+
+          <!-- Result: Class Schedule -->
+          @if (searchQuery()) {
+            <div class="section-title text-primary mb-3">
+              <i class="bi bi-clock-history me-2"></i> {{ t().public.titles.todaysSchedule }}
+            </div>
+
+            @if (filteredClasses().length > 0) {
+              <div class="card bg-surface border-0 rounded-4 shadow-sm mb-4 animate-fade-in">
+                <div class="card-header bg-transparent border-bottom border-white-10 p-3">
+                  <h5 class="mb-0 text-white fw-bold text-truncate">
+                    {{ filteredClasses()[0].name }}
+                  </h5>
+                  <small class="text-white-50 text-truncate d-block">
+                    {{ filteredClasses()[0].shift }} • Ambiente {{ filteredClasses()[0].roomId }}
+                  </small>
+                </div>
+                <div class="card-body p-0">
+                  @for (slot of mockSchedule(); track $index) {
+                    <div
+                      class="d-flex align-items-center p-3 border-bottom border-white-5"
+                      [class.bg-white-5]="slot.isBreak"
+                    >
+                      <div class="time-col text-white-50 small fw-bold me-3" style="width: 80px">
+                        {{ slot.time }}
+                      </div>
+                      <div class="flex-grow-1">
+                        @if (slot.isBreak) {
+                          <span class="text-white-50 fst-italic">Intervalo</span>
+                        } @else {
+                          <div class="fw-bold text-white text-truncate">{{ slot.subject }}</div>
+                          <div class="small text-muted text-truncate">{{ slot.teacher }}</div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="text-center text-white-50 py-4">{{ t().public.search.noResults }}</div>
+            }
+          } @else {
+            <!-- Empty state or general info -->
+            <div class="text-center py-5 opacity-50">
+              <i class="bi bi-search display-1 mb-3 d-block"></i>
+              <p>{{ t().public.search.placeholder }}</p>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- 2. NOTICES TAB -->
+      @if (activeTab() === 'notices') {
+        <div class="animate-fade-in pt-4">
+          <div class="h5 fw-bold text-warning mb-4">
+            <i class="bi bi-megaphone me-2"></i> {{ t().public.titles.importantNotices }}
+          </div>
+
+          <div class="d-flex flex-column gap-3">
+            @for (notice of mockNotices(); track $index) {
+              <div
+                class="card bg-surface border-theme rounded-4 shadow-sm p-4 border-start border-4"
+                [class.border-warning]="notice.type === 'alert'"
+                [class.border-info]="notice.type === 'info'"
+                [class.border-success]="notice.type === 'event'"
+              >
+                <div class="d-flex gap-3 align-items-center mb-2">
+                  <i
+                    class="bi fs-3"
+                    [class.bi-exclamation-triangle-fill]="notice.type === 'alert'"
+                    [class.bi-info-circle-fill]="notice.type === 'info'"
+                    [class.bi-calendar-check-fill]="notice.type === 'event'"
+                    [class.text-warning]="notice.type === 'alert'"
+                    [class.text-info]="notice.type === 'info'"
+                    [class.text-success]="notice.type === 'event'"
+                  ></i>
+                  <h6 class="fw-bold text-main mb-0">{{ notice.title }}</h6>
+                </div>
+                <p class="small text-muted mb-0 lh-lg">{{ notice.message }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- 3. CALENDAR TAB -->
+      @if (activeTab() === 'calendar') {
+        <div class="animate-fade-in pt-4">
+          <div class="h5 fw-bold text-success mb-4">
+            <i class="bi bi-calendar-event me-2"></i> {{ t().public.titles.upcomingEvents }}
+          </div>
+
+          <div class="d-flex flex-column gap-3">
+            @for (ev of upcomingEvents(); track ev.id) {
+              <div
+                class="card bg-surface border-theme rounded-4 shadow-sm p-3 d-flex flex-row align-items-center gap-3"
+              >
+                <div
+                  class="date-badge rounded-3 text-center p-2 text-white fw-bold shadow-sm"
+                  [style.background-color]="getEventColor(ev.translatedType)"
+                  style="min-width: 65px"
+                >
+                  <div class="h4 mb-0 lh-1">{{ formatDate(ev.startDate, 'day') }}</div>
+                  <div class="small text-uppercase mt-1" style="font-size: 0.6rem; opacity: 0.9">
+                    {{ formatDate(ev.startDate, 'month') }}
+                  </div>
+                </div>
+                <div class="flex-grow-1" style="min-width: 0">
+                  <div class="fw-bold text-main text-truncate">{{ ev.name }}</div>
+                  <div class="small text-muted text-truncate">{{ ev.translatedType }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Mobile Bottom Navigation (Tabs) -->
+    <nav
+      class="mobile-nav fixed-bottom bg-surface border-top border-white-10 p-2 shadow-lg d-lg-none"
+    >
+      <div class="d-flex justify-content-around align-items-center">
+        <button
+          class="btn nav-tab-btn"
+          [class.active]="activeTab() === 'timetable'"
+          (click)="activeTab.set('timetable')"
+        >
+          <i class="bi bi-clock-history"></i>
+          <span>Horários</span>
+        </button>
+        <button
+          class="btn nav-tab-btn"
+          [class.active]="activeTab() === 'notices'"
+          (click)="activeTab.set('notices')"
+        >
+          <i class="bi bi-megaphone"></i>
+          <span>Avisos</span>
+        </button>
+        <button
+          class="btn nav-tab-btn"
+          [class.active]="activeTab() === 'calendar'"
+          (click)="activeTab.set('calendar')"
+        >
+          <i class="bi bi-calendar-event"></i>
+          <span>Calendário</span>
+        </button>
+      </div>
+    </nav>
+  }
+
+  <!-- TV LAYOUT (Looping Scenes) -->
+  @if (!isMobile()) {
+    <div class="tv-content d-flex flex-column justify-content-center align-items-center h-100 p-5">
+      <!-- Scene: Timetable -->
+      @if (currentScene() === 'timetable') {
+        <div
+          class="w-100 animate-zoom-in flex-grow-1 d-flex flex-column justify-content-center"
+          style="min-height: 0"
+        >
+          <h2 class="display-4 fw-bold text-white mb-5 mt-5 text-center">
+            {{ t().public.titles.shiftSchedule }} {{ currentShift() }}
+          </h2>
+
+          <div class="row g-4 justify-content-center flex-grow-1 w-100 m-0">
+            @for (cls of tvClasses(); track cls.id) {
+              <div class="col-12 col-md-6">
+                <div
+                  class="card bg-surface border-0 rounded-4 shadow-lg h-100"
+                  style="min-height: 280px"
+                >
+                  <div class="card-header p-4 bg-primary bg-gradient border-0">
+                    <h3 class="mb-0 fw-bold fs-2 text-dark">{{ formatClassName(cls.name) }}</h3>
+                  </div>
+                  <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    <div class="display-5 fw-bold text-white mb-3">Matemática</div>
+                    <div class="h3 text-white-50 mb-2">
+                      <i class="bi bi-person-badge me-2 text-primary"></i>Prof. Ricardo
+                    </div>
+                    <div class="h4 text-primary opacity-75">Ambiente {{ cls.roomId }}</div>
+                  </div>
+                </div>
+              </div>
+            }
+
+            @if (tvClasses().length === 0) {
+              <div class="col-12 text-white-50 h3 text-center">
+                {{ t().public.labels.activeClassless }}
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Scene: Events -->
+      @if (currentScene() === 'events') {
+        <div
+          class="w-100 animate-slide-right flex-grow-1 d-flex flex-column justify-content-start"
+          style="min-height: 0"
+        >
+          <h2 class="display-3 fw-bold mt-5 text-white text-center mb-5">
+            {{ t().public.titles.schoolCalendar }}
+          </h2>
+
+          <div #eventsContainer class="flex-grow-1 w-100 overflow-hidden position-relative">
+            <div
+              #eventsList
+              class="row g-4 justify-content-center w-100 m-0 pb-5"
+              style="transition: transform linear"
+            >
+              @for (ev of upcomingEvents(); track ev.id) {
+                <div class="col-11 col-xxl-10">
+                  <div
+                    class="card bg-surface border-0 rounded-5 shadow-lg p-5 d-flex flex-row align-items-center gap-5"
+                  >
+                    <div
+                      class="rounded-4 text-center p-4 text-white fw-bold shadow-lg"
+                      [style.background-color]="getEventColor(ev.translatedType)"
+                      style="min-width: 140px"
+                    >
+                      <div class="display-2 mb-0 lh-1">{{ formatDate(ev.startDate, 'day') }}</div>
+                      <div class="h3 mb-0 text-uppercase mt-2">
+                        {{ formatDate(ev.startDate, 'month') }}
+                      </div>
+                    </div>
+                    <div class="flex-grow-1" style="min-width: 0">
+                      <div class="display-4 fw-bold text-white text-truncate">{{ ev.name }}</div>
+                      <div class="h2 text-white-50 fw-normal mb-0 text-truncate">
+                        {{ ev.translatedType }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Scene: Notices -->
+      @if (currentScene() === 'notices') {
+        <div
+          class="w-100 animate-fade-in flex-grow-1 d-flex flex-column justify-content-center align-items-center"
+        >
+          <i class="bi bi-megaphone-fill text-warning display-3 mb-4 mt-5"></i>
+          <h2 class="display-5 fw-bold text-white mb-5">
+            {{ t().public.titles.importantNotices }}
+          </h2>
+          <!-- Dynamic Notice Carousel -->
+          @for (notice of [mockNotices()[currentNoticeIndex()]]; track notice) {
+            <div
+              class="card bg-surface border-0 rounded-5 shadow-lg p-5 d-inline-flex flex-column justify-content-center animate-slide-right"
+              style="max-width: 1000px; min-height: 400px"
+            >
+              <div class="d-flex flex-column align-items-center gap-4 w-100">
+                <div class="d-flex align-items-center gap-4 mb-2">
+                  <i
+                    class="bi"
+                    [class.bi-megaphone-fill]="notice.type === 'alert'"
+                    [class.bi-info-circle-fill]="notice.type === 'info'"
+                    [class.bi-calendar-event-fill]="notice.type === 'event'"
+                    [class.text-warning]="notice.type === 'alert'"
+                    [class.text-info]="notice.type === 'info'"
+                    [class.text-success]="notice.type === 'event'"
+                    style="font-size: 3.5rem"
+                  >
+                  </i>
+                  <h3 class="display-6 fw-bold text-white mb-0">{{ notice.title }}</h3>
+                </div>
+                <div #noticeContainer class="w-100 position-relative text-center px-4">
+                  <p
+                    #noticeContent
+                    class="display-6 text-white-50 mb-0 lh-base fw-normal"
+                    style="transition: transform linear"
+                  >
+                    "{{ notice.message }}"
+                  </p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Progress Indicatior -->
+      <div class="scene-progress w-100 p-4 d-flex justify-content-center gap-2 mt-auto">
+        <div class="progress-dot" [class.active]="currentScene() === 'timetable'"></div>
+        <div class="progress-dot" [class.active]="currentScene() === 'events'"></div>
+        <div class="progress-dot" [class.active]="currentScene() === 'notices'"></div>
+      </div>
+    </div>
+  }
+</div>

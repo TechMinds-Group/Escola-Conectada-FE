@@ -1,0 +1,202 @@
+.btn-header-action {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+
+  i {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    background-color: #f9fafb !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    color: #000000 !important;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.notification-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+}
+
+.glass-dropdown {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 12px !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  padding: 0.5rem;
+  min-width: 200px;
+}
+
+.glass-dropdown.language-dropdown {
+  min-width: 60px !important;
+  width: auto !important;
+
+  .dropdown-item {
+    padding: 0.5rem !important;
+    justify-content: center !important;
+
+    /* Hide checkmark if present, or rely on flex to center */
+    .bi-check-lg {
+      display: none !important;
+    }
+  }
+}
+
+.dropdown-item {
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  &.active-lang {
+    background-color: rgba(139, 92, 246, 0.08);
+    .text-main {
+      color: #7c3aed;
+    }
+  }
+}
+
+.mobile-sheet-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2099;
+  backdrop-filter: blur(4px);
+}
+
+.mobile-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2100;
+  background-color: #fff;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* 
+  Angular uses View Encapsulation. To match [data-theme='dark'] on the <html> tag 
+  from within a component, we must use :host-context.
+*/
+:host-context([data-theme='dark']) {
+  .btn-header-action {
+    background-color: #000000 !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
+
+    i,
+    span,
+    * {
+      color: #ffffff !important;
+      opacity: 1 !important;
+    }
+
+    &:hover {
+      background-color: #1a1a1a !important;
+      border-color: rgba(255, 255, 255, 0.5) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+
+      i,
+      span,
+      * {
+        color: #ffffff !important;
+      }
+    }
+  }
+
+  .glass-dropdown {
+    background: rgba(0, 0, 0, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+  }
+
+  .dropdown-item {
+    color: #f3f4f6 !important;
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    .text-main {
+      color: #f3f4f6 !important;
+    }
+  }
+
+  .mobile-sheet {
+    background-color: #0b0b0f !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+  }
+}
+
+.search-container {
+  z-index: 1060;
+}
+
+.search-results-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  min-width: 300px;
+  margin-top: 0.5rem;
+  z-index: 1000;
+  animation: fadeInDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  .dropdown-item {
+    cursor: pointer;
+    i {
+      font-size: 1.2rem;
+      color: var(--bs-primary);
+      width: 24px;
+      text-align: center;
+    }
+    .text-main {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

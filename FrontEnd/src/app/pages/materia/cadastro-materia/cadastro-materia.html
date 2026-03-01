@@ -1,0 +1,146 @@
+<div class="container-fluid py-4 pb-5">
+  <!-- Sticky Header & Action Bar -->
+  <div class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn transition-hover btn-back-header" (click)="onCancel()">
+          <i class="bi bi-arrow-left"></i>
+        </button>
+        <div>
+          <h2 class="fw-bold mb-0 text-dark fs-4">
+            {{
+              isEditMode() ? t().admin.subjects.form.title.edit : t().admin.subjects.form.title.new
+            }}
+          </h2>
+          <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+            {{
+              isViewMode()
+                ? 'Visualizando matéria'
+                : subjectId()
+                  ? 'Editando detalhes'
+                  : 'Nova disciplina'
+            }}
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 action-bar-buttons"
+      >
+        @if (subjectId()) {
+          <app-button-delete (onClick)="deleteSubject()"></app-button-delete>
+          <div class="vr mx-2 opacity-25 d-none d-lg-block"></div>
+        }
+
+        @if (isViewMode()) {
+          <app-button-edit (onClick)="enableEdit()"></app-button-edit>
+        } @else {
+          <app-button-cancel (onClick)="cancelEdit()"></app-button-cancel>
+          <app-button-save (onClick)="onSubmit()" [isSubmitting]="isSubmitting()"></app-button-save>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-12 col-xl-8">
+      <form [formGroup]="subjectForm">
+        <!-- Section: Basic Info -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+          <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">
+            {{ t().admin.subjects.form.sections.info }}
+          </h6>
+
+          <div class="row g-4">
+            <!-- Name -->
+            <div class="col-12">
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
+                {{ t().admin.subjects.form.fields.name }} <span class="text-danger">*</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-type text-primary"></i></span>
+                <input
+                  type="text"
+                  class="form-control fw-bold py-2"
+                  formControlName="name"
+                  [placeholder]="t().admin.subjects.form.hints.name"
+                  [readonly]="isViewMode()"
+                  [class.is-invalid]="subjectForm.get('name')?.invalid && saveAttempted()"
+                />
+              </div>
+            </div>
+
+            <!-- Category -->
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
+                {{ t().admin.subjects.form.fields.category }}
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-tag text-primary"></i></span>
+                <select
+                  class="form-select fw-bold py-2"
+                  formControlName="category"
+                  [attr.disabled]="isViewMode() ? true : null"
+                >
+                  <option value="Base Comum">Base Comum</option>
+                  <option value="Técnica">Técnica</option>
+                  <option value="Eletiva">Eletiva</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Thematic Axis -->
+            <div class="col-12 col-md-6">
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
+                {{ t().admin.subjects.form.fields.axis }}
+              </label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-compass text-primary"></i></span>
+                <select
+                  class="form-select fw-bold py-2"
+                  formControlName="axis"
+                  [attr.disabled]="isViewMode() ? true : null"
+                  [class.is-invalid]="subjectForm.get('axis')?.invalid && saveAttempted()"
+                >
+                  <option value="" disabled selected>Selecione...</option>
+                  @for (axis of schoolData.thematicAxes(); track axis) {
+                    <option [value]="axis">{{ axis }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Visual Identity -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+          <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">
+            {{ t().admin.subjects.form.fields.color }}
+          </h6>
+
+          <div class="d-flex flex-wrap gap-2">
+            @for (color of presetColors; track color) {
+              <button
+                type="button"
+                class="btn rounded-4 p-0 shadow-sm transition-transform hover-scale"
+                [style.background-color]="color"
+                [style.width.px]="45"
+                [style.height.px]="45"
+                [class.ring-active]="subjectForm.get('color')?.value === color"
+                (click)="selectPresetColor(color)"
+                [disabled]="isViewMode()"
+              >
+                @if (subjectForm.get('color')?.value === color) {
+                  <i
+                    class="bi bi-check-lg text-white"
+                    style="font-size: 1.5rem; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3)"
+                  ></i>
+                }
+              </button>
+            }
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
