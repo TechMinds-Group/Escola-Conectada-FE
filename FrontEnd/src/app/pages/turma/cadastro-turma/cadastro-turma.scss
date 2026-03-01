@@ -1,3 +1,67 @@
+/* Essential Custom Styles (Identical to Professors for consistency) */
+
+.backdrop-blur {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.sticky-header {
+  top: 0;
+  background: rgba(var(--bs-body-bg-rgb), 0.8) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.nav-link {
+  transition: all 0.2s ease;
+
+  &.active {
+    background-color: #ffffff !important;
+    color: var(--bs-primary) !important;
+    border: 1px solid rgba(13, 110, 253, 0.4) !important;
+  }
+
+  &:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Dark Mode Overrides */
+:host-context([data-theme='dark']) {
+  .sticky-header {
+    background: rgba(30, 30, 30, 0.8) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .nav-link.active {
+    background-color: rgba(13, 110, 253, 0.15) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(13, 110, 253, 0.4) !important;
+    box-shadow: 0 0 15px rgba(13, 110, 253, 0.1);
+  }
+}
+
+.btn-back-header {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--bs-light);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--bs-white);
+    transform: translateX(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
 /* Specific Local Adjustments */
 .page-container {
   padding-bottom: 80px;
@@ -19,15 +83,11 @@
   }
 }
 
-:host-context([data-theme='light']) .workload-badge {
-  color: #000 !important;
-}
-
 .timetable-grid {
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 800px; // Ensure table doesn't squish too much in responsive-wrapper
+  min-width: 800px;
 
   th {
     background-color: #f8f9fa;
@@ -73,20 +133,6 @@
   }
 }
 
-// Mobile Card View
-.allocation-card {
-  transition: transform 0.2s, box-shadow 0.2s;
-  
-  &:active {
-    transform: scale(0.98);
-  }
-  
-  .card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-  }
-}
-
 .sub-dot {
   width: 10px;
   height: 10px;
@@ -94,30 +140,20 @@
   display: inline-block;
 }
 
-.allocation-summary-item {
-  transition: background-color 0.2s;
-  &:hover {
-    background-color: #f1f4f8 !important;
-  }
-}
-
 .smaller {
   font-size: 0.65rem;
 }
 
-.tracking-wider {
-  letter-spacing: 0.05em;
+.btn-height-40 {
+  height: 40px;
+  width: 40px;
 }
 
-// Touch targets for mobile
-@media (max-width: 768px) {
-  .form-select-sm {
-    height: 38px;
-    font-size: 0.9rem !important;
-  }
-  
-  .btn-lg-mobile {
-    padding: 12px;
-    width: 100%;
+.transition-hover {
+  transition: all 0.2s ease-in-out !important;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
   }
 }

@@ -1,0 +1,213 @@
+<div [class.d-none]="!isOpen" [class.d-block]="isOpen">
+  <div
+    class="modal fade modal-overlay"
+    [class.show]="isOpen"
+    [class.d-block]="isOpen"
+    tabindex="-1"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <!-- Header -->
+        <div class="modal-header bg-light border-0 p-4">
+          <div>
+            <h5 class="modal-title fw-extrabold text-dark mb-0">
+              {{
+                viewMode() === 'list'
+                  ? 'Gerenciar Grades de Horário'
+                  : editingGridId()
+                    ? 'Editar Grade'
+                    : 'Nova Grade'
+              }}
+            </h5>
+            <small class="text-muted">
+              {{
+                viewMode() === 'list'
+                  ? 'Selecione uma grade para editar seus horários'
+                  : 'Configure o nome, turno e aulas'
+              }}
+            </small>
+          </div>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+
+        <div class="modal-body p-4 pt-0">
+          @if (viewMode() === 'list') {
+            <!-- List View -->
+            <div class="d-flex justify-content-end mb-3 mt-3">
+              <button class="btn btn-primary fw-bold rounded-3" (click)="startNew()">
+                <i class="bi bi-plus-lg me-2"></i>Nova Grade
+              </button>
+            </div>
+
+            <div class="list-group list-group-flush rounded-4 border overflow-hidden shadow-xs">
+              @for (grid of schoolData.schoolTimeGrids(); track grid.id) {
+                <div
+                  class="list-group-item d-flex justify-content-between align-items-center p-3 transition-hover border-bottom"
+                >
+                  <div>
+                    <div class="fw-bold text-dark">{{ grid.name }}</div>
+                    <small class="text-muted text-uppercase tracking-wider fw-semibold"
+                      >{{ grid.shift }} • {{ grid.slots.length }} horários</small
+                    >
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button
+                      class="btn btn-outline-primary rounded-3"
+                      (click)="startEdit(grid)"
+                      title="Editar"
+                    >
+                      <i class="bi bi-pencil-fill"></i>
+                    </button>
+                    <button
+                      class="btn btn-outline-danger rounded-3"
+                      (click)="deleteGrid(grid.id)"
+                      title="Excluir"
+                    >
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              } @empty {
+                <div class="text-center py-5 text-muted bg-light bg-opacity-50">
+                  <i class="bi bi-alarm fs-2 opacity-25 d-block mb-2"></i>
+                  Nenhuma grade cadastrada.
+                </div>
+              }
+            </div>
+          } @else {
+            <!-- Edit View -->
+            <form [formGroup]="gridForm" class="mt-4">
+              <div class="row g-3 mb-4">
+                <div class="col-12 col-md-8">
+                  <label class="form-label small fw-bold text-muted text-uppercase"
+                    >Nome da Grade</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="name"
+                    placeholder="Ex: Manhã 2026"
+                    [class.is-invalid]="gridForm.get('name')?.invalid && saveAttempted()"
+                  />
+                </div>
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-bold text-muted text-uppercase">Turno</label>
+                  <select class="form-select" formControlName="shift">
+                    @for (s of shifts; track s) {
+                      <option [value]="s">{{ s }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-uppercase text-muted fw-bold small mb-0">Horários</h6>
+                <div class="d-flex gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm rounded-3"
+                    (click)="addSlot('Intervalo')"
+                  >
+                    + Intervalo
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-sm rounded-3 fw-bold"
+                    (click)="addSlot('Aula')"
+                  >
+                    + Aula
+                  </button>
+                </div>
+              </div>
+
+              <div
+                class="slots-container d-flex flex-column gap-2"
+                style="max-height: 350px; overflow-y: auto; padding-right: 5px"
+                formArrayName="slots"
+              >
+                @for (slot of slots.controls; track $index) {
+                  <div
+                    [formGroupName]="$index"
+                    class="d-flex align-items-center gap-2 p-2 border rounded-3 bg-white shadow-xs"
+                  >
+                    <div
+                      class="slot-type-badge text-center"
+                      style="width: 40px"
+                      [class.text-primary]="slot.get('type')?.value === 'Aula'"
+                      [class.text-secondary]="slot.get('type')?.value === 'Intervalo'"
+                    >
+                      @if (slot.get('type')?.value === 'Aula') {
+                        <span class="fw-bold fs-5">{{ slot.get('index')?.value }}º</span>
+                      } @else {
+                        <i class="bi bi-cup-hot fs-5"></i>
+                      }
+                    </div>
+
+                    <div class="d-flex align-items-center gap-1 flex-grow-1">
+                      <input
+                        type="text"
+                        class="form-control form-control-sm text-center fw-bold"
+                        formControlName="start"
+                        maxlength="5"
+                        placeholder="00:00"
+                        (input)="onTimeInput($event, $index, 'start')"
+                      />
+                      <span class="text-muted small">às</span>
+                      <input
+                        type="text"
+                        class="form-control form-control-sm text-center fw-bold"
+                        formControlName="end"
+                        maxlength="5"
+                        placeholder="00:00"
+                        (input)="onTimeInput($event, $index, 'end')"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      class="btn btn-link text-danger p-1"
+                      (click)="removeSlot($index)"
+                    >
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+            </form>
+          }
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer border-0 p-4">
+          @if (viewMode() === 'list') {
+            <button
+              type="button"
+              class="btn btn-light border w-100 fw-bold py-2 rounded-3"
+              (click)="closeModal()"
+            >
+              Fechar
+            </button>
+          } @else {
+            <div class="d-flex gap-2 w-100">
+              <button
+                type="button"
+                class="btn btn-light border flex-grow-1 fw-bold"
+                (click)="reset()"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary flex-grow-2 fw-bold"
+                (click)="$event.preventDefault(); saveGrid()"
+                [disabled]="isSubmitting()"
+              >
+                {{ isSubmitting() ? 'Salvando...' : 'Salvar Grade' }}
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,236 @@
+<div [class.d-none]="!isOpen" [class.d-block]="isOpen">
+  <div
+    class="modal fade modal-overlay"
+    [class.show]="isOpen"
+    [class.d-block]="isOpen"
+    tabindex="-1"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <!-- Header -->
+        <div class="modal-header bg-light border-0 p-4">
+          <div>
+            <h5 class="modal-title fw-extrabold text-dark mb-0">
+              {{
+                viewMode() === 'list'
+                  ? 'Gerenciar Ambientes'
+                  : editingRoomId()
+                    ? 'Editar Ambiente'
+                    : 'Novo Ambiente'
+              }}
+            </h5>
+            <small class="text-muted">
+              {{
+                viewMode() === 'list'
+                  ? 'Selecione um ambiente para editar'
+                  : 'Preencha os dados técnicos da sala'
+              }}
+            </small>
+          </div>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
+        </div>
+
+        <div class="modal-body p-4 pt-0">
+          @if (viewMode() === 'list') {
+            <!-- List View -->
+            <div class="d-flex justify-content-end mb-3 mt-3">
+              <button class="btn btn-primary fw-bold rounded-3" (click)="startNew()">
+                <i class="bi bi-plus-lg me-2"></i>Novo Ambiente
+              </button>
+            </div>
+
+            <div class="list-group list-group-flush rounded-4 border overflow-hidden shadow-xs">
+              @for (room of schoolData.schoolRooms(); track room.id) {
+                <div
+                  class="list-group-item d-flex justify-content-between align-items-center p-3 transition-hover border-bottom"
+                >
+                  <div>
+                    <div class="fw-bold text-dark">{{ room.name }}</div>
+                    <small class="text-muted text-uppercase tracking-wider fw-semibold">
+                      {{ room.block }} • Cap: {{ room.capacity }}
+                    </small>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary rounded-3" (click)="startEdit(room)">
+                      <i class="bi bi-pencil-fill"></i>
+                    </button>
+                    <button class="btn btn-outline-danger rounded-3" (click)="deleteRoom(room.id)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              } @empty {
+                <div class="text-center py-5 text-muted bg-light bg-opacity-50">
+                  <i class="bi bi-door-open fs-2 opacity-25 d-block mb-2"></i>
+                  Nenhum ambiente cadastrado.
+                </div>
+              }
+            </div>
+          } @else {
+            <!-- Edit View -->
+            <form [formGroup]="roomForm" class="mt-4 animate-in">
+              <div class="row g-3 mb-4">
+                <div class="col-12">
+                  <label class="form-label small fw-bold text-muted text-uppercase"
+                    >Nome da Sala</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="name"
+                    placeholder="Ex: Sala 101"
+                    [class.is-invalid]="roomForm.get('name')?.invalid && saveAttempted()"
+                  />
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold text-muted text-uppercase"
+                    >Tipo de Sala</label
+                  >
+                  <div class="d-flex gap-2">
+                    <select
+                      class="form-select"
+                      formControlName="typeId"
+                      [class.is-invalid]="roomForm.get('typeId')?.invalid && saveAttempted()"
+                    >
+                      <option value="" disabled>Selecione...</option>
+                      @for (type of schoolData.roomTypes(); track type.id) {
+                        <option [value]="type.id">{{ type.name }}</option>
+                      }
+                    </select>
+                    <button
+                      class="btn btn-outline-primary rounded-3"
+                      type="button"
+                      (click)="openTypeManager()"
+                    >
+                      <i class="bi bi-gear"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold text-muted text-uppercase"
+                    >Bloco/Pavimento</label
+                  >
+                  <div class="d-flex gap-2">
+                    <select
+                      class="form-select"
+                      formControlName="block"
+                      [class.is-invalid]="roomForm.get('block')?.invalid && saveAttempted()"
+                    >
+                      <option value="" disabled>Selecione...</option>
+                      @for (block of schoolData.schoolBlocks(); track block.id) {
+                        <option [value]="block.name">{{ block.name }}</option>
+                      }
+                    </select>
+                    <button
+                      class="btn btn-outline-primary rounded-3"
+                      type="button"
+                      (click)="openBlockManager()"
+                    >
+                      <i class="bi bi-gear"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <label class="form-label small fw-bold text-muted text-uppercase"
+                    >Capacidade</label
+                  >
+                  <input type="number" class="form-control" formControlName="capacity" />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="text-uppercase text-muted fw-bold small mb-0">Recursos Disponíveis</h6>
+                  <button
+                    class="btn btn-outline-primary btn-sm rounded-3"
+                    type="button"
+                    (click)="openResourceManager()"
+                  >
+                    <i class="bi bi-gear-fill me-1"></i>Gerenciar
+                  </button>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                  @for (res of schoolData.schoolResources(); track res.id) {
+                    <button
+                      type="button"
+                      class="btn btn-sm rounded-pill px-3 py-2 fw-bold transition-hover"
+                      [class.btn-primary]="isResourceSelected(res.name)"
+                      [class.btn-light]="!isResourceSelected(res.name)"
+                      (click)="toggleResource(res.name)"
+                    >
+                      {{ res.name }}
+                    </button>
+                  } @empty {
+                    <div class="small text-muted italic">Nenhum recurso cadastrado.</div>
+                  }
+                </div>
+              </div>
+            </form>
+          }
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer border-0 p-4">
+          @if (viewMode() === 'list') {
+            <button
+              type="button"
+              class="btn btn-light border w-100 fw-bold py-2 rounded-3"
+              (click)="closeModal()"
+            >
+              Fechar
+            </button>
+          } @else {
+            <div class="d-flex gap-2 w-100">
+              <button
+                type="button"
+                class="btn btn-light border flex-grow-1 fw-bold"
+                (click)="reset()"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary flex-grow-2 fw-bold"
+                (click)="saveRoom()"
+                [disabled]="isSubmitting()"
+              >
+                {{ isSubmitting() ? 'Salvando...' : 'Salvar Ambiente' }}
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Inner Managers -->
+<app-modal-manage-list
+  [isOpen]="showTypeManager()"
+  title="Gerenciar Tipos de Sala"
+  inputPlaceholder="Ex: Laboratório de Informática"
+  [items]="schoolData.roomTypes()"
+  (close)="closeTypeManager()"
+  (onSave)="saveType($event)"
+></app-modal-manage-list>
+
+<app-modal-manage-list
+  [isOpen]="showBlockManager()"
+  title="Gerenciar Blocos"
+  inputPlaceholder="Ex: Bloco A"
+  [items]="schoolData.schoolBlocks()"
+  (close)="closeBlockManager()"
+  (onSave)="saveBlock($event)"
+></app-modal-manage-list>
+
+<app-modal-manage-list
+  [isOpen]="showResourceManager()"
+  title="Gerenciar Recursos"
+  inputPlaceholder="Ex: Projetor 4K"
+  [items]="schoolData.schoolResources()"
+  (close)="closeResourceManager()"
+  (onSave)="saveResource($event)"
+></app-modal-manage-list>

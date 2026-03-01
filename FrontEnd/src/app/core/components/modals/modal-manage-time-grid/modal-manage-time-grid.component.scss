@@ -1,0 +1,51 @@
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  max-width: 100%;
+}
+
+.transition-hover {
+  transition: all 0.2s ease;
+  &:hover {
+    background-color: var(--bs-light);
+    transform: translateX(4px);
+  }
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.flex-grow-2 {
+  flex-grow: 2;
+}
+
+.slots-container {
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+    &:hover {
+      background: #bbb;
+    }
+  }
+}
+
+.slot-type-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+input.form-control-sm {
+  font-size: 0.85rem;
+}
