@@ -26,9 +26,9 @@ import { ButtonEditComponent } from '../../../core/components/buttons/button-edi
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ProfessorService, Professor } from '../../../core/services/professor.service';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
 import { ModalManageTimeGridComponent } from '../../../core/components/modals/modal-manage-time-grid/modal-manage-time-grid.component';
 import { ModalManageRoomComponent } from '../../../core/components/modals/modal-manage-room/modal-manage-room.component';
-import { ConfirmationService } from '../../../core/services/confirmation.service';
 
 @Component({
   selector: 'app-cadastro-turma',
