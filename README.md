@@ -36,6 +36,36 @@ ng build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
+## Environment Configuration
+
+This project uses a dynamic environment system with build-time variable injection. Multiple environments are supported:
+
+### Quick Commands
+
+```bash
+# Development (with proxy)
+npm start
+
+# Staging
+npm run start:staging
+npm run build:staging
+
+# Production
+npm run start:prod
+npm run build:prod
+```
+
+### Environment Files
+
+- `.env` - Development (localhost:5231)
+- `.env.staging` - Staging environment
+- `.env.production` - Production (techminds.net.br)
+
+### Documentation
+
+📖 **Complete guide:** [Docs/environments.md](Docs/environments.md)  
+⚡ **Quick reference:** [Docs/environments-quick-reference.md](Docs/environments-quick-reference.md)
+
 ## Running unit tests
 
 To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:

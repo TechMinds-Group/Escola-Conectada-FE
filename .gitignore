@@ -44,3 +44,4 @@ desktop.ini
 # Caso você use arquivos .env para chaves locais
 .env
 .env.local
+.env.production
