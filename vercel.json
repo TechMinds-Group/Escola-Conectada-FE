@@ -1,19 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build:prod",
-  "outputDirectory": "dist/escola-conectada",
+  "outputDirectory": "dist/browser",
   "installCommand": "npm install",
   "framework": null,
-  "redirects": [
-    {
-      "source": "/",
-      "destination": "/dashboard",
-      "permanent": false
-    }
-  ],
   "rewrites": [
     {
-      "source": "/((?!.*\\.).)*",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
