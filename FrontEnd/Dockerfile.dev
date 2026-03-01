@@ -1,0 +1,23 @@
+# Usamos apenas o Stage de Node para permitir o "ng serve"
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instalamos o Angular CLI globalmente para garantir que o comando 'ng' esteja disponível
+RUN npm install -g @angular/cli
+
+# Copia apenas os arquivos de dependências
+COPY package*.json ./
+
+# Instalamos as dependências (npm install é melhor em dev para evitar conflitos de lock)
+RUN npm install --prefer-offline --no-audit
+
+# Copia o restante do código fonte
+COPY . .
+
+# Expõe a porta padrão do Angular
+EXPOSE 4200
+
+# O comando que inicia o servidor de desenvolvimento.
+# O host 0.0.0.0 é obrigatório para o Docker conseguir acessar a rede.
+CMD ["ng", "serve", "--host", "0.0.0.0", "--port", "4200", "--poll", "2000"]
