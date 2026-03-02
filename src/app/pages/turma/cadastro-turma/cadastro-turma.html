@@ -9,32 +9,34 @@
         <div>
           <h2 class="fw-bold mb-0 text-dark fs-4">
             {{
-            isEditMode() ? (isViewMode() ? 'Detalhes da Turma' : 'Editar Turma') : 'Nova Turma'
+              isEditMode() ? (isViewMode() ? 'Detalhes da Turma' : 'Editar Turma') : 'Nova Turma'
             }}
           </h2>
           <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
             {{
-            isEditMode()
-            ? isViewMode()
-            ? 'Visualize os dados completos'
-            : 'Atualize os dados da turma'
-            : 'Preencha os dados da nova turma'
+              isEditMode()
+                ? isViewMode()
+                  ? 'Visualize os dados completos'
+                  : 'Atualize os dados da turma'
+                : 'Preencha os dados da nova turma'
             }}
           </p>
         </div>
       </div>
 
-      <div class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 action-bar-buttons">
+      <div
+        class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 action-bar-buttons"
+      >
         @if (editingId()) {
-        <app-button-delete (onClick)="deleteTurma()"></app-button-delete>
-        <div class="vr mx-2 opacity-25 d-none d-lg-block"></div>
+          <app-button-delete (onClick)="deleteTurma()"></app-button-delete>
+          <div class="vr mx-2 opacity-25 d-none d-lg-block"></div>
         }
 
         @if (isViewMode()) {
-        <app-button-edit (onClick)="onEditClick()"></app-button-edit>
+          <app-button-edit (onClick)="onEditClick()"></app-button-edit>
         } @else {
-        <app-button-cancel (onClick)="onCancel()"></app-button-cancel>
-        <app-button-save (onClick)="onSubmit()" [isSubmitting]="isSaving()"></app-button-save>
+          <app-button-cancel (onClick)="onCancel()"></app-button-cancel>
+          <app-button-save (onClick)="onSubmit()" [isSubmitting]="isSaving()"></app-button-save>
         }
       </div>
     </div>
@@ -45,17 +47,24 @@
     <!-- Tabs Header -->
     <ul class="nav nav-pills nav-fill gap-2 p-1 bg-light rounded-3 mb-4 border" role="tablist">
       <li class="nav-item">
-        <button class="nav-link rounded-3 small fw-bold text-secondary" [class.active]="activeTab() === 'info'"
-          [class.text-danger]="classForm.invalid && saveAttempted()" (click)="setActiveTab('info')">
+        <button
+          class="nav-link rounded-3 small fw-bold text-secondary"
+          [class.active]="activeTab() === 'info'"
+          [class.text-danger]="classForm.invalid && saveAttempted()"
+          (click)="setActiveTab('info')"
+        >
           Dados da Turma
           @if (classForm.invalid && saveAttempted()) {
-          <i class="bi bi-exclamation-circle ms-1"></i>
+            <i class="bi bi-exclamation-circle ms-1"></i>
           }
         </button>
       </li>
       <li class="nav-item">
-        <button class="nav-link rounded-3 small fw-bold text-secondary" [class.active]="activeTab() === 'allocation'"
-          (click)="setActiveTab('allocation')">
+        <button
+          class="nav-link rounded-3 small fw-bold text-secondary"
+          [class.active]="activeTab() === 'allocation'"
+          (click)="setActiveTab('allocation')"
+        >
           Alocação
         </button>
       </li>
@@ -64,259 +73,319 @@
     <form [formGroup]="classForm">
       <!-- ABA 1: Dados da Turma -->
       @if (activeTab() === 'info') {
-      <div class="animate-in">
-        <div class="row g-4 mt-1">
-          <div class="col-12 col-lg-8">
-            <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">
-              Informações Básicas
-            </h6>
+        <div class="animate-in">
+          <div class="row g-4 mt-1">
+            <div class="col-12 col-lg-8">
+              <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">
+                Informações Básicas
+              </h6>
 
-            <div class="row g-4 mb-4">
+              <div class="row g-4 mb-4">
+                <div class="col-12">
+                  <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
+                    Nome da Turma <span class="text-danger">*</span>
+                  </label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-people text-primary"></i></span>
+                    <input
+                      type="text"
+                      class="form-control fw-bold py-2"
+                      formControlName="nome"
+                      placeholder="Ex: 9º Ano A"
+                      [class.is-invalid]="f['nome'].invalid && saveAttempted()"
+                    />
+                  </div>
+                  @if (f['nome'].invalid && saveAttempted()) {
+                    <div class="text-danger small mt-1">
+                      {{ t().admin.validation.required }}
+                    </div>
+                  }
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
+                    >Vigência</label
+                  >
+                  <div class="input-group">
+                    <span class="input-group-text"
+                      ><i class="bi bi-calendar-check text-primary"></i
+                    ></span>
+                    <input
+                      type="text"
+                      class="form-control fw-bold py-2"
+                      formControlName="ano"
+                      readonly
+                    />
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
+                    Matriz Curricular <span class="text-danger">*</span>
+                  </label>
+                  <div class="input-group">
+                    <span class="input-group-text"
+                      ><i class="bi bi-grid-3x3 text-primary"></i
+                    ></span>
+                    <select
+                      class="form-select fw-bold py-2"
+                      formControlName="matrizId"
+                      [class.is-invalid]="f['matrizId'].invalid && saveAttempted()"
+                      [title]="selectedMatrixTooltip()"
+                    >
+                      <option [ngValue]="null" disabled>Selecione uma matriz...</option>
+                      @for (matrix of matrices(); track matrix.id) {
+                        <option [ngValue]="matrix.id">{{ getMatrixLabel(matrix) }}</option>
+                      }
+                    </select>
+                  </div>
+                  @if (f['matrizId'].invalid && saveAttempted()) {
+                    <div class="text-danger small mt-1">
+                      {{ t().admin.validation.required }}
+                    </div>
+                  }
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
+                    Grade de Horários <span class="text-danger">*</span>
+                  </label>
+                  <div class="d-flex align-items-start gap-2">
+                    <div class="flex-grow-1">
+                      <select
+                        class="form-select fw-bold py-2"
+                        formControlName="gradeHorariaId"
+                        [class.is-invalid]="f['gradeHorariaId'].invalid && saveAttempted()"
+                      >
+                        <option [ngValue]="null" disabled>Selecione uma grade...</option>
+                        @for (grid of timeGrids(); track grid.id) {
+                          <option [ngValue]="grid.id">{{ grid.name }} ({{ grid.shift }})</option>
+                        }
+                      </select>
+                    </div>
+                    <button
+                      class="btn btn-outline-primary rounded-3 d-flex align-items-center justify-content-center btn-height-40 flex-shrink-0"
+                      type="button"
+                      (click)="openGradeManager()"
+                      [disabled]="isViewMode()"
+                    >
+                      <i class="bi bi-gear-fill"></i>
+                    </button>
+                  </div>
+                  @if (f['gradeHorariaId'].invalid && saveAttempted()) {
+                    <div class="text-danger small mt-1">
+                      {{ t().admin.validation.required }}
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <hr class="my-4 border-dashed opacity-25" />
+
+              <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">
+                Infraestrutura
+              </h6>
+
               <div class="col-12">
-                <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                  Nome da Turma <span class="text-danger">*</span>
-                </label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-people text-primary"></i></span>
-                  <input type="text" class="form-control fw-bold py-2" formControlName="nome" placeholder="Ex: 9º Ano A"
-                    [class.is-invalid]="f['nome'].invalid && saveAttempted()" />
-                </div>
-                @if (f['nome'].invalid && saveAttempted()) {
-                <div class="text-danger small mt-1">
-                  {{ t().admin.validation.required }}
-                </div>
-                }
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">Vigência</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-calendar-check text-primary"></i></span>
-                  <input type="text" class="form-control fw-bold py-2" formControlName="ano" readonly />
-                </div>
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                  Matriz Curricular <span class="text-danger">*</span>
-                </label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-grid-3x3 text-primary"></i></span>
-                  <select class="form-select fw-bold py-2" formControlName="matrizId"
-                    [class.is-invalid]="f['matrizId'].invalid && saveAttempted()">
-                    <option [ngValue]="null" disabled>Selecione uma matriz...</option>
-                    @for (matrix of matrices(); track matrix.id) {
-                    <option [ngValue]="matrix.id">{{ matrix.name }} ({{ matrix.year }})</option>
-                    }
-                  </select>
-                </div>
-                @if (f['matrizId'].invalid && saveAttempted()) {
-                <div class="text-danger small mt-1">
-                  {{ t().admin.validation.required }}
-                </div>
-                }
-              </div>
-
-              <div class="col-12 col-md-6">
-                <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                  Grade de Horários <span class="text-danger">*</span>
-                </label>
+                <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
+                  >Sala de Aula</label
+                >
                 <div class="d-flex align-items-start gap-2">
-                  <div class="flex-grow-1">
-                    <select class="form-select fw-bold py-2" formControlName="gradeHorariaId"
-                      [class.is-invalid]="f['gradeHorariaId'].invalid && saveAttempted()">
-                      <option [ngValue]="null" disabled>Selecione uma grade...</option>
-                      @for (grid of timeGrids(); track grid.id) {
-                      <option [ngValue]="grid.id">{{ grid.name }} ({{ grid.shift }})</option>
+                  <div class="input-group flex-grow-1">
+                    <span class="input-group-text"
+                      ><i class="bi bi-door-open text-primary"></i
+                    ></span>
+                    <select class="form-select fw-bold py-2" formControlName="salaId">
+                      <option [ngValue]="null">Nenhuma sala selecionada</option>
+                      @for (room of rooms(); track room.id) {
+                        <option [ngValue]="room.id">
+                          {{ room.name }} — {{ room.block }} (Cap: {{ room.capacity }})
+                        </option>
                       }
                     </select>
                   </div>
                   <button
                     class="btn btn-outline-primary rounded-3 d-flex align-items-center justify-content-center btn-height-40 flex-shrink-0"
-                    type="button" (click)="openGradeManager()" [disabled]="isViewMode()">
+                    type="button"
+                    (click)="openRoomManager()"
+                    [disabled]="isViewMode()"
+                  >
                     <i class="bi bi-gear-fill"></i>
                   </button>
                 </div>
-                @if (f['gradeHorariaId'].invalid && saveAttempted()) {
-                <div class="text-danger small mt-1">
-                  {{ t().admin.validation.required }}
-                </div>
-                }
               </div>
             </div>
 
-            <hr class="my-4 border-dashed opacity-25" />
-
-            <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">
-              Infraestrutura
-            </h6>
-
-            <div class="col-12">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">Sala de Aula</label>
-              <div class="d-flex align-items-start gap-2">
-                <div class="input-group flex-grow-1">
-                  <span class="input-group-text"><i class="bi bi-door-open text-primary"></i></span>
-                  <select class="form-select fw-bold py-2" formControlName="salaId">
-                    <option [ngValue]="null">Nenhuma sala selecionada</option>
-                    @for (room of rooms(); track room.id) {
-                    <option [ngValue]="room.id">
-                      {{ room.name }} — {{ room.block }} (Cap: {{ room.capacity }})
-                    </option>
-                    }
-                  </select>
-                </div>
-                <button
-                  class="btn btn-outline-primary rounded-3 d-flex align-items-center justify-content-center btn-height-40 flex-shrink-0"
-                  type="button" (click)="openRoomManager()" [disabled]="isViewMode()">
-                  <i class="bi bi-gear-fill"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-12 col-lg-4">
-            <div class="p-4 rounded-4 bg-light border h-100">
-              <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">
-                Disciplinas da Matriz
-              </h6>
-              @if (!selectedMatrixId()) {
-              <div class="text-center text-muted py-4">
-                <i class="bi bi-grid-3x3-gap fs-2 d-block mb-2 opacity-25"></i>
-                <p class="mb-0 small">Selecione uma matriz...</p>
-              </div>
-              } @else if (gradeSummary().length === 0) {
-              <div class="text-center text-muted py-4">
-                <i class="bi bi-dash-circle fs-2 d-block mb-2 opacity-25"></i>
-                <p class="mb-0 small">Nenhuma disciplina.</p>
-              </div>
-              } @else {
-              <div class="d-flex flex-column gap-2">
-                @for (item of gradeSummary(); track item.id) {
-                <div
-                  class="d-flex align-items-center justify-content-between p-2 rounded-3 bg-white border-bottom shadow-xs">
-                  <div class="d-flex align-items-center gap-2">
-                    <div class="sub-dot flex-shrink-0" [style.background-color]="item.color"></div>
-                    <span class="small fw-bold text-dark">{{ item.name }}</span>
+            <div class="col-12 col-lg-4">
+              <div class="p-4 rounded-4 bg-light border h-100">
+                <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">
+                  Disciplinas da Matriz
+                </h6>
+                @if (!selectedMatrixId()) {
+                  <div class="text-center text-muted py-4">
+                    <i class="bi bi-grid-3x3-gap fs-2 d-block mb-2 opacity-25"></i>
+                    <p class="mb-0 small">Selecione uma matriz...</p>
                   </div>
-                  <span class="badge bg-primary-subtle text-primary fw-bold">
-                    {{ item.weeklyLessons }}h
-                  </span>
-                </div>
+                } @else if (gradeSummary().length === 0) {
+                  <div class="text-center text-muted py-4">
+                    <i class="bi bi-dash-circle fs-2 d-block mb-2 opacity-25"></i>
+                    <p class="mb-0 small">Nenhuma disciplina.</p>
+                  </div>
+                } @else {
+                  <div class="d-flex flex-column gap-2">
+                    @for (item of gradeSummary(); track item.id) {
+                      <div
+                        class="d-flex align-items-center justify-content-between p-2 rounded-3 bg-white border-bottom shadow-xs"
+                      >
+                        <div class="d-flex align-items-center gap-2">
+                          <div
+                            class="sub-dot flex-shrink-0"
+                            [style.background-color]="item.color"
+                          ></div>
+                          <span class="small fw-bold text-dark">{{ item.name }}</span>
+                        </div>
+                        <span class="badge bg-primary-subtle text-primary fw-bold">
+                          {{ item.weeklyLessons }}h
+                        </span>
+                      </div>
+                    }
+                  </div>
                 }
               </div>
-              }
             </div>
           </div>
         </div>
-      </div>
       }
 
       <!-- ABA 2: Alocação -->
       @if (activeTab() === 'allocation') {
-      <div class="animate-in">
-        <div class="row mt-1">
-          <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <h6 class="text-uppercase text-muted fw-bold small mb-0 tracking-widest">
-                Grade de Horários Semanal
-              </h6>
-              <div class="badge bg-primary-subtle text-primary border-0 px-3 py-2 rounded-pill fw-bold">
-                {{ allocations().length }} Aulas Alocadas
-              </div>
-            </div>
-
-            <div class="d-none d-md-block table-responsive border rounded-4 overflow-hidden shadow-xs bg-white">
-              <table class="table timetable-grid mb-0 align-middle">
-                <thead class="bg-light">
-                  <tr>
-                    <th class="time-column text-center">Horário</th>
-                    @for (day of days; track day.value) {
-                    <th class="day-column text-center">{{ day.label }}</th>
-                    }
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (slot of slots(); track slot.order) {
-                  <tr [class.bg-light]="slot.type === 'Intervalo'">
-                    <td class="text-center py-3">
-                      <div class="fw-bold text-dark">{{ slot.start }}</div>
-                      <div class="text-muted smaller">{{ slot.end }}</div>
-                    </td>
-                    @for (day of days; track day.value) {
-                    <td class="p-2 slot-cell border-start">
-                      @if (slot.type === 'Intervalo') {
-                      <div class="text-center text-muted small fw-bold opacity-25">
-                        INTERVALO
-                      </div>
-                      } @else {
-                      <div class="d-flex flex-column gap-2">
-                        <select class="form-select form-select-sm discipline-select"
-                          [value]="getSelectedDiscipline(day.value, slot.order)"
-                          (change)="onDisciplineChange(day.value, slot.order, $event)" [disabled]="isViewMode()">
-                          <option value="">Disciplina</option>
-                          @for (item of gradeSummary(); track item.id) {
-                          <option [value]="item.id">{{ item.name }}</option>
-                          }
-                        </select>
-                        @if (getSelectedDiscipline(day.value, slot.order)) {
-                        <select class="form-select form-select-sm teacher-select"
-                          [ngModel]="getSelectedTeacher(day.value, slot.order)" [ngModelOptions]="{ standalone: true }"
-                          (ngModelChange)="onTeacherChange(day.value, slot.order, $event)" [disabled]="isViewMode()">
-                          @for (
-                          teacher of getQualifiedTeachers(
-                          getSelectedDiscipline(day.value, slot.order)
-                          );
-                          track teacher.id
-                          ) {
-                          <option [ngValue]="teacher.id">{{ teacher.name }}</option>
-                          }
-                        </select>
-                        }
-                      </div>
-                      }
-                    </td>
-                    }
-                  </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Mobile View (Keep existing logic but wrap in card style if needed) -->
-            <!-- ... existing mobile code ... -->
-
-            <div class="mt-4 pt-4 border-top">
-              <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">Resumo</h6>
-              <div class="row g-2">
-                @for (item of gradeSummary(); track item.id) {
-                <div class="col-6 col-md-4 col-lg-3">
-                  <div
-                    class="p-2 border rounded-3 bg-white shadow-xs d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center gap-2">
-                      <div class="sub-dot" [style.background-color]="item.color"></div>
-                      <span class="smaller fw-bold">{{ item.name }}</span>
-                    </div>
-                    @let allocatedCount = getAllocatedCount(item.id);
-                    <span class="badge" [class.bg-success]="allocatedCount === item.weeklyLessons"
-                      [class.bg-warning]="allocatedCount < item.weeklyLessons"
-                      [class.bg-danger]="allocatedCount > item.weeklyLessons">
-                      {{ allocatedCount }}/{{ item.weeklyLessons }}
-                    </span>
-                  </div>
+        <div class="animate-in">
+          <div class="row mt-1">
+            <div class="col-12">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h6 class="text-uppercase text-muted fw-bold small mb-0 tracking-widest">
+                  Grade de Horários Semanal
+                </h6>
+                <div
+                  class="badge bg-primary-subtle text-primary border-0 px-3 py-2 rounded-pill fw-bold"
+                >
+                  {{ allocations().length }} Aulas Alocadas
                 </div>
-                }
+              </div>
+
+              <div
+                class="d-none d-md-block table-responsive border rounded-4 overflow-hidden shadow-xs bg-white"
+              >
+                <table class="table timetable-grid mb-0 align-middle">
+                  <thead class="bg-light">
+                    <tr>
+                      <th class="time-column text-center">Horário</th>
+                      @for (day of days; track day.value) {
+                        <th class="day-column text-center">{{ day.label }}</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (slot of slots(); track slot.order) {
+                      <tr [class.bg-light]="slot.type === 'Intervalo'">
+                        <td class="text-center py-3">
+                          <div class="fw-bold text-dark">{{ slot.start }}</div>
+                          <div class="text-muted smaller">{{ slot.end }}</div>
+                        </td>
+                        @for (day of days; track day.value) {
+                          <td class="p-2 slot-cell border-start">
+                            @if (slot.type === 'Intervalo') {
+                              <div class="text-center text-muted small fw-bold opacity-25">
+                                INTERVALO
+                              </div>
+                            } @else {
+                              <div class="d-flex flex-column gap-2">
+                                <select
+                                  class="form-select form-select-sm discipline-select"
+                                  [value]="getSelectedDiscipline(day.value, slot.order)"
+                                  (change)="onDisciplineChange(day.value, slot.order, $event)"
+                                  [disabled]="isViewMode()"
+                                >
+                                  <option value="">Disciplina</option>
+                                  @for (item of gradeSummary(); track item.id) {
+                                    <option [value]="item.id">{{ item.name }}</option>
+                                  }
+                                </select>
+                                @if (getSelectedDiscipline(day.value, slot.order)) {
+                                  <select
+                                    class="form-select form-select-sm teacher-select"
+                                    [ngModel]="getSelectedTeacher(day.value, slot.order)"
+                                    [ngModelOptions]="{ standalone: true }"
+                                    (ngModelChange)="onTeacherChange(day.value, slot.order, $event)"
+                                    [disabled]="isViewMode()"
+                                  >
+                                    @for (
+                                      teacher of getQualifiedTeachers(
+                                        getSelectedDiscipline(day.value, slot.order)
+                                      );
+                                      track teacher.id
+                                    ) {
+                                      <option [ngValue]="teacher.id">{{ teacher.name }}</option>
+                                    }
+                                  </select>
+                                }
+                              </div>
+                            }
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Mobile View (Keep existing logic but wrap in card style if needed) -->
+              <!-- ... existing mobile code ... -->
+
+              <div class="mt-4 pt-4 border-top">
+                <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">Resumo</h6>
+                <div class="row g-2">
+                  @for (item of gradeSummary(); track item.id) {
+                    <div class="col-6 col-md-4 col-lg-3">
+                      <div
+                        class="p-2 border rounded-3 bg-white shadow-xs d-flex justify-content-between align-items-center"
+                      >
+                        <div class="d-flex align-items-center gap-2">
+                          <div class="sub-dot" [style.background-color]="item.color"></div>
+                          <span class="smaller fw-bold">{{ item.name }}</span>
+                        </div>
+                        @let allocatedCount = getAllocatedCount(item.id);
+                        <span
+                          class="badge"
+                          [class.bg-success]="allocatedCount === item.weeklyLessons"
+                          [class.bg-warning]="allocatedCount < item.weeklyLessons"
+                          [class.bg-danger]="allocatedCount > item.weeklyLessons"
+                        >
+                          {{ allocatedCount }}/{{ item.weeklyLessons }}
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
       }
     </form>
   </div>
 </div>
 
-<app-modal-manage-time-grid #gradeModal [isOpen]="showGradeManager()" (close)="closeGradeManager()"
-  (onSaved)="onGridSaved($event)"></app-modal-manage-time-grid>
+<app-modal-manage-time-grid
+  #gradeModal
+  [isOpen]="showGradeManager()"
+  (close)="closeGradeManager()"
+  (onSaved)="onGridSaved($event)"
+></app-modal-manage-time-grid>
 
-<app-modal-manage-room #roomModal [isOpen]="showRoomManager()" (close)="closeRoomManager()"
-  (onSaved)="onRoomSaved($event)"></app-modal-manage-room>
+<app-modal-manage-room
+  #roomModal
+  [isOpen]="showRoomManager()"
+  (close)="closeRoomManager()"
+  (onSaved)="onRoomSaved($event)"
+></app-modal-manage-room>

@@ -88,8 +88,7 @@ export class Sidebar implements OnInit, OnDestroy {
       '/classes',
       '/ambientes',
       '/subjects',
-      '/consulta-matriz-escolar',
-      '/cadastro-matriz-escolar',
+      '/school-matrices',
       '/calendar',
     ];
     const adminRoutes = ['/time-grids', '/structure', '/tv-settings', '/consulta-configuracao'];

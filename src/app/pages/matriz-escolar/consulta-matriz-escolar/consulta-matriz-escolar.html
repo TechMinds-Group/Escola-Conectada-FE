@@ -12,7 +12,7 @@
     <div class="d-flex align-items-center gap-3">
       <button
         class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold transition-hover"
-        [routerLink]="['/cadastro-matriz-escolar']"
+        [routerLink]="['/school-matrices/new']"
       >
         <i class="bi bi-plus-lg fs-5"></i>
         {{ t().admin.matrices.buttons.new }}
@@ -27,7 +27,7 @@
       <button
         class="btn btn-primary rounded-circle shadow-lg p-0 d-flex align-items-center justify-content-center transition-hover"
         style="width: 56px; height: 56px"
-        [routerLink]="['/cadastro-matriz-escolar']"
+        [routerLink]="['/school-matrices/new']"
       >
         <i class="bi bi-plus-lg fs-3 text-white"></i>
       </button>
@@ -42,9 +42,12 @@
           <tr>
             <th
               class="border-0 ps-4 py-3 text-muted small fw-bold text-uppercase"
-              style="width: 35%"
+              style="width: 25%"
             >
               {{ t().admin.matrices.table.name }}
+            </th>
+            <th class="border-0 py-3 text-muted small fw-bold text-uppercase" style="width: 15%">
+              {{ t().admin.matrices.table.validity }}
             </th>
             <th class="border-0 py-3 text-muted small fw-bold text-uppercase" style="width: 25%">
               {{ t().admin.matrices.table.level }}
@@ -64,7 +67,7 @@
           @for (matrix of matrices(); track matrix.id) {
             <tr
               class="transition-hover cursor-pointer border-bottom-light"
-              [routerLink]="['/cadastro-matriz-escolar', matrix.id]"
+              [routerLink]="['/school-matrices/edit', matrix.id]"
             >
               <td class="ps-4 py-3">
                 <div class="d-flex align-items-center gap-3">
@@ -76,11 +79,11 @@
                   </div>
                   <div>
                     <div class="fw-bold text-dark">{{ matrix.name }}</div>
-                    <div class="xx-small text-muted text-uppercase fw-semibold tracking-wider">
-                      {{ t().admin.matrices.table.validity }}: {{ matrix.year }}
-                    </div>
                   </div>
                 </div>
+              </td>
+              <td class="py-3">
+                <span class="small fw-bold text-muted">{{ matrix.year }}</span>
               </td>
               <td class="py-3">
                 <div class="d-flex flex-wrap gap-1">
@@ -144,7 +147,7 @@
     @for (matrix of matrices(); track matrix.id) {
       <div
         class="card border-0 shadow-sm rounded-4 p-3 bg-white transition-hover position-relative"
-        [routerLink]="['/cadastro-matriz-escolar', matrix.id]"
+        [routerLink]="['/school-matrices/edit', matrix.id]"
       >
         <div class="d-flex align-items-start gap-3 mb-3">
           <div

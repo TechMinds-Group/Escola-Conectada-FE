@@ -46,7 +46,7 @@ export class SearchService {
       },
       {
         label: t.admin.sidebar.matrix,
-        route: '/consulta-matriz-escolar',
+        route: '/school-matrices',
         icon: 'bi-grid-3x3',
         category: t.admin.sidebar.records,
       },

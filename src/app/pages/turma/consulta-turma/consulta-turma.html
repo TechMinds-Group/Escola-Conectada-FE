@@ -204,7 +204,7 @@
       @for (turma of filteredTurmas(); track turma.id) {
         <div
           class="card border-0 shadow-sm rounded-4 p-3 bg-white transition-hover"
-          [routerLink]="['/cadastro-turma', turma.id]"
+          [routerLink]="['/classes/edit', turma.id]"
         >
           <div class="d-flex align-items-start gap-3 mb-3">
             <div

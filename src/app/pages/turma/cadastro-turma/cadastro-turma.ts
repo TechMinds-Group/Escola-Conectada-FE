@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import {
   FormBuilder,
   FormGroup,
@@ -16,6 +16,7 @@ import {
   SchoolRoom,
   SchoolTimeGrid,
   TimeSlot,
+  SchoolMatrix,
 } from '../../../core/services/school-data';
 import { TranslationService } from '../../../core/services/translation.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -60,6 +61,7 @@ export class CadastroTurma implements OnInit {
   private professorService = inject(ProfessorService);
   private confirmation = inject(ConfirmationService);
   public translation = inject(TranslationService);
+  private location = inject(Location);
   t = this.translation.dictionary;
 
   classForm: FormGroup;
@@ -159,6 +161,19 @@ export class CadastroTurma implements OnInit {
     });
 
     return summaryItems;
+  });
+
+  getMatrixLabel(matrix: SchoolMatrix): string {
+    if (!matrix) return '';
+    const levels = matrix.levels?.map((l: any) => l.level).join(', ');
+    return `${matrix.name} - ${levels} - ${matrix.year}`;
+  }
+
+  selectedMatrixTooltip = computed(() => {
+    const id = this.selectedMatrixId();
+    if (!id) return 'Selecione uma matriz curricular';
+    const matrix = this.matrices().find((m) => m.id === id);
+    return matrix ? this.getMatrixLabel(matrix) : 'Matriz selecionada não encontrada';
   });
 
   constructor() {
@@ -554,7 +569,7 @@ export class CadastroTurma implements OnInit {
       }
     } else {
       // Se estava vendo ou criando, sai da tela
-      this.router.navigate(['/consulta-turma']);
+      this.location.back();
     }
   }
 

@@ -3,7 +3,7 @@
   <div class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
       <div class="d-flex align-items-center gap-3">
-        <button class="btn transition-hover btn-back-header" routerLink="/consulta-matriz-escolar">
+        <button class="btn transition-hover btn-back-header" routerLink="/school-matrices">
           <i class="bi bi-arrow-left"></i>
         </button>
         <div>
@@ -43,8 +43,25 @@
   <!-- Matrix Meta Info -->
   <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white" [formGroup]="matrixForm">
     <div class="row g-4 align-items-end">
+      <!-- Nome da Matriz -->
+      <div class="col-12 col-xl-4">
+        <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
+          Nome da Matriz <span class="text-danger">*</span>
+        </label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="bi bi-fonts text-primary"></i></span>
+          <input
+            type="text"
+            class="form-control fw-bold py-2"
+            formControlName="name"
+            placeholder="Ex: Matriz Escolar Fundamental 2026"
+            [readonly]="isViewMode()"
+          />
+        </div>
+      </div>
+
       <!-- Ano Base -->
-      <div class="col-12 col-md-6 col-xl-3">
+      <div class="col-12 col-md-4 col-xl-2">
         <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
           >Ano Base <span class="text-danger">*</span></label
         >
@@ -61,9 +78,9 @@
       </div>
 
       <!-- Carga Horária MEC (Mín.) -->
-      <div class="col-12 col-md-6 col-xl-3">
+      <div class="col-12 col-md-4 col-xl-2">
         <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
-          >Carga Horária MEC (Mín.) <span class="text-danger">*</span></label
+          >Carga MEC <span class="text-danger">*</span></label
         >
         <div class="input-group">
           <span class="input-group-text"><i class="bi bi-clock-history text-primary"></i></span>
@@ -73,12 +90,12 @@
             formControlName="mecAnnualHours"
             [readonly]="isViewMode()"
           />
-          <span class="input-group-text small">h/ano</span>
+          <span class="input-group-text small px-2">h</span>
         </div>
       </div>
 
       <!-- Novo Nível -->
-      <div class="col-12 col-lg-8 col-xl-4">
+      <div class="col-12 col-md-4 col-xl-3">
         <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
           >Novo Nível <span class="text-danger">*</span></label
         >
@@ -98,15 +115,15 @@
       </div>
 
       <!-- Add Level Button -->
-      <div class="col-12 col-lg-4 col-xl-2 d-flex justify-content-lg-end">
+      <div class="col-12 col-xl-1 d-flex justify-content-lg-end">
         <button
-          class="btn btn-primary rounded-3 shadow-sm w-100 w-lg-auto transition-hover d-flex align-items-center justify-content-center btn-height-40"
+          class="btn btn-primary rounded-3 shadow-sm w-100 transition-hover d-flex align-items-center justify-content-center btn-height-40"
           (click)="addLevelRow()"
           [disabled]="!selectedLevelToAdd() || isViewMode() || levelsArray.length >= 1"
           title="Adicionar Nível"
         >
-          <i class="bi bi-plus-lg me-1 me-lg-0"></i>
-          <span class="d-lg-none fw-bold">Adicionar Nível</span>
+          <i class="bi bi-plus-lg"></i>
+          <span class="d-xl-none fw-bold ms-2">Adicionar</span>
         </button>
       </div>
     </div>

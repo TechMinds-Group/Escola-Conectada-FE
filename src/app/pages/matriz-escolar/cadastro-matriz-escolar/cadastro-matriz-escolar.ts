@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import {
   ReactiveFormsModule,
   FormsModule,
@@ -58,6 +58,7 @@ export class CadastroMatrizEscolarPage implements OnInit {
   private notification = inject(NotificationService);
   private ambienteService = inject(AmbienteService);
   private confirmationService = inject(ConfirmationService);
+  private location = inject(Location);
   t = this.translation.dictionary;
 
   // Environment Management Logic (from cadastro-ambiente)
@@ -82,6 +83,7 @@ export class CadastroMatrizEscolarPage implements OnInit {
 
   // Form
   matrixForm = this.fb.group({
+    name: ['', Validators.required],
     year: [new Date().getFullYear(), [Validators.required, Validators.min(2024)]],
     mecAnnualHours: [1200, [Validators.required, Validators.min(1)]],
     levels: this.fb.array([]),
@@ -129,7 +131,7 @@ export class CadastroMatrizEscolarPage implements OnInit {
           this.matrixForm.disable();
         })
         .catch(() => {
-          this.router.navigate(['/consulta-matriz-escolar']);
+          this.router.navigate(['/school-matrices']);
         });
     } else {
       this.createMatrix();
@@ -195,6 +197,7 @@ export class CadastroMatrizEscolarPage implements OnInit {
 
   createMatrix() {
     this.matrixForm.reset({
+      name: '',
       year: new Date().getFullYear(),
       mecAnnualHours: 1200,
     });
@@ -211,6 +214,7 @@ export class CadastroMatrizEscolarPage implements OnInit {
     // 2. Patch Main Values (Directly, avoiding full reset)
     this.matrixForm.patchValue(
       {
+        name: matrix.name ?? '',
         year: matrix.year ?? new Date().getFullYear(),
         mecAnnualHours: matrix.mecAnnualHours ?? 1200,
       },
@@ -481,7 +485,7 @@ export class CadastroMatrizEscolarPage implements OnInit {
 
       matrixData = {
         id: this.editingId() || '',
-        name: `Matriz Escolar ${val.year} - ${levelNames}`,
+        name: val.name!,
         year: val.year!,
         mecAnnualHours: val.mecAnnualHours!,
         levels: levelsData,
@@ -498,7 +502,7 @@ export class CadastroMatrizEscolarPage implements OnInit {
       }
 
       this.originalMatrixSnapshot.set(matrixData);
-      this.router.navigate(['/consulta-matriz-escolar']);
+      this.router.navigate(['/school-matrices']);
     } catch (error: any) {
       // 6. Debug e Notificação de Erro
       console.error('--- DEBUG SAVE ERROR ---');
@@ -542,13 +546,13 @@ export class CadastroMatrizEscolarPage implements OnInit {
             this.originalMatrixSnapshot.set(matrix);
             this.loadMatrix(matrix);
           })
-          .catch(() => this.router.navigate(['/consulta-matriz-escolar']));
+          .catch(() => this.router.navigate(['/school-matrices']));
       }
 
       // 3. Ensure disable
       this.matrixForm.disable({ emitEvent: false });
     } else {
-      this.router.navigate(['/consulta-matriz-escolar']);
+      this.router.navigate(['/school-matrices']);
     }
   }
 
@@ -565,7 +569,7 @@ export class CadastroMatrizEscolarPage implements OnInit {
           // Assuming deleteMatrix is async or returns a promise/observable
           await this.schoolData.deleteMatrix(this.editingId()!);
           this.notification.success('Matriz escolar excluída com sucesso!');
-          this.router.navigate(['/consulta-matriz-escolar']);
+          this.router.navigate(['/school-matrices']);
         } catch (error) {
           this.notification.error('Erro ao excluir matriz escolar.');
         }
