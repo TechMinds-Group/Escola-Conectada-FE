@@ -3,6 +3,34 @@
   padding-bottom: 80px;
 }
 
+// ============================================================
+// Sticky Header
+// ============================================================
+.sticky-header {
+  top: 0;
+  background-color: transparent !important;
+  backdrop-filter: blur(12px);
+}
+
+// ============================================================
+// Back button
+// ============================================================
+.btn-back-header {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+// ============================================================
+// Generic 40px height for gear / action buttons
+// ============================================================
+.btn-height-40-auto {
+  height: 40px;
+}
+
 .border-start-4-info {
   border-left: 4px solid var(--bs-info) !important;
 }
@@ -19,5 +47,37 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+// ============================================================
+// Hover transition
+// ============================================================
+.transition-hover {
+  transition: all 0.2s ease-in-out !important;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  }
+}
+
+// ============================================================
+// Action bar — mobile full-width buttons
+// ============================================================
+@media (max-width: 991.98px) {
+  .action-bar-buttons {
+    width: 100%;
+
+    app-button-edit,
+    app-button-cancel,
+    app-button-save {
+      width: 100%;
+
+      ::ng-deep button {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+    }
   }
 }

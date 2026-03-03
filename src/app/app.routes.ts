@@ -87,5 +87,6 @@ export const routes: Routes = [
       },
     ],
   },
+  { path: 'view', component: PublicView },
   { path: '**', redirectTo: 'dashboard' },
 ];
