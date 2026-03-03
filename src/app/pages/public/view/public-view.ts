@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { SchoolDataService } from '../../../core/services/school-data';
+import { SchoolDataService, SchoolClass } from '../../../core/services/school-data';
 import { TranslationService } from '../../../core/services/translation.service';
 import { MatIconModule } from '@angular/material/icon';
 import { debounceTime } from 'rxjs';
@@ -41,13 +41,14 @@ export class PublicView implements OnInit, OnDestroy {
   currentPage = signal(0);
   currentTime = signal(new Date()); // Clock
   private loopInterval: any;
-  private pageInterval: any;
   private clockInterval: any;
+  private dataSyncInterval: any;
   private scenes: ('timetable' | 'events' | 'notices')[] = ['timetable', 'events', 'notices'];
 
   // Data
   classes = this.schoolData.schoolClasses;
   events = this.schoolData.schoolEvents;
+  lastSync = signal<Date>(new Date());
 
   // Search (Mobile mainly)
   searchControl = new FormControl('');
@@ -111,37 +112,6 @@ export class PublicView implements OnInit, OnDestroy {
     ];
   });
 
-  // Helper for Date Formatting
-  formatDate(
-    date: Date | string,
-    format: 'time' | 'shortDate' | 'month' | 'day' | 'timeSeconds' = 'shortDate',
-  ): string {
-    const d = new Date(date);
-    const lang = this.translationService.lang(); // 'pt', 'es'
-    const localeMap: Record<string, string> = { pt: 'pt-BR', es: 'es-ES' };
-    const locale = localeMap[lang] || 'pt-BR';
-
-    if (format === 'time') {
-      return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(d);
-    }
-    if (format === 'timeSeconds') {
-      // Special case for clock
-      // Handled in template pipe manually usually, but let's provide string
-      return d.toLocaleTimeString(locale);
-    }
-    if (format === 'month') {
-      return new Intl.DateTimeFormat(locale, { month: 'short' })
-        .format(d)
-        .toUpperCase()
-        .replace('.', '');
-    }
-    if (format === 'day') {
-      return new Intl.DateTimeFormat(locale, { day: '2-digit' }).format(d);
-    }
-
-    return new Intl.DateTimeFormat(locale).format(d);
-  }
-
   currentNoticeIndex = signal(0);
 
   constructor() {
@@ -164,7 +134,6 @@ export class PublicView implements OnInit, OnDestroy {
 
   ngOnInit() {
     if (!this.isMobile()) {
-      this.calculateItemsPerPage();
       this.startTvLoop();
     }
 
@@ -172,11 +141,28 @@ export class PublicView implements OnInit, OnDestroy {
     this.clockInterval = setInterval(() => {
       this.currentTime.set(new Date());
     }, 1000);
+
+    // Start Real-Time Data Sync (Heartbeat)
+    this.startDataSync();
+  }
+
+  private startDataSync() {
+    // Initial sync check
+    this.schoolData.loadAll();
+
+    // Polling every 30 seconds
+    this.dataSyncInterval = setInterval(() => {
+      console.log('[PublicView] Heartbeat: Syncing real-time data...');
+      this.schoolData.loadAll().then(() => {
+        this.lastSync.set(new Date());
+      });
+    }, 30000);
   }
 
   ngOnDestroy() {
     this.stopTvLoop();
     if (this.clockInterval) clearInterval(this.clockInterval);
+    if (this.dataSyncInterval) clearInterval(this.dataSyncInterval);
     window.removeEventListener('resize', this.onResize.bind(this));
   }
 
@@ -187,7 +173,6 @@ export class PublicView implements OnInit, OnDestroy {
     if (mobile) {
       this.stopTvLoop();
     } else {
-      this.calculateItemsPerPage();
       this.startTvLoop();
     }
   }
@@ -196,28 +181,27 @@ export class PublicView implements OnInit, OnDestroy {
     this.translationService.setLang(lang as 'pt' | 'es');
   }
 
-  // Dynamic Pagination Calculation
-  calculateItemsPerPage() {
-    const height = window.innerHeight;
+  // Intelligent Scaling Logic:
+  // Mobile/Tablet: 4 items (2x2)
+  // TV/Desktop: 6 items (3x2)
+  dynamicItemsPerPage = computed(() => (this.isMobile() ? 4 : 6));
 
-    // Header + Footer + Padding estimation (~220px)
-    // Generous buffer to ensure 4 items fit on 14" screens with diminished font size
-    const availableHeight = height - 220;
+  tvClasses = computed(() => {
+    const list = this.relevantClasses();
+    const page = this.currentPage();
+    const itemsPerPage = this.dynamicItemsPerPage();
+    const start = page * itemsPerPage;
+    return list.slice(start, start + itemsPerPage);
+  });
 
-    // Reduced min height threshold to match new CSS clamp values
-    const minCardHeight = 220;
-
-    const possibleRows = Math.floor(availableHeight / minCardHeight);
-
-    // Dynamic Logic:
-    // If we can fit 2 rows -> 4 items (2x2).
-    // If not -> 2 items (1x2).
-    const items = possibleRows >= 2 ? 4 : 2;
-
-    this.dynamicItemsPerPage.set(items);
-  }
-
-  dynamicItemsPerPage = signal(12); // Default
+  // Grid Calculation for Zero-Scroll scaling
+  gridRows = computed(() => {
+    const count = this.tvClasses().length;
+    if (this.isMobile()) {
+      return count <= 2 ? 1 : 2; // 2x1 or 2x2
+    }
+    return count <= 3 ? 1 : 2; // 3x1 or 3x2
+  });
 
   startTvLoop() {
     this.stopTvLoop();
@@ -239,37 +223,25 @@ export class PublicView implements OnInit, OnDestroy {
     const baseDuration = settings.sceneDurations[current] * 1000;
     let actualDuration = baseDuration;
 
-    // Handle Timetable Pagination Rotation
+    // Handle Timetable Sequential Rotation
     if (current === 'timetable') {
-      const itemsPerPage = this.dynamicItemsPerPage();
-      const totalItems = this.relevantClasses().length;
-      const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-      actualDuration = baseDuration * totalPages;
-      this.startPageRotation(baseDuration, totalPages);
-
-      this.loopInterval = setTimeout(() => {
-        this.nextScene(current);
-      }, actualDuration);
+      this.currentPage.set(0);
+      this.runTimetableSequence(0, baseDuration);
     } else if (current === 'notices') {
       // Notices Logic: Recursive Sequence to handle per-item duration (scrolling)
       this.currentNoticeIndex.set(0);
-      this.stopPageRotation();
       this.runNoticeSequence(0, baseDuration);
     } else {
-      this.stopPageRotation();
-
       // Handle Auto-Scroll for Events (Async calculation)
       if (current === 'events') {
         setTimeout(() => {
-          const scrollDuration = this.checkAndAnimateScroll(baseDuration);
-          if (scrollDuration > 0) {
-            actualDuration = 2000 + scrollDuration + 2000;
-
-            // Re-schedule
+          const scrollTotal = this.checkAndAnimateScroll(baseDuration);
+          if (scrollTotal > 0) {
+            // Override default loop to wait for 1s + scroll + 1s
             clearTimeout(this.loopInterval);
             this.loopInterval = setTimeout(() => {
               this.nextScene(current);
-            }, actualDuration);
+            }, scrollTotal);
           }
         }, 50);
       }
@@ -357,20 +329,33 @@ export class PublicView implements OnInit, OnDestroy {
     list.style.transform = 'translateY(0)';
 
     if (list.offsetHeight > container.offsetHeight) {
-      const distance = list.offsetHeight - container.offsetHeight + 100; // +100 for padding
+      const distance = list.offsetHeight - container.offsetHeight + 100;
 
-      // User Request: Scroll Speed based on Defined Time (durationMs)
-      // The duration of the scroll animation IS the defined time.
-
-      // Start Animation after 2s delay
+      // Logic: 1s pause at start + scroll (durationMs) + 1s pause at end
       setTimeout(() => {
         list.style.transition = `transform ${durationMs}ms linear`;
         list.style.transform = `translateY(-${distance}px)`;
-      }, 2000);
+      }, 1000);
 
-      return durationMs;
+      return durationMs + 2000;
     }
     return 0;
+  }
+
+  runTimetableSequence(page: number, duration: number) {
+    const itemsPerPage = this.dynamicItemsPerPage();
+    const totalItems = this.relevantClasses().length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    this.currentPage.set(page);
+
+    this.loopInterval = setTimeout(() => {
+      if (page < totalPages - 1) {
+        this.runTimetableSequence(page + 1, duration);
+      } else {
+        this.nextScene('timetable');
+      }
+    }, duration);
   }
 
   stopTvLoop() {
@@ -378,36 +363,27 @@ export class PublicView implements OnInit, OnDestroy {
       clearTimeout(this.loopInterval);
       this.loopInterval = null;
     }
-    this.stopPageRotation();
-  }
-
-  startPageRotation(timePerPage: number, totalPages: number) {
-    this.stopPageRotation();
-    this.currentPage.set(0);
-
-    if (totalPages > 1) {
-      this.pageInterval = setInterval(() => {
-        this.currentPage.update((p) => (p + 1) % totalPages);
-      }, timePerPage);
-    }
-  }
-
-  stopPageRotation() {
-    if (this.pageInterval) {
-      clearInterval(this.pageInterval);
-      this.pageInterval = null;
-    }
   }
 
   // Shift Logic
   currentShift = computed(() => {
-    const now = new Date();
-    // For demo purposes, refreshes every time change detection runs (or trigger by interval)
-    // In real app, use a timer signal.
-    const timeStr = now.toTimeString().slice(0, 5);
-    const triggers = this.schoolData.tvSettings().shiftTriggers;
+    const now = this.currentTime();
+    const timeStr =
+      now.getHours().toString().padStart(2, '0') +
+      ':' +
+      now.getMinutes().toString().padStart(2, '0');
+
+    const grids = this.schoolData.schoolTimeGrids();
     const dict = this.t().common.shifts;
 
+    // 1. Try to find shift by active slot in any grid
+    for (const grid of grids) {
+      const hasActiveSlot = grid.slots.some((s) => timeStr >= s.start && timeStr <= s.end);
+      if (hasActiveSlot) return grid.shift;
+    }
+
+    // 2. Fallback to triggers
+    const triggers = this.schoolData.tvSettings().shiftTriggers;
     if (timeStr >= triggers.night) return dict.night;
     if (timeStr >= triggers.afternoon) return dict.afternoon;
     return dict.morning;
@@ -416,18 +392,8 @@ export class PublicView implements OnInit, OnDestroy {
   relevantClasses = computed(() => {
     const shift = this.currentShift();
     const all = this.classes();
-    // LIMIT TOTAL TO 6 items for TV loop as per user request
-    return all.filter((c) => c.shift === shift).slice(0, 6);
-  });
-
-  tvClasses = computed(() => {
-    const list = this.relevantClasses();
-    const page = this.currentPage();
-    // Use dynamic count instead of fixed setting
-    const itemsPerPage = this.dynamicItemsPerPage();
-
-    const start = page * itemsPerPage;
-    return list.slice(start, start + itemsPerPage);
+    // Do NOT slice here, let pagination handle overflow
+    return all.filter((c) => c.shift === shift);
   });
 
   getEventColor(type: string): string {
@@ -447,5 +413,109 @@ export class PublicView implements OnInit, OnDestroy {
       .replace(' - Tarde', '')
       .replace(' - Noite', '')
       .replace(' - Integral', '');
+  }
+
+  getRoomInfo(roomId?: string): string {
+    if (!roomId) return '';
+    const room = this.schoolData.schoolRooms().find((r) => r.id === roomId);
+    if (!room) return roomId;
+    return room.block ? `${room.block} - ${room.name}` : room.name;
+  }
+
+  getCurrentSlot(gridId?: string | null): { index: number; type: string; time: string } | null {
+    const now = this.currentTime();
+    const timeStr =
+      now.getHours().toString().padStart(2, '0') +
+      ':' +
+      now.getMinutes().toString().padStart(2, '0');
+
+    const grids = this.schoolData.schoolTimeGrids();
+
+    // If gridId provided (from class), use it. Otherwise use current shift detection.
+    const grid = gridId
+      ? grids.find((g) => String(g.id) === String(gridId))
+      : grids.find((g) => g.shift === this.currentShift());
+
+    if (!grid) return null;
+
+    // 1. Find exact active slot
+    const activeSlot = grid.slots.find((s) => timeStr >= s.start && timeStr <= s.end);
+
+    if (activeSlot) {
+      // 2. If it's a break, return the NEXT 'Aula' slot if it exists
+      if (activeSlot.type === 'Intervalo') {
+        const nextAula = grid.slots
+          .filter((s) => (s.index ?? 0) > (activeSlot.index ?? 0))
+          .find((s) => s.type === 'Aula');
+        if (nextAula) {
+          return {
+            index: nextAula.index ?? 0,
+            type: 'Aula',
+            time: `${nextAula.start} - ${nextAula.end}`,
+          };
+        }
+      }
+      return {
+        index: activeSlot.index ?? 0,
+        type: activeSlot.type,
+        time: `${activeSlot.start} - ${activeSlot.end}`,
+      };
+    }
+
+    // 3. No exact slot found: check if we are BEFORE the first slot of the turn
+    const firstSlot = grid.slots[0];
+    if (firstSlot && timeStr < firstSlot.start) {
+      const firstAula = grid.slots.find((s) => s.type === 'Aula');
+      if (firstAula) {
+        return {
+          index: firstAula.index ?? 0,
+          type: 'Aula',
+          time: `${firstAula.start} - ${firstAula.end}`,
+        };
+      }
+    }
+
+    return null;
+  }
+
+  getTeacherName(teacherId: string | null): string {
+    if (!teacherId) return '---';
+    const teacher = this.schoolData.teachers().find((t) => t.id === teacherId);
+    return teacher ? teacher.name : '---';
+  }
+
+  getSubjectName(matrixId: string, subjectId: string): string {
+    const matrix = this.schoolData.schoolMatrices().find((m) => String(m.id) === String(matrixId));
+    if (!matrix) return '---';
+
+    // MatrixSubject link
+    let matrixSub;
+    for (const level of matrix.levels) {
+      matrixSub = level.subjects.find((s) => String(s.id) === String(subjectId));
+      if (matrixSub) break;
+    }
+
+    if (!matrixSub) return '---';
+
+    // Global Subject lookup
+    const globalSub = this.schoolData
+      .subjects()
+      .find((s) => String(s.id) === String(matrixSub!.subjectId));
+    return globalSub ? globalSub.name : '---';
+  }
+
+  getActiveAssignment(cls: SchoolClass) {
+    const slot = this.getCurrentSlot(cls.gradeHorariaId);
+    const day = new Date().getDay(); // 0-6 (Sun-Sat)
+
+    if (!slot || slot.type !== 'Aula') return null;
+
+    // Normalizing Mon=1 to Sun=7
+    const adjustedDay = day === 0 ? 7 : day;
+
+    return cls.assignments.find(
+      (a: { dayOfWeek?: number; slotIndex?: number }) =>
+        String(a.dayOfWeek) === String(adjustedDay) && String(a.slotIndex) === String(slot.index),
+    );
   }
 }

@@ -95,11 +95,17 @@ export interface SchoolClass {
   year: number;
   shift: 'Manhã' | 'Tarde' | 'Noite' | 'Integral';
   matrixId: string;
+  gradeHorariaId: string;
   roomId?: string;
   maxCapacity: number;
   studentsCount: number;
   scheduleStatus: 'Completo' | 'Incompleto' | 'Conflito';
-  assignments: { subjectId: string; teacherId: string | null }[]; // Link Subject -> Teacher
+  assignments: {
+    subjectId: string;
+    teacherId: string | null;
+    dayOfWeek?: number;
+    slotIndex?: number;
+  }[]; // Link Subject -> Teacher
 }
 
 export interface SchoolTVSettings {
@@ -878,6 +884,7 @@ export class SchoolDataService {
       year: c.ano || c.Ano,
       shift: mappedShift as any,
       matrixId: c.matrizId,
+      gradeHorariaId: c.gradeHorariaId,
       roomId: c.salaId,
       maxCapacity: c.capacidadeMaxima,
       studentsCount: 0, // Not provided by API yet
@@ -886,6 +893,8 @@ export class SchoolDataService {
         c.alocacoes?.map((a: any) => ({
           subjectId: a.matrizDisciplinaId,
           teacherId: a.professorId,
+          dayOfWeek: a.diaDaSemana,
+          slotIndex: a.ordemAula,
         })) || [],
     };
   }

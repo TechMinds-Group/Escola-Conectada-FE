@@ -75,11 +75,17 @@ export class Sidebar implements OnInit, OnDestroy {
 
   toggleCadastros() {
     this.isCadastrosOpen = !this.isCadastrosOpen;
+    if (this.isCadastrosOpen) {
+      this.isAdminOpen = false;
+    }
     this.cdr.detectChanges();
   }
 
   toggleAdmin() {
     this.isAdminOpen = !this.isAdminOpen;
+    if (this.isAdminOpen) {
+      this.isCadastrosOpen = false;
+    }
     this.cdr.detectChanges();
   }
   private checkActiveRoute(runDetection: boolean) {

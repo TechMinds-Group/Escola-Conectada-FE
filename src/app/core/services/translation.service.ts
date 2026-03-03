@@ -53,7 +53,11 @@ export class TranslationService {
     const locale = localeMap[lang] || 'pt-BR';
 
     if (format === 'time') {
-      return new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(d);
+      return new Intl.DateTimeFormat(locale, {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }).format(d);
     }
     if (format === 'timeSeconds') {
       return d.toLocaleTimeString(locale);
@@ -71,4 +75,3 @@ export class TranslationService {
     return new Intl.DateTimeFormat(locale).format(d);
   }
 }
-
