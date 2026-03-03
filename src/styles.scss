@@ -21,6 +21,7 @@ $theme-colors: (
 
 @use '@angular/material/prebuilt-themes/indigo-pink.css';
 @use 'bootstrap-icons/font/bootstrap-icons.css';
+@use 'angular-calendar/scss/angular-calendar.scss';
 
 /* Global Contrast & Accessibility Rules */
 .bg-primary,
@@ -163,13 +164,12 @@ $theme-colors: (
   .form-select:not(.input-group .form-select),
   .input-group {
     background-color: var(--input-bg) !important;
-    &:focus, &:has(.form-control:focus) {
+    &:focus,
+    &:has(.form-control:focus) {
       background-color: var(--surface-color) !important;
     }
   }
 }
-
-
 
 /* Light Mode Placeholders (Global Default) */
 ::placeholder {
@@ -190,7 +190,12 @@ $theme-colors: (
   .form-control,
   .form-select {
     &::placeholder {
-      color: rgba(255, 255, 255, 0.45) !important; // Increased visibility for parity with light mode
+      color: rgba(
+        255,
+        255,
+        255,
+        0.45
+      ) !important; // Increased visibility for parity with light mode
       opacity: 1;
     }
   }
@@ -584,8 +589,6 @@ body {
 .xx-small {
   font-size: 0.65rem;
 }
-
-
 
 // =========================================
 // PREMIUM UI DNA (Shared across modules)
@@ -1024,11 +1027,11 @@ body.sidebar-collapsed .modal {
   width: 100% !important;
   max-width: 500px !important;
   pointer-events: auto !important;
-  
+
   /* Flex direction to fill height without overflowing container */
   display: flex !important;
   flex-direction: column !important;
-  max-height: 100% !important; 
+  max-height: 100% !important;
 }
 
 .modal-dialog-centered {
@@ -1076,14 +1079,19 @@ div.modern-help-popover.mat-mdc-menu-panel {
   }
 
   /* Force every single text-bearing element to be dark slate */
-  &, 
-  & *, 
-  span, 
-  h1, h2, h3, h4, h5, h6, 
-  div, 
-  p, 
-  i, 
-  .workload-description, 
+  &,
+  & *,
+  span,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  div,
+  p,
+  i,
+  .workload-description,
   .text-muted,
   .text-primary {
     color: #0f172a !important; /* Slate 900 (Very Dark Slate) */

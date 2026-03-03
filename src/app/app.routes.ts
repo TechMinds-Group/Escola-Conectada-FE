@@ -16,7 +16,6 @@ import { CadastroTurma } from './pages/turma/cadastro-turma/cadastro-turma';
 import { ConsultaAmbiente } from './pages/ambientes/consulta-ambiente/consulta-ambiente';
 import { CadastroAmbiente } from './pages/ambientes/cadastro-ambiente/cadastro-ambiente';
 import { ConsultaCalendario } from './pages/calendario/consulta-calendario/consulta-calendario';
-import { CadastroCalendario } from './pages/calendario/cadastro-calendario/cadastro-calendario';
 import { ConsultaGrade } from './pages/administrativo/grades/consulta-grade/consulta-grade';
 import { CadastroGrade } from './pages/administrativo/grades/cadastro-grade/cadastro-grade';
 
@@ -62,12 +61,8 @@ export const routes: Routes = [
       // Ambientes
       { path: 'ambientes', component: ConsultaAmbiente },
       { path: 'ambientes/new', component: CadastroAmbiente },
-      { path: 'ambientes/edit/:id', component: CadastroAmbiente },
       // Calendário
       { path: 'calendar', component: ConsultaCalendario },
-      { path: 'calendar/new', component: CadastroCalendario },
-      { path: 'calendar/edit/:id', component: CadastroCalendario },
-      { path: 'view', component: PublicView },
       // Admin
       {
         path: 'users',

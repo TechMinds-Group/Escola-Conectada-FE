@@ -1,207 +1,185 @@
-<div class="container-fluid py-4 page-container">
+<div class="container-fluid py-4 pb-5">
   <!-- Header -->
   <div
-    class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
+    class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mb-4 text-center text-md-start"
   >
-    <div>
-      <h2 class="fw-bold mb-0 text-main">{{ t().admin.calendar.title }}</h2>
+    <div class="w-100 w-md-auto">
+      <h2 class="fw-bold mb-0 text-primary fs-4 fs-md-2">{{ t().admin.calendar.title }}</h2>
       <p class="text-muted mb-0 small">{{ t().admin.calendar.subtitle }}</p>
     </div>
 
-    <div class="d-flex align-items-center gap-3">
-      <!-- View Switcher -->
-      <div class="btn-group bg-surface shadow-sm p-1 rounded-pill border border-theme" role="group">
+    <!-- Navigation (Central) -->
+    <div
+      class="d-flex align-items-center justify-content-center justify-content-md-start flex-wrap gap-2 gap-md-3 w-100 w-md-auto"
+    >
+      <div class="btn-group shadow-sm">
         <button
-          type="button"
-          class="btn btn-sm rounded-pill px-3 transition-all fw-bold"
-          [class.btn-primary]="viewMode() === 'list'"
-          [class.text-dark]="viewMode() === 'list'"
-          [class.text-muted]="viewMode() !== 'list'"
-          [class.btn-light]="viewMode() !== 'list'"
-          (click)="viewMode.set('list')"
+          class="btn btn-light border bg-white rounded-start-4 px-3"
+          (click)="decrementDate()"
         >
-          <i class="bi bi-list-ul me-1"></i> {{ t().admin.calendar.buttons.list }}
-        </button>
-        <button
-          type="button"
-          class="btn btn-sm rounded-pill px-3 transition-all fw-bold"
-          [class.btn-primary]="viewMode() === 'month'"
-          [class.text-dark]="viewMode() === 'month'"
-          [class.text-muted]="viewMode() !== 'month'"
-          [class.btn-light]="viewMode() !== 'month'"
-          (click)="viewMode.set('month')"
-        >
-          <i class="bi bi-calendar3 me-1"></i> {{ t().admin.calendar.buttons.month }}
-        </button>
-      </div>
-
-      <button
-        class="btn btn-primary d-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold"
-        (click)="navigateToNew()"
-      >
-        <i class="bi bi-plus-lg fs-5"></i>
-        <span class="d-none d-md-inline">{{ t().admin.calendar.buttons.new }}</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- LIST VIEW -->
-  @if (viewMode() === 'list') {
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden animate-in">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead>
-            <tr>
-              <th
-                class="border-0 ps-4 py-3 text-muted small fw-bold text-uppercase"
-                style="width: 30%"
-              >
-                {{ t().admin.calendar.table.eventDate }}
-              </th>
-              <th class="border-0 py-3 text-muted small fw-bold text-uppercase" style="width: 20%">
-                {{ t().admin.calendar.table.type }}
-              </th>
-              <th
-                class="border-0 py-3 text-center text-muted small fw-bold text-uppercase"
-                style="width: 15%"
-              >
-                {{ t().admin.calendar.table.schoolDay }}
-              </th>
-              <th
-                class="border-0 py-3 text-center text-muted small fw-bold text-uppercase"
-                style="width: 20%"
-              >
-                {{ t().admin.calendar.table.scope }}
-              </th>
-              <th
-                class="border-0 py-3 text-end pe-4 text-muted small fw-bold text-uppercase"
-                style="width: 15%"
-              >
-                {{ t().admin.calendar.table.actions }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (event of sortedEvents(); track event.id) {
-              <tr class="transition-hover cursor-pointer" (click)="editEvent(event.id)">
-                <td class="ps-4">
-                  <div class="d-flex align-items-center gap-3">
-                    <div
-                      class="btn-icon bg-light text-primary rounded-3 flex-shrink-0"
-                      style="width: 40px; height: 40px"
-                    >
-                      <i class="bi bi-calendar-event"></i>
-                    </div>
-                    <div>
-                      <div class="fw-bold text-main">{{ event.name }}</div>
-                      <div class="text-muted small">
-                        {{ event.startDate | date: 'dd/MM/yyyy' }}
-                        @if (event.startDate !== event.endDate) {
-                          {{ t().admin.calendar.table.from }}
-                          {{ event.endDate | date: 'dd/MM/yyyy' }}
-                        }
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <span class="badge rounded-pill fw-normal" [class]="getBadgeClass(event.type)">
-                    {{ getEventTypeLabel(event.type) }}
-                  </span>
-                </td>
-                <td class="text-center">
-                  @if (event.isSchoolDay) {
-                    <i
-                      class="bi bi-check-circle-fill text-success fs-5"
-                      [title]="t().admin.calendar.badges.schoolDay"
-                    ></i>
-                  } @else {
-                    <i
-                      class="bi bi-dash-circle text-muted fs-5 opacity-50"
-                      [title]="t().admin.calendar.badges.notSchoolDay"
-                    ></i>
-                  }
-                </td>
-                <td class="text-center">
-                  <span class="badge bg-light text-secondary border fw-normal">{{
-                    getScopeLabel(event.scope)
-                  }}</span>
-                </td>
-                <td class="pe-4 text-end" (click)="$event.stopPropagation()">
-                  <button
-                    class="btn btn-icon text-muted ms-auto"
-                    (click)="editEvent(event.id)"
-                    title="Editar"
-                  >
-                    <i class="bi bi-pencil"></i>
-                  </button>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="5" class="text-center py-5 text-muted">
-                  <i class="bi bi-calendar-x fs-1 d-block mb-3"></i>
-                  {{ t().admin.calendar.table.empty }}
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
-
-  <!-- MONTH VIEW -->
-  @if (viewMode() === 'month') {
-    <div class="card border-0 shadow-sm rounded-4 p-4 animate-in">
-      <!-- Calendar Header -->
-      <div class="d-flex align-items-center justify-content-between mb-4">
-        <button class="btn btn-icon rounded-circle bg-white border shadow-sm" (click)="prevMonth()">
           <i class="bi bi-chevron-left"></i>
         </button>
-        <h4 class="fw-bold text-capitalize mb-0 text-main">{{ formatMonthYear(currentDate()) }}</h4>
-        <button class="btn btn-icon rounded-circle bg-white border shadow-sm" (click)="nextMonth()">
+        <button class="btn btn-light border bg-white px-3 fw-bold" (click)="today()">Hoje</button>
+        <button class="btn btn-light border bg-white rounded-end-4 px-3" (click)="incrementDate()">
           <i class="bi bi-chevron-right"></i>
         </button>
       </div>
 
-      <!-- Calendar Grid -->
-      <div class="calendar-grid">
-        <!-- Week Days -->
-        @for (day of weekDays(); track day) {
-          <div class="text-center text-muted x-small fw-bold py-2 border-bottom text-uppercase">
-            {{ day }}
-          </div>
-        }
-
-        <!-- Days -->
-        @for (day of calendarDays(); track day.day) {
-          <div
-            class="calendar-day p-2 border rounded-3 position-relative d-flex flex-column"
-            [class.bg-light-subtle]="!day.isToday"
-            [class.today-highlight]="day.isToday"
-            [class.text-muted]="!day.isCurrentMonth"
-            [style.opacity]="day.isCurrentMonth ? 1 : 0.5"
-          >
-            <span class="d-block small fw-bold mb-2" [class.text-primary]="day.isToday">{{
-              day.day
-            }}</span>
-
-            <div class="d-flex flex-column gap-1 flex-grow-1 overflow-hidden">
-              @for (ev of day.events; track ev.id) {
-                <div
-                  class="event-pill small text-truncate px-2 py-1 rounded-2 cursor-pointer shadow-sm border border-0"
-                  [class]="getBadgeClass(ev.type)"
-                  [title]="ev.name"
-                  (click)="editEvent(ev.id); $event.stopPropagation()"
-                >
-                  {{ ev.name }}
-                </div>
-              }
-            </div>
-          </div>
-        }
+      <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
+        <span
+          class="badge nav-month-badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill text-capitalize fw-bold fs-6 shadow-sm"
+        >
+          {{ viewMonth() }}
+        </span>
+        <span
+          class="badge nav-year-badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-2 rounded-pill fw-bold fs-6 shadow-sm"
+        >
+          {{ viewYear() }}
+        </span>
       </div>
     </div>
-  }
+
+    <!-- Mobile FAB -->
+    <div
+      class="d-md-none position-fixed bottom-0 end-0 m-4 z-3"
+      style="margin-bottom: 5rem !important"
+    >
+      <button
+        class="btn btn-primary rounded-circle shadow-lg p-0 d-flex align-items-center justify-content-center"
+        style="width: 56px; height: 56px"
+        (click)="navigateToNew()"
+      >
+        <i class="bi bi-plus-lg fs-3 text-white"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Card & Actions -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <span class="text-muted small fw-bold text-uppercase tracking-wider">Filtros:</span>
+
+        <div class="dropdown" tourAnchor="calendarFilterDropdown">
+          <button
+            class="btn btn-white border bg-white rounded-3 px-3 py-2 d-flex align-items-center gap-2 shadow-sm dropdown-toggle fw-semibold"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <i class="bi bi-funnel text-primary"></i>
+            Categorias
+            <span
+              class="badge bg-primary rounded-pill small ms-1"
+              *ngIf="activeFilters().length < eventCategories().length"
+            >
+              {{ activeFilters().length }}
+            </span>
+          </button>
+          <ul class="dropdown-menu shadow border-0 rounded-4 p-2" style="min-width: 220px">
+            <li *ngFor="let cat of eventCategories()">
+              <label
+                class="dropdown-item d-flex align-items-center gap-2 rounded-3 py-2 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  class="form-check-input mt-0"
+                  [checked]="isFilterActive(cat)"
+                  (change)="toggleFilter(cat)"
+                />
+                <span class="fw-medium">{{ cat }}</span>
+              </label>
+            </li>
+            <li class="dropdown-divider opacity-50"></li>
+            <li>
+              <button
+                class="dropdown-item text-center small text-primary fw-bold rounded-3"
+                (click)="activeFilters.set(eventCategories())"
+              >
+                Selecionar Todas
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- New Event Button (Visible in Desktop row) -->
+      <button
+        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold rounded-4"
+        (click)="navigateToNew()"
+      >
+        <i class="bi bi-plus-lg fs-5"></i>
+        {{ t().admin.calendar.buttons.new }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Calendar Rendering -->
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden" [ngSwitch]="calendarView">
+    <mwl-calendar-month-view
+      *ngSwitchCase="CalendarView.Month"
+      [viewDate]="viewDate()"
+      [events]="events()"
+      [locale]="'pt-BR'"
+      [weekStartsOn]="0"
+      [cellTemplate]="monthCellTemplate"
+      (dayClicked)="handleDayClick($event.day.date)"
+      (eventClicked)="handleEventClick($event.event)"
+    >
+    </mwl-calendar-month-view>
+
+    <!-- Template Customizado para Célula do Mês -->
+    <ng-template #monthCellTemplate let-day="day" let-openDay="openDay" let-locale="locale">
+      <div class="cal-cell-top">
+        <span class="cal-day-number">{{
+          day.date | calendarDate: 'monthViewDayNumber' : locale
+        }}</span>
+      </div>
+      <div class="cal-events">
+        <div
+          *ngFor="let event of day.events"
+          class="cal-event"
+          [style.backgroundColor]="event.color?.primary"
+          [title]="event.title"
+          (click)="$event.stopPropagation(); handleEventClick(event)"
+        >
+          {{ event.title }}
+        </div>
+      </div>
+    </ng-template>
+
+    <mwl-calendar-day-view
+      *ngSwitchCase="CalendarView.Day"
+      [viewDate]="viewDate()"
+      [events]="events()"
+      [locale]="'pt-BR'"
+      (eventClicked)="handleEventClick($event.event)"
+    >
+    </mwl-calendar-day-view>
+  </div>
+
+  <!-- Event Modal -->
+  <app-modal-manage-event
+    [isOpen]="isModalOpen()"
+    (close)="closeModal()"
+    (onSaved)="loadEvents()"
+    (onCategoryManage)="openCategoryManager()"
+  ></app-modal-manage-event>
+
+  <!-- Category Management Modal -->
+  <app-modal-manage-list
+    #categoryModal
+    [isOpen]="showCategoryManager()"
+    title="Gerenciar Categorias"
+    subtitle="Configure as categorias disponíveis para seus eventos"
+    labelNew="Nova Categoria"
+    labelEdit="Editar Categoria"
+    inputPlaceholder="Ex: Reunião de Pais"
+    [items]="categoryItems"
+    emptyMessage="Nenhuma categoria cadastrada."
+    emptyIcon="bi-tag"
+    (close)="closeCategoryManager()"
+    (onSave)="saveCategory($event)"
+    (onDelete)="deleteCategory($event)"
+  ></app-modal-manage-list>
 </div>

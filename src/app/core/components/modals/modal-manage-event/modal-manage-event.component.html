@@ -1,0 +1,125 @@
+<div [class.d-none]="!isOpen" [class.d-block]="isOpen">
+  <div
+    class="modal fade"
+    [class.show]="isOpen"
+    [class.d-block]="isOpen"
+    tabindex="-1"
+    [style.background]="isOpen ? 'rgba(0,0,0,0.5)' : 'none'"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <!-- Header -->
+        <div class="modal-header bg-primary text-white border-0 py-3">
+          <h5 class="modal-title fw-bold">
+            <i class="bi bi-calendar-event me-2"></i>
+            {{ editingEventId() ? 'Editar Evento' : 'Novo Evento' }}
+          </h5>
+          <button
+            type="button"
+            class="btn-close btn-close-white"
+            (click)="closeModal()"
+            aria-label="Close"
+          ></button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body p-4">
+          <form [formGroup]="eventForm">
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-muted text-uppercase"
+                >Título do Evento</label
+              >
+              <input
+                type="text"
+                class="form-control bg-light border-0 rounded-3"
+                formControlName="titulo"
+                placeholder="Ex: Prova de Matemática"
+              />
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-bold text-muted text-uppercase">Início</label>
+                <input
+                  type="datetime-local"
+                  class="form-control bg-light border-0 rounded-3"
+                  formControlName="dataInicio"
+                />
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-bold text-muted text-uppercase">Término</label>
+                <input
+                  type="datetime-local"
+                  class="form-control bg-light border-0 rounded-3"
+                  formControlName="dataFim"
+                />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-muted text-uppercase">Categoria</label>
+              <div class="d-flex gap-2">
+                <select class="form-select bg-light border-0 rounded-3" formControlName="categoria">
+                  <option value="">Selecione...</option>
+                  <option *ngFor="let cat of categories()" [value]="cat">{{ cat }}</option>
+                </select>
+                <button
+                  type="button"
+                  class="btn btn-outline-primary rounded-3 d-flex align-items-center justify-content-center border-0 bg-light"
+                  style="width: 44px"
+                  title="Gerenciar Categorias"
+                  (click)="onCategoryManage.emit()"
+                >
+                  <i class="bi bi-gear-fill"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="mb-0">
+              <label class="form-label small fw-bold text-muted text-uppercase"
+                >Descrição (Opcional)</label
+              >
+              <textarea
+                class="form-control bg-light border-0 rounded-3"
+                formControlName="descricao"
+                rows="3"
+                placeholder="Detalhes adicionais..."
+              ></textarea>
+            </div>
+          </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-between">
+          <div>
+            <button
+              *ngIf="editingEventId()"
+              type="button"
+              class="btn btn-outline-danger border-0 fw-bold"
+              (click)="deleteEvent()"
+            >
+              <i class="bi bi-trash me-1"></i> Excluir
+            </button>
+          </div>
+          <div class="d-flex gap-2">
+            <button
+              type="button"
+              class="btn btn-light px-4 fw-bold text-muted border-0"
+              (click)="closeModal()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary px-4 fw-bold shadow-sm"
+              (click)="saveEvent()"
+              [disabled]="isSubmitting()"
+            >
+              {{ isSubmitting() ? 'Salvando...' : 'Salvar Evento' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

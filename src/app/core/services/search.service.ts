@@ -50,6 +50,7 @@ export class SearchService {
         icon: 'bi-grid-3x3',
         category: t.admin.sidebar.records,
       },
+
       {
         label: t.admin.sidebar.calendar,
         route: '/calendar',

@@ -1,168 +1,191 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed, effect, ViewChild, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { SchoolDataService } from '../../../core/services/school-data';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { FormsModule } from '@angular/forms';
 import { TranslationService } from '../../../core/services/translation.service';
+import { EventoService, Evento } from '../../../core/services/evento.service';
+import { addMonths, subMonths, startOfToday, format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { CalendarModule, CalendarView, CalendarEvent } from 'angular-calendar';
+import { ModalManageEventComponent } from '../../../core/components/modals/modal-manage-event/modal-manage-event.component';
+import { ModalManageListComponent } from '../../../core/components/modals/modal-manage-list/modal-manage-list.component';
 
 @Component({
   selector: 'app-consulta-calendario',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, FormsModule],
+  imports: [CommonModule, CalendarModule, ModalManageEventComponent, ModalManageListComponent],
   templateUrl: './consulta-calendario.html',
   styleUrl: './consulta-calendario.scss',
 })
-export class ConsultaCalendario {
-  private schoolData = inject(SchoolDataService);
-  private router = inject(Router);
-  public translation = inject(TranslationService);
+export class ConsultaCalendario implements OnInit {
+  @ViewChild(ModalManageEventComponent) eventModal!: ModalManageEventComponent;
+  @ViewChild('categoryModal') categoryModal!: ModalManageListComponent;
+
+  private translation = inject(TranslationService);
+  private eventoService = inject(EventoService);
   t = this.translation.dictionary;
 
-  viewMode = signal<'list' | 'month'>('list');
+  // Categorias vindas do serviço
+  eventCategories = this.eventoService.eventCategories;
+  showCategoryManager = signal(false);
 
-  // Month View State
-  currentDate = signal(new Date());
+  // Variables simples (conforme solicitado para evitar () no template)
+  // State reativo para a data de visualização
+  viewDate = signal<Date>(new Date());
+  calendarView: CalendarView = CalendarView.Month;
+  CalendarView = CalendarView; // Para usar no template
 
-  // Computed week days based on current language
-  weekDays = computed(() => {
-    const lang = this.translation.lang();
-    const locale = lang === 'es' ? 'es-ES' : 'pt-BR';
-    const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
-    const days = [];
-    // Start from Sunday (using a known Sunday date, e.g., 2024-01-07)
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(2024, 0, 7 + i);
-      days.push(formatter.format(date));
-    }
-    return days;
+  // State
+  isModalOpen = signal(false);
+  activeFilters = signal<string[]>([]);
+
+  // Sincronizar filtros ativos com as categorias disponíveis
+  private syncFilters = effect(
+    () => {
+      const cats = this.eventCategories();
+      // Na primeira carga ou se categorias mudarem, selecionamos tudo por padrão
+      this.activeFilters.set(cats);
+    },
+    { allowSignalWrites: true },
+  );
+
+  // Events Data
+  rawEvents = signal<Evento[]>([]);
+
+  // Computed for Calendar Events
+  events = computed<CalendarEvent[]>(() => {
+    const filters = this.activeFilters();
+    return this.rawEvents()
+      .filter((e) => filters.includes(e.categoria))
+      .map((e) => ({
+        id: e.id,
+        start: e.dataInicio ? parseISO(e.dataInicio) : new Date(),
+        end: e.dataFim ? parseISO(e.dataFim) : undefined,
+        title: e.titulo,
+        color: this.getEventColor(e.categoria),
+        meta: e,
+      }));
   });
 
-  events = this.schoolData.schoolEvents;
-
-  // Computed for List View (Sorted by Date)
-  sortedEvents = computed(() => {
-    return this.events().sort((a, b) => a.startDate.localeCompare(b.startDate));
+  viewMonth = computed(() => {
+    return format(this.viewDate(), 'MMMM', { locale: ptBR });
   });
 
-  // Computed for Month View
-  calendarDays = computed(() => {
-    const year = this.currentDate().getFullYear();
-    const month = this.currentDate().getMonth();
-
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-
-    const days = [];
-
-    // Padding for previous month
-    const startDayOfWeek = firstDay.getDay(); // 0 (Sun) to 6 (Sat)
-    for (let i = 0; i < startDayOfWeek; i++) {
-      const prevDate = new Date(year, month, -(startDayOfWeek - 1 - i));
-      days.push({
-        date: prevDate,
-        day: prevDate.getDate(),
-        isToday: false,
-        isCurrentMonth: false,
-        events: [] as any[],
-      });
-    }
-
-    // Current month days
-    for (let d = 1; d <= lastDay.getDate(); d++) {
-      const date = new Date(year, month, d);
-      const dateStr = date.toISOString().split('T')[0];
-
-      // Find events for this day
-      const dayEvents = this.events().filter((e) => dateStr >= e.startDate && dateStr <= e.endDate);
-
-      days.push({
-        date: date,
-        day: d,
-        isToday: new Date().toDateString() === date.toDateString(),
-        isCurrentMonth: true,
-        events: dayEvents,
-      });
-    }
-
-    // Padding for next month to complete the row (optional, looks better)
-    const remainingCells = 7 - (days.length % 7);
-    if (remainingCells < 7) {
-      for (let i = 1; i <= remainingCells; i++) {
-        const nextDate = new Date(year, month + 1, i);
-        days.push({
-          date: nextDate,
-          day: i,
-          isToday: false,
-          isCurrentMonth: false,
-          events: [] as any[],
-        });
-      }
-    }
-
-    return days;
+  viewYear = computed(() => {
+    return format(this.viewDate(), 'yyyy', { locale: ptBR });
   });
 
-  getTypeColor(type: string): string {
-    switch (type) {
-      case 'Feriado Nacional':
-        return 'danger'; // Laranja/Vermelho
-      case 'Feriado Local':
-        return 'info'; // Azul (Substituto do Amarelo)
-      case 'Recesso Escolar':
-        return 'secondary'; // Cinza
-      case 'Planejamento Pedagógico':
-        return 'info'; // Azul
+  viewTitle = computed(() => {
+    return format(this.viewDate(), 'MMMM yyyy', { locale: ptBR });
+  });
+
+  constructor() {
+    effect(() => {
+      const updated = this.eventoService.eventosUpdated();
+      this.loadEvents();
+    });
+  }
+
+  ngOnInit() {
+    this.loadEvents();
+    this.checkScreenSize();
+    window.addEventListener('resize', () => this.checkScreenSize());
+  }
+
+  private checkScreenSize() {
+    this.calendarView = window.innerWidth < 768 ? CalendarView.Day : CalendarView.Month;
+  }
+
+  loadEvents() {
+    this.eventoService.getAll().subscribe({
+      next: (events) => this.rawEvents.set(events),
+      error: (err) => console.error('Erro ao carregar eventos:', err),
+    });
+  }
+
+  getEventColor(category: string): any {
+    switch (category) {
+      case 'Prova':
+        return { primary: '#0d6efd', secondary: '#0d6efd' }; // Azul
+      case 'Reunião':
+        return { primary: '#ffc107', secondary: '#ffc107' }; // Amarelo
+      case 'Feriado':
+        return { primary: '#dc3545', secondary: '#dc3545' }; // Vermelho
       case 'Evento Festivo':
-        return 'success'; // Verde
+        return { primary: '#6610f2', secondary: '#6610f2' }; // Roxo
       default:
-        return 'primary';
+        return { primary: '#6c757d', secondary: '#6c757d' };
     }
   }
 
-  getBadgeClass(type: string): string {
-    const color = this.getTypeColor(type);
-    return `bg-${color}-subtle text-${color}-emphasis`;
+  // Navigation
+  incrementDate() {
+    this.viewDate.update((d) => addMonths(d, 1));
   }
 
-  getEventTypeLabel(type: string): string {
-    const types = this.t().admin.calendar.types as Record<string, string>;
-    return types[type] || type;
+  decrementDate() {
+    this.viewDate.update((d) => subMonths(d, 1));
   }
 
-  getScopeLabel(scope: string): string {
-    const options = this.t().admin.calendar.form.options as Record<string, string>;
-    const map: Record<string, string> = {
-      Todos: 'all',
-      Fundamental: 'elementary',
-      Médio: 'highSchool',
-    };
-    const key = map[scope];
-    return key ? options[key] : scope;
+  today() {
+    this.viewDate.set(startOfToday());
   }
 
-  nextMonth() {
-    const curr = this.currentDate();
-    this.currentDate.set(new Date(curr.getFullYear(), curr.getMonth() + 1, 1));
+  // Interaction Handlers
+  handleDayClick(date: Date) {
+    this.isModalOpen.set(true);
+    this.eventModal.startNew(date);
   }
 
-  prevMonth() {
-    const curr = this.currentDate();
-    this.currentDate.set(new Date(curr.getFullYear(), curr.getMonth() - 1, 1));
+  handleEventClick(event: CalendarEvent) {
+    this.isModalOpen.set(true);
+    this.eventModal.startEdit(event.meta);
   }
 
-  formatMonthYear(date: Date): string {
-    const lang = this.translation.lang();
-    const locale = lang === 'es' ? 'es-ES' : 'pt-BR';
-    return date.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+  // Filters
+  toggleFilter(category: string) {
+    this.activeFilters.update((filters) => {
+      if (filters.includes(category)) {
+        return filters.filter((f) => f !== category);
+      } else {
+        return [...filters, category];
+      }
+    });
+  }
+
+  isFilterActive(category: string): boolean {
+    return this.activeFilters().includes(category);
   }
 
   navigateToNew() {
-    this.router.navigate(['/cadastro-calendario']);
+    this.handleDayClick(new Date());
   }
 
-  editEvent(id: number) {
-    this.router.navigate(['/cadastro-calendario', id]);
+  closeModal() {
+    this.isModalOpen.set(false);
+  }
+
+  // Category Management
+  openCategoryManager() {
+    this.showCategoryManager.set(true);
+  }
+
+  closeCategoryManager() {
+    this.showCategoryManager.set(false);
+  }
+
+  saveCategory(item: { id?: string; name: string }) {
+    if (item.id) {
+      this.eventoService.updateCategory(item.id, item.name);
+    } else {
+      this.eventoService.addCategory(item.name);
+    }
+    this.categoryModal.reset();
+  }
+
+  deleteCategory(name: string) {
+    this.eventoService.deleteCategory(name);
+  }
+
+  get categoryItems() {
+    return this.eventCategories().map((c) => ({ id: c, name: c }));
   }
 }

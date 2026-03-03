@@ -39,3 +39,42 @@
   justify-content: center !important;
   flex-shrink: 0;
 }
+
+// Suporte ao Modo Escuro
+:host-context([data-theme='dark']) {
+  .modal-content {
+    background-color: #1a1d21 !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+  }
+
+  .list-group-item {
+    background-color: transparent !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    &.bg-primary-subtle {
+      background-color: rgba(13, 110, 253, 0.15) !important;
+      color: #79c0ff !important;
+      border-color: rgba(121, 192, 255, 0.2) !important;
+    }
+  }
+
+  .bg-light {
+    background-color: rgba(0, 0, 0, 0.2) !important;
+  }
+
+  input.form-control {
+    background-color: var(--input-bg) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+    &::placeholder {
+      color: var(--text-secondary) !important;
+      opacity: 0.5;
+    }
+  }
+}
