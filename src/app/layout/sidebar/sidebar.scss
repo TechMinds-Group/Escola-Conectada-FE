@@ -18,8 +18,9 @@
   z-index: 900 !important; /* Lower than overlays and tutorial backdrop (1000) */
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.02);
   will-change: width;
-  overflow-x: hidden;
-  overflow-y: hidden; /* Prevent sidebar itself from scrolling, force inner nav to scroll */
+  overflow: hidden; /* Ensure nothing leaks out */
+  display: flex;
+  flex-direction: column;
   border-right: 1px solid var(--border-color);
 
   /* Collapsed State (70px) */
@@ -81,8 +82,10 @@
 .header-container {
   padding: 1.5rem 1.25rem !important;
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0; /* Prevent header from being squashed */
 
   .logo-icon {
     font-size: 3rem;
@@ -177,6 +180,10 @@
   background-color: var(--input-bg);
 }
 
+.sidebar .mt-auto {
+  flex-shrink: 0; /* Prevent footer from being squashed */
+}
+
 .collapse-menu {
   max-height: 0;
   overflow: hidden;
@@ -184,7 +191,7 @@
   opacity: 0;
 
   &.show {
-    max-height: 800px;
+    max-height: 1000px; /* Increased to accommodate many items */
     opacity: 1;
   }
 }
@@ -262,13 +269,21 @@
 }
 
 .nav-scrollable {
-  overflow-y: auto;
+  overflow-y: auto !important;
   overflow-x: hidden;
+  flex: 1 1 auto; /* Grow and shrink as needed */
   min-height: 0; /* Critical for flex scrolling */
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
 
-  /* Thin scrollbar for Webkit */
+  /* Standard scrollbar for Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #adb5bd transparent; /* Darker thumb */
+
+  /* Scrollbar for Webkit */
   &::-webkit-scrollbar {
-    width: 4px;
+    width: 8px; /* Slightly wider */
   }
 
   &::-webkit-scrollbar-track {
@@ -276,12 +291,14 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: var(--border-color);
-    border-radius: 4px;
+    background-color: #adb5bd; /* Visible grey */
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: content-box;
   }
 
   &:hover::-webkit-scrollbar-thumb {
-    background-color: var(--text-secondary);
+    background-color: #6c757d; /* Darker on hover */
   }
 }
 

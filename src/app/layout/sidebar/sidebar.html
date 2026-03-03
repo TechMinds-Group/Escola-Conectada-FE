@@ -183,7 +183,7 @@
           }
         </div>
         <span class="text-nowrap ms-2 transition-label flex-grow-1">{{
-          t().admin.sidebar.settings
+          t().admin.sidebar.settings || 'Configurações'
         }}</span>
         <i
           class="bi bi-chevron-down toggle-icon ms-2 transition-label"
@@ -228,7 +228,7 @@
   </ul>
 
   <!-- User Profile (Profile & Admin Menu) -->
-  <div class="dropup w-100 p-2 mt-auto border-top border-theme pt-3">
+  <div class="dropup w-100 p-2 mt-auto border-top border-theme pt-3 flex-shrink-0">
     <a
       href="#"
       class="d-flex align-items-center text-decoration-none dropdown-toggle w-100 px-2 py-2 rounded profile-link group-hover-light"

@@ -61,6 +61,7 @@ export const routes: Routes = [
       // Ambientes
       { path: 'ambientes', component: ConsultaAmbiente },
       { path: 'ambientes/new', component: CadastroAmbiente },
+      { path: 'ambientes/edit/:id', component: CadastroAmbiente },
       // Calendário
       { path: 'calendar', component: ConsultaCalendario },
       // Admin

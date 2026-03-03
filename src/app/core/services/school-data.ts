@@ -1,7 +1,11 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, tap } from 'rxjs';
+import { AmbienteService } from './ambiente.service';
+import { ProfessorService } from './professor.service';
+import { TurmaService } from './turma.service';
+import { EventoService } from './evento.service';
 
 export enum EducationLevel {
   Graduacao = 'Graduação',
@@ -51,6 +55,7 @@ export interface Teacher {
   cpf?: string;
   // New Fields
   contractualWorkload: number; // Total hours hired
+  allocatedWorkload: number; // Currently assigned hours
   mainSubjectId: string;
   secondarySubjectIds: string[];
 }
@@ -202,6 +207,10 @@ export interface SchoolRoom {
 export class SchoolDataService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
+  private ambienteService = inject(AmbienteService);
+  private professorService = inject(ProfessorService);
+  private turmaService = inject(TurmaService);
+  private eventoService = inject(EventoService);
 
   // Static/Enum-based Data Signals
   readonly educationLevels = signal<string[]>(Object.values(EducationLevel));
@@ -215,6 +224,22 @@ export class SchoolDataService {
     const b = parseInt(hex.substr(4, 2), 16);
     const yiq = (r * 299 + g * 587 + b * 114) / 1000;
     return yiq >= 128 ? '#000000' : '#ffffff';
+  }
+
+  async loadAll() {
+    try {
+      await Promise.allSettled([
+        this.loadSubjects(),
+        this.loadMatrices(),
+        this.loadRooms(),
+        this.loadTeachers(),
+        this.loadClasses(),
+        this.loadEvents(),
+        this.loadTimeGrids(),
+      ]);
+    } catch (err) {
+      console.error('[SchoolDataService] Error loading all data:', err);
+    }
   }
 
   // HTTP Methods
@@ -269,6 +294,29 @@ export class SchoolDataService {
     return result;
   }
 
+  async loadRooms() {
+    const res = await firstValueFrom(this.ambienteService.list());
+    const data = res && (res as any).data ? (res as any).data : res;
+    this.schoolRooms.set(Array.isArray(data) ? data : []);
+  }
+
+  async loadTeachers() {
+    const res = await firstValueFrom(this.professorService.getAll());
+    this.teachers.set(Array.isArray(res) ? res.map((t) => this.mapToTeacher(t)) : []);
+  }
+
+  async loadClasses() {
+    const res = await firstValueFrom(this.turmaService.list());
+    const data = res && (res as any).data ? (res as any).data : res;
+    this.schoolClasses.set(Array.isArray(data) ? data.map((c) => this.mapToSchoolClass(c)) : []);
+  }
+
+  async loadEvents() {
+    const res = await firstValueFrom(this.eventoService.getAll());
+    const data = res && (res as any).data ? (res as any).data : res;
+    this.schoolEvents.set(Array.isArray(data) ? data.map((e) => this.mapToSchoolEvent(e)) : []);
+  }
+
   // Data Signals
   readonly subjects = signal<Subject[]>([]);
   readonly schoolMatrices = signal<SchoolMatrix[]>([]);
@@ -305,6 +353,7 @@ export class SchoolDataService {
       phone: '(11) 99999-9999',
       cpf: '111.111.111-11',
       contractualWorkload: 40,
+      allocatedWorkload: 0,
       mainSubjectId: '1',
       secondarySubjectIds: ['3'],
     },
@@ -318,6 +367,7 @@ export class SchoolDataService {
       phone: '(11) 88888-8888',
       cpf: '222.222.222-22',
       contractualWorkload: 32,
+      allocatedWorkload: 0,
       mainSubjectId: '2',
       secondarySubjectIds: ['5', '7'],
     },
@@ -331,6 +381,7 @@ export class SchoolDataService {
       phone: '(11) 77777-7777',
       cpf: '333.333.333-33',
       contractualWorkload: 40,
+      allocatedWorkload: 0,
       mainSubjectId: '3',
       secondarySubjectIds: ['1'],
     },
@@ -682,40 +733,13 @@ export class SchoolDataService {
 
   constructor() {
     // Initial data load
-    this.loadSubjects();
-    this.loadMatrices();
+    this.loadAll();
 
     window.addEventListener('storage', (event) => {
       if (event.key === 'school_tv_settings' && event.newValue) {
         this.tvSettings.set(JSON.parse(event.newValue));
       }
     });
-
-    this.generateMockData();
-  }
-
-  private generateMockData() {
-    const classes: SchoolClass[] = [];
-    const shifts = ['Manhã', 'Tarde', 'Noite'] as const;
-    let idCounter = 1000;
-
-    shifts.forEach((shift) => {
-      for (let i = 1; i <= 10; i++) {
-        classes.push({
-          id: (idCounter++).toString(),
-          name: `${i}º Ano ${String.fromCharCode(65 + Math.floor(i / 10))} - ${shift}`,
-          year: 2026,
-          shift: shift,
-          matrixId: '1',
-          roomId: (100 + (i % 20)).toString(),
-          maxCapacity: 40,
-          studentsCount: 30 + Math.floor(Math.random() * 10),
-          scheduleStatus: 'Incompleto',
-          assignments: [],
-        });
-      }
-    });
-    this.schoolClasses.set(classes);
   }
 
   private loadSettings(): SchoolTVSettings {
@@ -821,5 +845,69 @@ export class SchoolDataService {
     const hh = parts[0].padStart(2, '0');
     const mm = (parts[1] || '00').padStart(2, '0');
     return `${hh}:${mm}`;
+  }
+
+  private mapToTeacher(p: any): Teacher {
+    return {
+      id: p.id,
+      name: p.name,
+      email: p.email,
+      phone: p.celular,
+      contractualWorkload: p.contractualWorkload,
+      allocatedWorkload: p.allocatedWorkload || 0,
+      mainSubjectId: p.mainSubjectId || '',
+      secondarySubjectIds: p.secondarySubjectIds || [],
+      avatar: p.avatar,
+      availability: p.availability || [],
+      allocations: [], // Map if needed
+    };
+  }
+
+  private mapToSchoolClass(c: any): SchoolClass {
+    const shift = (c.turno || '').toLowerCase();
+    const mappedShift =
+      shift.includes('manhã') || shift.includes('morning')
+        ? 'Manhã'
+        : shift.includes('tarde') || shift.includes('afternoon')
+          ? 'Tarde'
+          : 'Noite';
+
+    return {
+      id: String(c.id),
+      name: c.nome || c.Name,
+      year: c.ano || c.Ano,
+      shift: mappedShift as any,
+      matrixId: c.matrizId,
+      roomId: c.salaId,
+      maxCapacity: c.capacidadeMaxima,
+      studentsCount: 0, // Not provided by API yet
+      scheduleStatus: c.statusCronograma as any,
+      assignments:
+        c.alocacoes?.map((a: any) => ({
+          subjectId: a.matrizDisciplinaId,
+          teacherId: a.professorId,
+        })) || [],
+    };
+  }
+
+  private mapToSchoolEvent(e: any): SchoolEvent {
+    // API Evento format to SchoolEvent format
+    const types: Record<string, SchoolEvent['type']> = {
+      Feriado: 'Feriado Nacional',
+      Reunião: 'Planejamento Pedagógico',
+      Recesso: 'Recesso Escolar',
+      'Evento Festivo': 'Evento Festivo',
+    };
+
+    return {
+      id: parseInt(e.id),
+      name: e.titulo,
+      startDate: e.dataInicio?.split('T')[0] || '',
+      endDate: e.dataFim?.split('T')[0] || '',
+      type: types[e.categoria] || 'Evento Festivo',
+      isSchoolDay: e.categoria !== 'Feriado' && e.categoria !== 'Recesso',
+      suspendClasses: e.categoria === 'Feriado' || e.categoria === 'Recesso',
+      scope: 'Todos',
+    };
   }
 }

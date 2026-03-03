@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, AfterViewInit } from '@angular/core';
+import { Component, computed, inject, signal, AfterViewInit, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SchoolDataService } from '../../core/services/school-data';
@@ -11,10 +11,14 @@ import { TranslationService } from '../../core/services/translation.service';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
-export class Dashboard implements AfterViewInit {
+export class Dashboard implements AfterViewInit, OnInit {
   private schoolData = inject(SchoolDataService);
   private translation = inject(TranslationService);
   t = this.translation.dictionary;
+
+  ngOnInit() {
+    this.schoolData.loadAll();
+  }
 
   // 1. Shift Control (Time removed per user request)
   selectedShift = signal<'Manhã' | 'Tarde' | 'Noite'>(this.getSystemShift());
@@ -121,7 +125,7 @@ export class Dashboard implements AfterViewInit {
 
     // 4b. Missing Teachers
     const missingCount = classes.filter(
-      (c) => c.assignments && c.assignments.some((a) => a.teacherId === null),
+      (c) => c.assignments && c.assignments.some((a) => !a.teacherId),
     ).length;
     if (missingCount > 0) {
       alerts.push({
@@ -133,16 +137,17 @@ export class Dashboard implements AfterViewInit {
       });
     }
 
-    // 4c. Teacher Fatigue (Mock/Simulated logic)
-    const teachers = this.teachers().slice(0, 3);
+    // 4c. Teacher Fatigue (Real data logic)
+    const teachers = this.teachers();
     teachers.forEach((teach) => {
-      if (teach.contractualWorkload > 35) {
+      // Alert if allocated workload exceeds contracted hours
+      if (teach.allocatedWorkload > teach.contractualWorkload) {
         alerts.push({
           severity: 'warning',
           icon: 'bi-lightning-charge-fill',
           title: t.fatigue,
-          message: `O Professor ${teach.name} ultrapassou o limite de tempos seguidos na quarta-feira.`,
-          link: '/records/professor',
+          message: `O Professor ${teach.name} está com sobrecarga (${teach.allocatedWorkload}/${teach.contractualWorkload}h).`,
+          link: '/professores',
         });
       }
     });
@@ -192,36 +197,51 @@ export class Dashboard implements AfterViewInit {
   // 6. Monthly Preview Data
   monthDays = computed(() => {
     const days: any[] = [];
-    const year = 2026;
-    const month = 1; // February (0-indexed)
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
     const numDays = new Date(year, month + 1, 0).getDate();
-    const dictionary = this.t();
+    const events = this.events();
 
     for (let i = 1; i <= numDays; i++) {
       const date = new Date(year, month, i);
+      const isoDate = date.toISOString().split('T')[0];
       const dayOfWeek = date.getDay();
 
       // Weekday names
       const names = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
       const name = names[dayOfWeek];
-      const isToday = i === 4; // Based on system time 2026-02-04
+      const isToday = i === now.getDate();
 
-      // Simulated Events Logic
+      // Real Events Logic
+      const dayEvents = events.filter((e) => e.startDate <= isoDate && e.endDate >= isoDate);
       let event = '';
       let cssClass = '';
+      let color = '';
 
-      if (dayOfWeek === 0 || dayOfWeek === 6) {
-        event = '';
+      if (dayEvents.length > 0) {
+        const mainEvent = dayEvents[0];
+        event = mainEvent.name.split(' ')[0].toUpperCase();
+
+        // Match category styles
+        if (mainEvent.type.includes('Feriado')) {
+          cssClass = 'event-holiday';
+          color = '#0d6efd';
+        } else if (mainEvent.type.includes('Recesso')) {
+          cssClass = 'event-recess';
+          color = '#f59e0b';
+        } else if (mainEvent.type.includes('Planejamento')) {
+          cssClass = 'event-meeting';
+          color = '#10b981';
+        } else if (mainEvent.type.includes('Festivo')) {
+          cssClass = 'event-festive';
+          color = '#d63384';
+        } else {
+          cssClass = 'event-other';
+          color = '#6c757d';
+        }
+      } else if (dayOfWeek === 0 || dayOfWeek === 6) {
         cssClass = 'opacity-25'; // Weekend
-      } else if (i === 2) {
-        event = 'RECESSO';
-        cssClass = 'event-recess';
-      } else if (i === 3 || i === 17) {
-        event = 'REUNIÃO';
-        cssClass = 'event-meeting';
-      } else if (i === 5 || i === 24) {
-        event = 'FERIADO';
-        cssClass = 'event-holiday';
       }
 
       days.push({
@@ -229,11 +249,31 @@ export class Dashboard implements AfterViewInit {
         name: name,
         event: event,
         class: cssClass,
+        color: color,
         isToday: isToday,
       });
     }
     return days;
   });
+
+  getCurrentMonthName(): string {
+    const months = [
+      'JANEIRO',
+      'FEVEREIRO',
+      'MARÇO',
+      'ABRIL',
+      'MAIO',
+      'JUNHO',
+      'JULHO',
+      'AGOSTO',
+      'SETEMBRO',
+      'OUTUBRO',
+      'NOVEMBRO',
+      'DEZEMBRO',
+    ];
+    const now = new Date();
+    return months[now.getMonth()] + ' ' + now.getFullYear();
+  }
 
   setShift(s: 'Manhã' | 'Tarde' | 'Noite') {
     this.selectedShift.set(s);
@@ -255,14 +295,13 @@ export class Dashboard implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Disabled disruptive auto-scroll that was pulling the page to the bottom on reload
-    /*
+    // Auto-scroll to today in the monthly preview card
     setTimeout(() => {
-      const todayEl = document.getElementById('day-4');
+      const today = new Date().getDate();
+      const todayEl = document.getElementById(`day-${today}`);
       if (todayEl) {
         todayEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
-    }, 500); 
-    */
+    }, 1000);
   }
 }
