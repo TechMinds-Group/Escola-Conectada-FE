@@ -15,6 +15,7 @@ import { Subscription } from 'rxjs';
 import { ThemeService } from '../../core/services/theme.service';
 import { LanguageService } from '../../core/services/language.service';
 import { TranslationService } from '../../core/services/translation.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -41,6 +42,12 @@ export class Sidebar implements OnInit, OnDestroy {
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);
   private sub = new Subscription();
+  private auth = inject(AuthService);
+
+  logout(event: Event) {
+    event.preventDefault();
+    this.auth.logout();
+  }
 
   ngOnInit() {
     this.checkActiveRoute(false); // No detectChanges on init

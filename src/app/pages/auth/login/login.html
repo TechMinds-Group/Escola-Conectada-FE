@@ -1,0 +1,133 @@
+<div
+  class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-dark overflow-hidden position-relative"
+>
+  <!-- Subtle Background Pattern -->
+  <div
+    class="position-absolute w-100 h-100 opacity-25"
+    style="
+      background-image: radial-gradient(#0d6efd 0.5px, transparent 0.5px);
+      background-size: 30px 30px;
+      pointer-events: none;
+    "
+  ></div>
+
+  <div class="col-11 col-sm-8 col-md-5 col-lg-4 col-xl-3 position-relative animate-slide-up">
+    <!-- Header: Consistent with system identity -->
+    <div class="mb-4 text-center px-3">
+      <div class="d-flex align-items-center justify-content-center mb-3">
+        <div
+          class="bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+          style="width: 56px; height: 56px"
+        >
+          <i class="bi bi-grid-1x2-fill text-primary fs-4"></i>
+        </div>
+      </div>
+      <h3 class="fw-bold mb-0 text-white">Escola Conectada</h3>
+    </div>
+
+    <!-- Login Card: Corporate Off-White Style -->
+    <div class="card border-0 shadow-lg rounded-3 bg-light overflow-hidden">
+      <div class="card-body p-4 py-md-4 px-md-5">
+        <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+          <!-- School Selection (TenantId) -->
+          <div class="mb-3">
+            <label class="form-label xx-small fw-bold text-muted text-uppercase tracking-wider mb-1"
+              >Unidade</label
+            >
+            <div class="input-group rounded-3 overflow-hidden border bg-white">
+              <span class="input-group-text bg-transparent border-0 py-2 px-3">
+                <i class="bi bi-building text-secondary small"></i>
+              </span>
+              <select
+                class="form-select border-0 bg-transparent py-2 ps-1 pe-3 small text-dark"
+                [(ngModel)]="selectedTenantId"
+                name="tenantId"
+                required
+              >
+                <option value="" disabled selected>Escolha uma unidade...</option>
+                @for (unidade of unidades(); track unidade.id) {
+                  <option [value]="unidade.id">{{ unidade.nome }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Email Field -->
+          <div class="mb-3">
+            <label class="form-label xx-small fw-bold text-muted text-uppercase tracking-wider mb-1"
+              >E-mail</label
+            >
+            <div class="input-group rounded-3 overflow-hidden border bg-white">
+              <span class="input-group-text bg-transparent border-0 py-2 px-3">
+                <i class="bi bi-envelope text-secondary small"></i>
+              </span>
+              <input
+                type="email"
+                class="form-control border-0 bg-transparent py-2 ps-1 small text-dark"
+                placeholder="nome@escola.com.br"
+                [(ngModel)]="email"
+                name="email"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="mb-4">
+            <label class="form-label xx-small fw-bold text-muted text-uppercase tracking-wider mb-1"
+              >Senha</label
+            >
+            <div class="input-group rounded-3 overflow-hidden border bg-white">
+              <span class="input-group-text bg-transparent border-0 py-2 px-3">
+                <i class="bi bi-key-fill text-secondary small"></i>
+              </span>
+              <input
+                type="password"
+                class="form-control border-0 bg-transparent py-2 ps-1 small text-dark"
+                placeholder="••••••••"
+                [(ngModel)]="password"
+                name="password"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Error Feedback - Compact -->
+          @if (errorMessage) {
+            <div
+              class="alert alert-danger border-0 rounded-3 xx-small mb-3 py-2 bg-opacity-10 text-danger text-center fw-bold animate-slide-up"
+            >
+              {{ errorMessage }}
+            </div>
+          }
+
+          <!-- Submit Button: Symmetrical and Premium -->
+          <button
+            type="submit"
+            class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2 transition-hover text-white mb-2"
+            [disabled]="loading || !loginForm.form.valid"
+          >
+            @if (loading) {
+              <span
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Autenticando...
+            } @else {
+              Acessar Painel
+              <i class="bi bi-arrow-right-short fs-5"></i>
+            }
+          </button>
+        </form>
+      </div>
+
+      <!-- Premium Discrete Footer -->
+      <div class="bg-white bg-opacity-50 py-3 text-center border-top border-light">
+        <p class="text-muted xx-small mb-0 opacity-75 fw-medium">
+          &copy; 2026 Escola Conectada &middot; Dashboard Corporativo
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

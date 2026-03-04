@@ -6,6 +6,7 @@ import { TranslationService } from '../../core/services/translation.service';
 import { TRANSLATIONS } from '../../core/data/translations';
 import { SearchService, SearchResult } from '../../core/services/search.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-topbar',
@@ -18,13 +19,18 @@ export class Topbar {
   public theme = inject(ThemeService);
   public translation = inject(TranslationService);
   private searchService = inject(SearchService);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
+  logout() {
+    this.authService.logout();
+  }
+
   // Dynamic language configuration based on available translations
-  availableLanguages = Object.keys(TRANSLATIONS).map(code => ({
+  availableLanguages = Object.keys(TRANSLATIONS).map((code) => ({
     code: code as 'pt' | 'es' | 'en',
     flag: this.getFlagForLanguage(code as 'pt' | 'es' | 'en'),
-    name: code // Will be translated dynamically
+    name: code, // Will be translated dynamically
   }));
 
   getFlagForLanguage(lang: 'pt' | 'es' | 'en'): string {

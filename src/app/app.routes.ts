@@ -23,10 +23,18 @@ import { CadastroGrade } from './pages/administrativo/grades/cadastro-grade/cada
 import { PublicView } from './pages/public/view/public-view';
 import { ConfiguracaoTV } from './pages/administrativo/configuracao-tv/configuracao-tv';
 
+import { authGuard } from './core/guards/auth.guard';
+import { Login } from './pages/auth/login/login';
+
 export const routes: Routes = [
+  {
+    path: 'login',
+    component: Login,
+  },
   {
     path: '',
     component: MainLayout,
+    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: Dashboard },
@@ -65,7 +73,6 @@ export const routes: Routes = [
       { path: 'ambientes', component: ConsultaAmbiente },
       { path: 'ambientes/new', component: CadastroAmbiente },
       { path: 'ambientes/edit/:id', component: CadastroAmbiente },
-      // Calendário
       { path: 'calendar', component: ConsultaCalendario },
       // Avisos
       {
