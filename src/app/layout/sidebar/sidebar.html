@@ -161,6 +161,19 @@
               <span class="transition-label ms-2">{{ t().admin.sidebar.calendar }}</span>
             </a>
           </li>
+          <li>
+            <a
+              routerLink="/avisos"
+              routerLinkActive="active"
+              class="nav-link d-flex align-items-center py-2 text-nowrap"
+              [title]="isCollapsed ? t().admin.sidebar.notices : ''"
+            >
+              <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
+                <i class="bi bi-megaphone"></i>
+              </div>
+              <span class="transition-label ms-2">{{ t().admin.sidebar.notices }}</span>
+            </a>
+          </li>
         </ul>
       </div>
     </li>

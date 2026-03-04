@@ -121,7 +121,7 @@
         </h2>
         <div class="flex-grow-1 overflow-hidden events-container" #eventsContainer>
           <div class="d-flex flex-column gap-3 events-list" #eventsList>
-            @for (ev of upcomingEvents(); track ev.id) {
+            @for (ev of upcomingEvents(); track $index) {
               <div class="card-stretch flex-row align-items-center p-3 gap-4" style="flex: 1">
                 <div
                   class="rounded-4 text-center p-2 text-white fw-bold d-flex flex-column justify-content-center"
@@ -149,17 +149,43 @@
     <!-- Notices Scene (Adaptive) -->
     @if (!isMobile() && currentScene() === 'notices') {
       <div
-        class="notices-scene animate-zoom-in d-flex flex-column align-items-center justify-content-center w-100 p-5"
+        class="notices-scene animate-zoom-in d-flex flex-column align-items-center justify-content-center w-100 px-5 pb-2"
       >
         <i class="bi bi-megaphone-fill text-warning display-1 mb-4"></i>
-        @for (notice of [mockNotices()[currentNoticeIndex()]]; track notice) {
+        @if (mockNotices().length > 0) {
+          @for (notice of [mockNotices()[currentNoticeIndex()]]; track $index) {
+            <div
+              class="modern-notice-card"
+              [ngClass]="'type-' + (notice?.type | lowercase)"
+              style="max-width: 1200px; width: 90%; flex: 0 1 70vh"
+            >
+              <div class="notice-header">
+                <i
+                  class="bi"
+                  [ngClass]="{
+                    'bi-info-circle-fill': notice?.type === 'Informativo',
+                    'bi-exclamation-triangle-fill': notice?.type === 'Urgente',
+                    'bi-check-circle-fill': notice?.type === 'Sucesso',
+                  }"
+                ></i>
+                <span class="notice-type-label">{{ notice?.type | uppercase }}</span>
+              </div>
+              <div class="notice-body" #noticeContainer>
+                <div class="notice-scroll-content" #noticeContent>
+                  <h3 class="notice-title">{{ notice?.title }}</h3>
+                  <p class="notice-content">"{{ notice?.content }}"</p>
+                </div>
+              </div>
+            </div>
+          }
+        } @else {
           <div
-            class="card-stretch p-5 text-center shadow-lg w-100"
-            style="max-width: 1200px; flex: 0 1 70vh"
+            class="modern-notice-card type-empty"
+            style="max-width: 1200px; width: 90%; flex: 0 1 70vh"
           >
-            <div class="d-flex flex-column justify-content-center gap-4 h-100">
-              <h3 class="display-2 fw-black mb-0">{{ notice.title }}</h3>
-              <p class="display-4 text-muted lh-base mb-0">"{{ notice.message }}"</p>
+            <div class="notice-body text-center justify-content-center h-100">
+              <i class="bi bi-inbox text-muted opacity-25 display-1 mb-4"></i>
+              <h3 class="display-3 fw-bold text-muted opacity-50">Nenhum aviso ativo</h3>
             </div>
           </div>
         }

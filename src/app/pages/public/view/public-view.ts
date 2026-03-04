@@ -92,24 +92,8 @@ export class PublicView implements OnInit, OnDestroy {
   });
 
   mockNotices = computed(() => {
-    const d = this.t().public.data.notices;
-    return [
-      {
-        title: d.renewalTitle,
-        message: d.renewalMsg,
-        type: 'alert',
-      },
-      {
-        title: d.scienceTitle,
-        message: d.scienceMsg,
-        type: 'info',
-      },
-      {
-        title: d.meetingTitle,
-        message: d.meetingMsg,
-        type: 'event',
-      },
-    ];
+    const list = this.schoolData.schoolAvisos();
+    return list.filter((a) => a.active);
   });
 
   currentNoticeIndex = signal(0);
@@ -289,26 +273,34 @@ export class PublicView implements OnInit, OnDestroy {
     const container = this.noticeContainers.first.nativeElement;
     const content = this.noticeContents.first.nativeElement;
 
-    // Reset
+    // Force layout recalculation (reflow) before measuring
+    void content.offsetHeight;
+
+    // Explicitly reset any previous transform to measure correctly
     content.style.transition = 'none';
     content.style.transform = 'translateY(0)';
 
-    const containerHeight = container.getBoundingClientRect().height;
-    const contentHeight = content.getBoundingClientRect().height;
+    // Request animation frame to ensure rendering has caught up after CSS reset
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const containerHeight = container.getBoundingClientRect().height;
+        const contentHeight = content.getBoundingClientRect().height;
 
-    // Precise Float comparison with minimal tolerance (1px)
-    if (contentHeight > containerHeight + 1) {
-      const distance = contentHeight - containerHeight + 50; // Padding buffer
+        if (contentHeight > containerHeight - 5) {
+          const distance = contentHeight - containerHeight + 80;
 
-      // Animation
-      setTimeout(() => {
-        content.style.transition = `transform ${durationMs}ms linear`;
-        content.style.transform = `translateY(-${distance}px)`;
-      }, 2000);
+          setTimeout(() => {
+            content.style.transition = `transform ${durationMs}ms linear`;
+            content.style.transform = `translateY(-${distance}px)`;
+          }, 2000);
+        }
+      });
+    });
 
-      return durationMs;
-    }
-    return 0;
+    // Provide a safe estimate back to the sequence runner based on CSS heuristics
+    const approximateHeight = content.scrollHeight;
+    const approximateContainer = container.clientHeight;
+    return approximateHeight > approximateContainer - 5 ? durationMs : 0;
   }
 
   nextScene(current: string) {

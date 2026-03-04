@@ -6,6 +6,7 @@ import { AmbienteService } from './ambiente.service';
 import { ProfessorService } from './professor.service';
 import { TurmaService } from './turma.service';
 import { EventoService } from './evento.service';
+import { AvisoService, Aviso } from './aviso.service';
 
 export enum EducationLevel {
   Graduacao = 'Graduação',
@@ -217,6 +218,7 @@ export class SchoolDataService {
   private professorService = inject(ProfessorService);
   private turmaService = inject(TurmaService);
   private eventoService = inject(EventoService);
+  private avisoService = inject(AvisoService);
 
   // Static/Enum-based Data Signals
   readonly educationLevels = signal<string[]>(Object.values(EducationLevel));
@@ -242,6 +244,7 @@ export class SchoolDataService {
         this.loadClasses(),
         this.loadEvents(),
         this.loadTimeGrids(),
+        this.loadAvisos(),
       ]);
     } catch (err) {
       console.error('[SchoolDataService] Error loading all data:', err);
@@ -323,6 +326,11 @@ export class SchoolDataService {
     this.schoolEvents.set(Array.isArray(data) ? data.map((e) => this.mapToSchoolEvent(e)) : []);
   }
 
+  async loadAvisos() {
+    const res = await firstValueFrom(this.avisoService.list());
+    this.schoolAvisos.set(Array.isArray(res) ? res : []);
+  }
+
   // Data Signals
   readonly subjects = signal<Subject[]>([]);
   readonly schoolMatrices = signal<SchoolMatrix[]>([]);
@@ -333,6 +341,7 @@ export class SchoolDataService {
   readonly schoolRooms = signal<SchoolRoom[]>([]);
   readonly academicParameters = signal({ lessonDuration: 50, schoolWeeks: 40 });
   readonly schoolEvents = signal<SchoolEvent[]>([]);
+  readonly schoolAvisos = signal<Aviso[]>([]);
   readonly schoolTimeGrids = signal<SchoolTimeGrid[]>([]);
   readonly schoolUsers = signal<any[]>([
     { name: 'Michel Bittencourt', email: 'michel@escola.com.br', role: 'Administrador' },

@@ -96,6 +96,7 @@ export class Sidebar implements OnInit, OnDestroy {
       '/subjects',
       '/school-matrices',
       '/calendar',
+      '/avisos',
     ];
     const adminRoutes = ['/time-grids', '/structure', '/tv-settings', '/consulta-configuracao'];
     const currentUrl = this.router.url;

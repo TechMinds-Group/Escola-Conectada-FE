@@ -64,6 +64,33 @@ export const routes: Routes = [
       { path: 'ambientes/edit/:id', component: CadastroAmbiente },
       // Calendário
       { path: 'calendar', component: ConsultaCalendario },
+      // Avisos
+      {
+        path: 'avisos',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./pages/registros/avisos/consulta-avisos/consulta-avisos').then(
+                (m) => m.ConsultaAvisos,
+              ),
+          },
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('./pages/registros/avisos/cadastro-avisos/cadastro-avisos').then(
+                (m) => m.CadastroAvisos,
+              ),
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () =>
+              import('./pages/registros/avisos/cadastro-avisos/cadastro-avisos').then(
+                (m) => m.CadastroAvisos,
+              ),
+          },
+        ],
+      },
       // Admin
       {
         path: 'users',
