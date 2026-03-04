@@ -282,6 +282,107 @@
   }
 }
 
+// --- NEW MODERN NOTICE CARD (TV SCENE) ---
+.modern-notice-card {
+  background: #ffffff;
+  border-radius: 2rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+
+  // Decorative top border based on type
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+  }
+
+  &.type-informativo::before {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  }
+  &.type-urgente::before {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+  }
+  &.type-sucesso::before {
+    background: linear-gradient(90deg, #10b981, #34d399);
+  }
+  &.type-empty::before {
+    background: #cbd5e1;
+  }
+
+  .notice-header {
+    background: rgba(0, 0, 0, 0.03);
+    padding: 2vh 4vw 1vh; // Decreased bottom padding
+    display: flex;
+    align-items: center;
+    gap: 1.5vw;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+
+    i {
+      font-size: clamp(2rem, 5vh, 4rem);
+    }
+
+    .notice-type-label {
+      font-size: clamp(1.2rem, 3.5vh, 2.5rem);
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #64748b;
+    }
+  }
+
+  // Type specific icon colors
+  &.type-informativo .notice-header i {
+    color: #3b82f6;
+  }
+  &.type-urgente .notice-header i {
+    color: #ef4444;
+  }
+  &.type-sucesso .notice-header i {
+    color: #10b981;
+  }
+
+  .notice-body {
+    flex: 1 1 0;
+    min-height: 0; // CRITICAL for flex items to allow internal overflow
+    overflow: hidden;
+    position: relative;
+
+    .notice-scroll-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      min-height: 100%;
+      padding: 3vh 6vw 6vh; // Decreased top padding
+      gap: 3vh;
+    }
+
+    .notice-title {
+      font-size: clamp(1.8rem, 4vw, 3.2rem); // Decreased size
+      font-weight: 900;
+      color: #0f172a;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+      text-align: center; // Centered
+      margin: 0;
+    }
+
+    .notice-content {
+      font-size: clamp(1.2rem, 2.5vw, 2.2rem); // Decreased size
+      color: #334155;
+      line-height: 1.5;
+      margin: 0;
+      font-weight: 500;
+      text-align: justify; // Justified
+      word-break: break-word;
+    }
+  }
+}
+
 // --- SCENE WRAPPERS ---
 .timetable-scene,
 .calendar-scene,

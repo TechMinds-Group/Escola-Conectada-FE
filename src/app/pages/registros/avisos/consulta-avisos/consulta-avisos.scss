@@ -1,0 +1,33 @@
+.letter-spacing-1 {
+  letter-spacing: 0.05rem;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.table > :not(caption) > * > * {
+  border-bottom-width: 1px;
+  border-bottom-color: rgba(var(--bs-primary-rgb), 0.05);
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(var(--bs-primary-rgb), 0.02);
+}
+
+.room-icon {
+  transition: all 0.3s ease;
+}
+
+tr:hover .room-icon {
+  transform: scale(1.05);
+  background-color: var(--bs-primary) !important;
+  color: white !important;
+}
+
+.btn-white {
+  background-color: #fff;
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}

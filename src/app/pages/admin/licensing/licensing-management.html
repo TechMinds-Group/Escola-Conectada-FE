@@ -1,0 +1,308 @@
+<div class="container-fluid py-4">
+  <div class="d-flex align-items-center mb-4">
+    <div class="icon-box bg-primary bg-opacity-10 text-primary p-3 rounded-4 me-3">
+      <i class="bi bi-shield-check fs-3"></i>
+    </div>
+    <div>
+      <h2 class="h4 fw-bold mb-0">Gestão de Licenciamento</h2>
+      <p class="text-muted small mb-0">Controle de unidades e chaves de acesso ao sistema</p>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <ul class="nav nav-pills custom-pills mb-4 p-1 bg-light rounded-pill d-inline-flex border">
+    <li class="nav-item">
+      <button
+        class="nav-link rounded-pill px-4 py-2 fw-medium"
+        [class.active]="activeTab() === 'unidades'"
+        (click)="setTab('unidades')"
+      >
+        <i class="bi bi-building me-2"></i> Unidades
+      </button>
+    </li>
+    <li class="nav-item">
+      <button
+        class="nav-link rounded-pill px-4 py-2 fw-medium"
+        [class.active]="activeTab() === 'licencas'"
+        (click)="setTab('licencas')"
+      >
+        <i class="bi bi-key me-2"></i> Chaves de Licença
+      </button>
+    </li>
+  </ul>
+
+  <!-- Unidades Tab -->
+  <div *ngIf="activeTab() === 'unidades'" class="fade-in">
+    <div class="row">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light border-bottom">
+                <tr>
+                  <th class="ps-4">Unidade</th>
+                  <th>Identificador</th>
+                  <th>CNPJ</th>
+                  <th>Expiração</th>
+                  <th>Status</th>
+                  <th class="text-end pe-4">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let u of unidades()">
+                  <td class="ps-4">
+                    <div class="fw-bold">{{ u.nome }}</div>
+                    <div class="text-muted xx-small">ID: {{ u.id }}</div>
+                  </td>
+                  <td>
+                    <code>{{ u.identificador }}</code>
+                  </td>
+                  <td>{{ u.documento || '---' }}</td>
+                  <td>
+                    <span
+                      *ngIf="u.dataExpiracao; else noExp"
+                      class="badge rounded-pill text-bg-light border fw-medium px-3"
+                    >
+                      {{ u.dataExpiracao | date: 'dd/MM/yyyy HH:mm' }}
+                    </span>
+                    <ng-template #noExp>
+                      <span class="text-muted small">Sem expiração</span>
+                    </ng-template>
+                  </td>
+                  <td>
+                    <span
+                      [class]="
+                        u.ativo
+                          ? 'badge bg-success-subtle text-success border border-success'
+                          : 'badge bg-danger-subtle text-danger border border-danger'
+                      "
+                      class="rounded-pill px-3 py-2 fw-bold small"
+                    >
+                      {{ u.ativo ? 'ATIVO' : 'BLOQUEADO' }}
+                    </span>
+                  </td>
+                  <td class="text-end pe-4">
+                    <button class="btn btn-icon-hover" (click)="editUnidade(u)" title="Editar">
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Licenças Tab -->
+  <div *ngIf="activeTab() === 'licencas'" class="fade-in">
+    <div class="row g-4">
+      <!-- Create New License -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+          <h5 class="fw-bold mb-4">Gerar Nova Chave</h5>
+          <form (submit)="saveLicenca()">
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-uppercase opacity-75">Chave</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  [(ngModel)]="newLicenca().chave"
+                  name="chave"
+                  class="form-control"
+                  placeholder="Aguardando geração..."
+                  required
+                />
+                <button class="btn btn-outline-primary" type="button" (click)="generateKey()">
+                  <i class="bi bi-arrow-repeat"></i>
+                </button>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-uppercase opacity-75"
+                >Dias de Validade</label
+              >
+              <input
+                type="number"
+                [(ngModel)]="newLicenca().diasValidade"
+                name="dias"
+                class="form-control"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary w-100 py-3 fw-bold rounded-3"
+              [disabled]="!newLicenca().chave"
+            >
+              CRIAR LICENÇA
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- List Licenses -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="bg-light border-bottom">
+                <tr>
+                  <th class="ps-4">Chave</th>
+                  <th>Duração</th>
+                  <th>Uso</th>
+                  <th>Data Uso</th>
+                  <th class="text-end pe-4">Ação</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let l of licencas()">
+                  <td class="ps-4">
+                    <code class="fw-bold text-primary">{{ l.chave }}</code>
+                  </td>
+                  <td>{{ l.diasValidade }} dias</td>
+                  <td>
+                    <span *ngIf="l.utilizada" class="badge bg-secondary rounded-pill"
+                      >Utilizada</span
+                    >
+                    <span *ngIf="!l.utilizada" class="badge bg-success rounded-pill"
+                      >Disponível</span
+                    >
+                  </td>
+                  <td>{{ (l.dataUtilizacao | date: 'dd/MM/yyyy') || '---' }}</td>
+                  <td class="text-end pe-4">
+                    <button
+                      class="btn btn-link text-danger p-0"
+                      (click)="deleteLicenca(l.id)"
+                      title="Deletar"
+                    >
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Unidade Modal -->
+  <div *ngIf="editingUnidade()" class="modal-backdrop fade show"></div>
+  <div *ngIf="editingUnidade()" class="modal fade show d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 shadow-lg p-3">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold">Editar Unidade</h5>
+          <button type="button" class="btn-close" (click)="editingUnidade.set(null)"></button>
+        </div>
+        <div class="modal-body py-0">
+          <form (submit)="saveUnidade()">
+            <div class="mb-3">
+              <label class="form-label small fw-bold opacity-75">Nome</label>
+              <input
+                type="text"
+                [(ngModel)]="editingUnidade()!.nome"
+                name="editNome"
+                class="form-control"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold opacity-75">Identificador (Slug)</label>
+              <input
+                type="text"
+                [(ngModel)]="editingUnidade()!.identificador"
+                name="editIden"
+                class="form-control"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold opacity-75">Documento (CNPJ)</label>
+              <input
+                type="text"
+                [(ngModel)]="editingUnidade()!.documento"
+                name="editDoc"
+                class="form-control"
+              />
+            </div>
+            <div class="form-check form-switch mb-4">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                [(ngModel)]="editingUnidade()!.ativo"
+                name="editAtivo"
+                id="editAtivo"
+              />
+              <label class="form-check-label small fw-bold opacity-75" for="editAtivo"
+                >Unidade Ativa</label
+              >
+            </div>
+            <div class="modal-footer border-0 px-0">
+              <button
+                type="button"
+                class="btn btn-light rounded-3 px-4"
+                (click)="editingUnidade.set(null)"
+              >
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary rounded-3 px-4 fw-bold">
+                Salvar Alterações
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .custom-pills .nav-link {
+    color: #64748b;
+  }
+  .custom-pills .nav-link.active {
+    background-color: #fff;
+    color: var(--primary-color);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  }
+  .btn-icon-hover {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    transition: all 0.2s;
+  }
+  .btn-icon-hover:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--primary-color);
+  }
+  .fade-in {
+    animation: fadeIn 0.3s ease-in;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .xx-small {
+    font-size: 0.65rem;
+  }
+  .modal-backdrop {
+    background-color: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1040;
+  }
+  .modal.show {
+    z-index: 1050;
+  }
+</style>

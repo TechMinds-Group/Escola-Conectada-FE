@@ -96,8 +96,18 @@ export class Sidebar implements OnInit, OnDestroy {
       '/subjects',
       '/school-matrices',
       '/calendar',
+      '/avisos',
+      '/reservas-salas',
     ];
-    const adminRoutes = ['/time-grids', '/structure', '/tv-settings', '/consulta-configuracao'];
+    const adminRoutes = [
+      '/time-grids',
+      '/structure',
+      '/tv-settings',
+      '/consulta-configuracao',
+      '/licensing',
+      '/school-settings',
+      '/logs',
+    ];
     const currentUrl = this.router.url;
 
     if (cadastrosRoutes.some((route) => currentUrl.includes(route))) {

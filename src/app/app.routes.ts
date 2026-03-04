@@ -12,6 +12,7 @@ import { ConsultaMatrizEscolarPage } from './pages/matriz-escolar/consulta-matri
 import { CadastroMatrizEscolarPage } from './pages/matriz-escolar/cadastro-matriz-escolar/cadastro-matriz-escolar';
 import { ConsultaTurma } from './pages/turma/consulta-turma/consulta-turma';
 import { CadastroTurma } from './pages/turma/cadastro-turma/cadastro-turma';
+import { ReservasSalas } from './pages/reservas-salas/reservas-salas';
 
 import { ConsultaAmbiente } from './pages/ambientes/consulta-ambiente/consulta-ambiente';
 import { CadastroAmbiente } from './pages/ambientes/cadastro-ambiente/cadastro-ambiente';
@@ -58,12 +59,41 @@ export const routes: Routes = [
       { path: 'classes', component: ConsultaTurma },
       { path: 'classes/new', component: CadastroTurma },
       { path: 'classes/edit/:id', component: CadastroTurma },
+      // Reservas de Salas
+      { path: 'reservas-salas', component: ReservasSalas },
       // Ambientes
       { path: 'ambientes', component: ConsultaAmbiente },
       { path: 'ambientes/new', component: CadastroAmbiente },
       { path: 'ambientes/edit/:id', component: CadastroAmbiente },
       // Calendário
       { path: 'calendar', component: ConsultaCalendario },
+      // Avisos
+      {
+        path: 'avisos',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./pages/registros/avisos/consulta-avisos/consulta-avisos').then(
+                (m) => m.ConsultaAvisos,
+              ),
+          },
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('./pages/registros/avisos/cadastro-avisos/cadastro-avisos').then(
+                (m) => m.CadastroAvisos,
+              ),
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () =>
+              import('./pages/registros/avisos/cadastro-avisos/cadastro-avisos').then(
+                (m) => m.CadastroAvisos,
+              ),
+          },
+        ],
+      },
       // Admin
       {
         path: 'users',
@@ -85,8 +115,20 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/admin/user-profile/user-profile').then((m) => m.UserProfile),
       },
+      {
+        path: 'licensing',
+        loadComponent: () =>
+          import('./pages/admin/licensing/licensing-management').then((m) => m.LicensingManagement),
+      },
     ],
   },
   { path: 'view', component: PublicView },
+  {
+    path: 'ativar-licenca',
+    loadComponent: () =>
+      import('./pages/ativar-licenca/ativar-licenca.component').then(
+        (m) => m.AtivarLicencaComponent,
+      ),
+  },
   { path: '**', redirectTo: 'dashboard' },
 ];

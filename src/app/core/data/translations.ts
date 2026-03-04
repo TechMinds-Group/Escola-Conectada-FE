@@ -68,6 +68,7 @@ export const TRANSLATIONS = {
       sidebar: {
         dashboard: 'Início',
         records: 'Registros',
+        notices: 'Avisos',
         teachers: 'Professores',
         classes: 'Turmas',
         rooms: 'Ambientes',
@@ -82,6 +83,7 @@ export const TRANSLATIONS = {
         schoolSettings: 'Configurações da Escola',
         users: 'Gestão de Usuários',
         logs: 'Gestão de Logs',
+        licensing: 'Gestão de Licenças',
         logout: 'Sair',
         resetTutorial: 'Resetar Tutorial',
         tutorial: {
@@ -655,6 +657,54 @@ export const TRANSLATIONS = {
         },
         success: 'Configurações Salvas!',
       },
+      notices: {
+        title: 'Gestão de Avisos',
+        subtitle: 'Configure avisos para exibição imediata no Mural da TV.',
+        buttons: {
+          new: 'Novo Aviso',
+          save: 'Salvar Alterações',
+          create: 'Salvar Aviso',
+          delete: 'Excluir Aviso',
+          edit: 'Editar Aviso',
+          cancel: 'Cancelar',
+        },
+        table: {
+          title: 'Título',
+          type: 'Prioridade',
+          status: 'Ativo na TV',
+          actions: 'Ações',
+          empty: 'Nenhum aviso encontrado.',
+          active: 'Ativo',
+          inactive: 'Inativo',
+        },
+        form: {
+          title: {
+            new: 'Novo Aviso',
+            edit: 'Editar Aviso',
+          },
+          subtitle: 'Configure a mensagem e o nível de prioridade.',
+          sections: {
+            details: 'Conteúdo do Aviso',
+            settings: 'Configurações de Exibição',
+          },
+          fields: {
+            title: 'Título do Aviso',
+            type: 'Prioridade / Tipo',
+            content: 'Mensagem (Conteúdo)',
+            active: 'Ativo na TV',
+          },
+          placeholders: {
+            title: 'Ex: Reunião de Pais',
+            content: 'Texto que aparecerá na tela...',
+          },
+          types: {
+            Informativo: 'Informativo (Azul)',
+            Urgente: 'Urgente (Vermelho)',
+            Sucesso: 'Sucesso (Verde)',
+          },
+          deleteConfirm: 'Deseja excluir este aviso?',
+        },
+      },
       dashboard: {
         title: 'Painel de Comando Estratégico',
         subtitle: 'Gestão por exceção e inteligência escolar.',
@@ -790,6 +840,7 @@ export const TRANSLATIONS = {
       sidebar: {
         dashboard: 'Inicio',
         records: 'Registros',
+        notices: 'Avisos',
         teachers: 'Profesores',
         classes: 'Clases',
         rooms: 'Ambientes',
@@ -804,6 +855,7 @@ export const TRANSLATIONS = {
         schoolSettings: 'Ajustes de Escuela',
         users: 'Gestión de Usuarios',
         logs: 'Gestión de Logs',
+        licensing: 'Gestión de Licencias',
         logout: 'Salir',
         resetTutorial: 'Reiniciar Tutorial (Ambientes)',
         tutorial: {
@@ -1373,6 +1425,54 @@ export const TRANSLATIONS = {
         },
         success: '¡Configuraciones Guardadas!',
       },
+      notices: {
+        title: 'Gestión de Avisos',
+        subtitle: 'Configure avisos para visualización inmediata en el Muro de TV.',
+        buttons: {
+          new: 'Nuevo Aviso',
+          save: 'Guardar Cambios',
+          create: 'Guardar Aviso',
+          delete: 'Eliminar Aviso',
+          edit: 'Editar Aviso',
+          cancel: 'Cancelar',
+        },
+        table: {
+          title: 'Título',
+          type: 'Prioridad',
+          status: 'Activo en la TV',
+          actions: 'Acciones',
+          empty: 'No se encontraron avisos.',
+          active: 'Activo',
+          inactive: 'Inactivo',
+        },
+        form: {
+          title: {
+            new: 'Nuevo Aviso',
+            edit: 'Editar Aviso',
+          },
+          subtitle: 'Configure el mensaje y el nivel de prioridad.',
+          sections: {
+            details: 'Contenido del Aviso',
+            settings: 'Ajustes de Visualización',
+          },
+          fields: {
+            title: 'Título del Aviso',
+            type: 'Prioridad / Tipo',
+            content: 'Mensaje (Contenido)',
+            active: 'Activo en la TV',
+          },
+          placeholders: {
+            title: 'Ej: Reunión de Padres',
+            content: 'Texto que aparecerá en la pantalla...',
+          },
+          types: {
+            Informativo: 'Informativo (Azul)',
+            Urgente: 'Urgente (Rojo)',
+            Sucesso: 'Éxito (Verde)',
+          },
+          deleteConfirm: '¿Desea eliminar este aviso?',
+        },
+      },
       dashboard: {
         title: 'Panel de Comando Estratégico',
         subtitle: 'Gestión por excepción e inteligencia escolar.',
@@ -1466,7 +1566,7 @@ export const TRANSLATIONS = {
         noResults: 'No classes found.',
       },
       titles: {
-        todaysSchedule: 'Today\'s Schedule',
+        todaysSchedule: "Today's Schedule",
         upcomingEvents: 'Upcoming Events',
         importantNotices: 'Important Notices',
         schoolCalendar: 'School Calendar',
@@ -1489,7 +1589,7 @@ export const TRANSLATIONS = {
         notices: {
           renewalTitle: 'Registration Renewal',
           renewalMsg:
-            'The registration renewal deadline is next Friday. Go to the secretariat to secure your spot. Remember to bring updated documents, proof of residence, and a recent 3x4 photo. Office hours are 8:00 AM to 5:00 PM without lunch break. Don\'t leave it for the last minute!',
+            "The registration renewal deadline is next Friday. Go to the secretariat to secure your spot. Remember to bring updated documents, proof of residence, and a recent 3x4 photo. Office hours are 8:00 AM to 5:00 PM without lunch break. Don't leave it for the last minute!",
           scienceTitle: 'Science Fair',
           scienceMsg:
             'Registrations open for the 2024 Science Fair. Contact your advisor by 05/15. Accepted topics: Sustainability, Robotics, Artificial Intelligence, and Biotechnology.',
@@ -1508,6 +1608,7 @@ export const TRANSLATIONS = {
       sidebar: {
         dashboard: 'Home',
         records: 'Records',
+        notices: 'Notices',
         teachers: 'Teachers',
         classes: 'Classes',
         rooms: 'Rooms',
@@ -1522,6 +1623,7 @@ export const TRANSLATIONS = {
         schoolSettings: 'School Settings',
         users: 'User Management',
         logs: 'Logs',
+        licensing: 'License Management',
         logout: 'Logout',
         resetTutorial: 'Reset Tutorial',
         tutorial: {
@@ -1664,8 +1766,7 @@ export const TRANSLATIONS = {
           hints: {
             matrix: 'Define the subject grid and workload this class will follow.',
             summary: 'Shows subjects and workload defined by the selected Curriculum Matrix.',
-            noMatrix:
-              'Select a curriculum matrix in the "Basic Information" tab to view the grid.',
+            noMatrix: 'Select a curriculum matrix in the "Basic Information" tab to view the grid.',
           },
           sections: {
             basic: 'Basic Definitions',
@@ -1957,7 +2058,7 @@ export const TRANSLATIONS = {
             },
             suspendClasses: {
               label: 'Suspend Classes',
-              hint: 'If enabled, regular classes won\'t appear in student and teacher schedules.',
+              hint: "If enabled, regular classes won't appear in student and teacher schedules.",
             },
           },
           options: {
@@ -2018,7 +2119,7 @@ export const TRANSLATIONS = {
             lesson: 'Class',
             break: 'Break',
             empty: 'No times defined. Add classes or breaks.',
-            breakHint: 'Breaks don\'t count toward matrix workload.',
+            breakHint: "Breaks don't count toward matrix workload.",
           },
           deleteConfirm: 'Are you sure you want to delete this grid?',
         },
@@ -2042,12 +2143,12 @@ export const TRANSLATIONS = {
           duration: {
             title: 'Class Duration',
             content:
-              'Enter here how many minutes a class period lasts. The system will use this value to convert the weekly schedule into actual hours, ensuring the student\'s academic record is correct.',
+              "Enter here how many minutes a class period lasts. The system will use this value to convert the weekly schedule into actual hours, ensuring the student's academic record is correct.",
           },
           weeks: {
             title: 'School Weeks',
             content:
-              'Number of class weeks in the year. The standard for meeting 200 school days is 40 weeks, but may vary according to your institution\'s specific calendar.',
+              "Number of class weeks in the year. The standard for meeting 200 school days is 40 weeks, but may vary according to your institution's specific calendar.",
           },
         },
         note: {
@@ -2094,6 +2195,54 @@ export const TRANSLATIONS = {
         },
         success: 'Settings Saved!',
       },
+      notices: {
+        title: 'Notice Management',
+        subtitle: 'Configure notices for immediate display on the TV wall.',
+        buttons: {
+          new: 'New Notice',
+          save: 'Save Changes',
+          create: 'Save Notice',
+          delete: 'Delete Notice',
+          edit: 'Edit Notice',
+          cancel: 'Cancel',
+        },
+        table: {
+          title: 'Title',
+          type: 'Priority',
+          status: 'Active on TV',
+          actions: 'Actions',
+          empty: 'No notices found.',
+          active: 'Active',
+          inactive: 'Inactive',
+        },
+        form: {
+          title: {
+            new: 'New Notice',
+            edit: 'Edit Notice',
+          },
+          subtitle: 'Configure the message and priority level.',
+          sections: {
+            details: 'Notice Content',
+            settings: 'Display Settings',
+          },
+          fields: {
+            title: 'Notice Title',
+            type: 'Priority / Type',
+            content: 'Message (Content)',
+            active: 'Active on TV',
+          },
+          placeholders: {
+            title: 'Ex: Parent Meeting',
+            content: 'Text that will appear on the screen...',
+          },
+          types: {
+            Informativo: 'Informative (Blue)',
+            Urgente: 'Urgent (Red)',
+            Sucesso: 'Success (Green)',
+          },
+          deleteConfirm: 'Are you sure you want to delete this notice?',
+        },
+      },
       dashboard: {
         title: 'Strategic Command Panel',
         subtitle: 'Exception management and school intelligence.',
@@ -2116,7 +2265,7 @@ export const TRANSLATIONS = {
           },
         },
         monitor: {
-          title: 'What\'s happening now?',
+          title: "What's happening now?",
           currentSlot: 'Current Time',
           roomStatus: 'Occupation Map',
           legend: {
