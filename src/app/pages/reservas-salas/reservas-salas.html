@@ -1,0 +1,272 @@
+<div class="container-fluid py-4 pb-5 content-area fade-in">
+  <!-- Sticky Header & Action Bar -->
+  <div class="bg-transparent mb-4 py-3 z-3">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <div>
+          <h2 class="fw-bold mb-0 text-dark fs-4">Reservas de Salas</h2>
+          <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+            Gerencie reservas e solicitações de uso por horário
+          </p>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-primary rounded-4 shadow-sm px-4 fw-semibold">
+          <i class="bi bi-calendar3 me-2"></i> Minhas Reservas
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Time Filter Area -->
+  <div class="card bg-white border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4 d-flex flex-wrap gap-4 align-items-end">
+      <div>
+        <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
+          <i class="bi bi-brightness-high me-1"></i> Turno
+        </label>
+        <select
+          class="form-select bg-light fw-semibold py-2 rounded-3 border-0 shadow-sm"
+          style="min-width: 200px"
+          [ngModel]="selectedTurno()"
+          (ngModelChange)="onTurnoChange($event)"
+        >
+          @for (turno of turnos(); track turno) {
+            <option [value]="turno">{{ turno }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="flex-grow-1" style="max-width: 300px">
+        <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
+          <i class="bi bi-clock-history me-1"></i> Horário
+        </label>
+        <select
+          class="form-select bg-light fw-semibold py-2 rounded-3 border-0 shadow-sm"
+          [ngModel]="selectedTimeId()"
+          (ngModelChange)="selectedTimeId.set($event)"
+        >
+          @for (time of availableTimes(); track time.id) {
+            <option [value]="time.id">{{ time.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Panel for Pending Requests -->
+  @if (pendencias().length > 0) {
+    <div class="alert alert-light border-0 shadow-sm rounded-4 mb-4 p-4">
+      <h5 class="fw-bold text-dark mb-3">
+        <i class="bi bi-bell-fill text-warning me-2"></i> Solicitações Pendentes (Simulação Admin)
+      </h5>
+      <div class="d-flex flex-column gap-3">
+        @for (req of pendencias(); track req.id) {
+          <div
+            class="d-flex align-items-center justify-content-between p-3 bg-white rounded-3 shadow-sm border border-secondary-subtle"
+          >
+            <div>
+              <div class="fw-bold text-dark mb-1">
+                {{ req.roomName }}
+                <span class="badge bg-secondary ms-2 fw-medium rounded-pill">{{
+                  req.timeLabel
+                }}</span>
+              </div>
+              <div class="small text-muted mb-1">
+                Solicitado por:
+                <span class="fw-semibold text-primary">{{ req.requestingTeacher }}</span>
+              </div>
+              @if (req.reason) {
+                <div class="small text-secondary fst-italic">"{{ req.reason }}"</div>
+              }
+            </div>
+            <div class="d-flex gap-2">
+              <button
+                class="btn btn-success btn-sm rounded-pill px-3 shadow-sm fw-semibold"
+                (click)="acceptRequest(req.id)"
+              >
+                Aceitar
+              </button>
+              <button
+                class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold"
+                (click)="rejectRequest(req.id)"
+              >
+                Recusar
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Rooms Grid (Reactive to selected time) -->
+  <div class="row row-cols-1 row-cols-md-3 g-4">
+    @for (room of viewSalas(); track room.id) {
+      <div class="col">
+        <div class="card h-100 bg-white border-0 shadow-sm rounded-4 transition-hover">
+          <div class="card-body p-4 d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h5 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                  {{ room.name }}
+                  @if (room.capacity > 0) {
+                    <span
+                      class="badge bg-light text-secondary border rounded-pill px-2 py-1"
+                      style="font-size: 0.75em"
+                    >
+                      <i class="bi bi-people-fill me-1"></i> {{ room.capacity }}
+                    </span>
+                  }
+                </h5>
+                <span class="text-muted small fw-semibold">
+                  <i class="bi bi-clock me-1"></i> {{ room.horarios[selectedTimeId()].label }}
+                </span>
+              </div>
+
+              <span
+                class="badge rounded-pill px-3 py-2 fw-semibold shadow-sm"
+                [ngClass]="{
+                  'bg-success': room.horarios[selectedTimeId()].status === 'Livre',
+                  'bg-danger': room.horarios[selectedTimeId()].status === 'Ocupada',
+                }"
+              >
+                {{ room.horarios[selectedTimeId()].status }}
+              </span>
+            </div>
+
+            <div class="mb-4 mt-3 flex-grow-1">
+              @if (room.horarios[selectedTimeId()].status === 'Ocupada') {
+                <div class="small text-muted d-flex align-items-center gap-2">
+                  <i class="bi bi-person-workspace text-secondary fs-5"></i>
+                  <span
+                    >Ocupada por:
+                    <strong class="text-dark">{{
+                      room.horarios[selectedTimeId()].currentTeacher
+                    }}</strong></span
+                  >
+                </div>
+              } @else {
+                <div class="small text-success d-flex align-items-center gap-2">
+                  <i class="bi bi-check-circle text-success fs-5"></i>
+                  <span class="fw-medium">Disponível para uso neste horário</span>
+                </div>
+              }
+            </div>
+
+            <div class="mt-auto">
+              @if (room.horarios[selectedTimeId()].status === 'Livre') {
+                <button
+                  class="btn btn-outline-success w-100 rounded-pill fw-bold shadow-sm"
+                  (click)="openRequestModal(room.id)"
+                >
+                  Reservar este horário
+                </button>
+              } @else {
+                <button
+                  class="btn btn-outline-warning w-100 rounded-pill fw-bold shadow-sm text-dark"
+                  (click)="openRequestModal(room.id)"
+                >
+                  Solicitar Uso
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (viewSalas().length === 0) {
+      <div class="col-12 py-5 text-center text-muted bg-white rounded-4 shadow-sm">
+        <i class="bi bi-building-slash fs-1 d-block mb-3"></i>
+        <p class="mb-0 fw-medium">Nenhum ambiente encontrado.</p>
+      </div>
+    }
+  </div>
+
+  <!-- Request Usage/Reservation Modal -->
+  @if (isModalOpen()) {
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.5)">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+          <div class="modal-header border-0 pb-0 flex-column align-items-start p-4">
+            <h5 class="modal-title fw-bold text-dark fs-4">Identificação de Reserva</h5>
+            <p class="text-muted small mb-0 mt-1">Confirme os detalhes e selecione seu perfil.</p>
+          </div>
+
+          <div class="modal-body p-4 pt-3">
+            <!-- Context Context Alert -->
+            <div
+              class="alert alert-info border-0 rounded-3 mb-4 py-2 px-3 d-flex align-items-center gap-2 shadow-sm"
+            >
+              <i class="bi bi-info-circle-fill text-info"></i>
+              <div class="small text-dark">
+                <span class="fw-bold">{{ getSelectedRoomName() }}</span> &bull;
+                <span>{{ getSelectedTimeLabel() }}</span>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
+                Professor Solicitante <span class="text-danger">*</span>
+              </label>
+              <select
+                class="form-select bg-light fw-semibold py-2 rounded-3 border-0 shadow-sm"
+                [ngModel]="requestTeacherId()"
+                (ngModelChange)="requestTeacherId.set($event)"
+              >
+                <option value="" disabled selected>Selecione seu nome na lista</option>
+                @for (prof of professoresApi(); track prof.id) {
+                  <option [value]="prof.id">{{ prof.name }}</option>
+                }
+              </select>
+            </div>
+
+            @if (requestTeacherId()) {
+              <div
+                class="alert alert-success border-0 rounded-3 py-2 px-3 mb-4 small fw-medium shadow-sm d-flex align-items-center gap-2"
+              >
+                <i class="bi bi-check-circle-fill"></i>
+                A reserva será registrada em nome deste professor.
+              </div>
+            }
+
+            <div class="mb-2">
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
+                Motivo da Solicitação
+                <span class="text-muted text-lowercase fw-normal"
+                  >(Opcional para salas livres)</span
+                >
+              </label>
+              <textarea
+                class="form-control bg-light fw-semibold py-2 rounded-3 border-0 shadow-sm"
+                rows="3"
+                placeholder="Ex: Aplicação de prova, reforço escolar..."
+                [ngModel]="requestReason()"
+                (ngModelChange)="requestReason.set($event)"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer border-0 pt-0 p-4 gap-2 d-flex flex-nowrap w-100">
+            <button
+              type="button"
+              class="btn btn-light rounded-pill flex-grow-1 fw-semibold"
+              (click)="closeModal()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary rounded-pill flex-grow-1 fw-bold shadow-sm"
+              (click)="submitRequest()"
+              [disabled]="!requestTeacherId()"
+            >
+              Confirmar Reserva
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

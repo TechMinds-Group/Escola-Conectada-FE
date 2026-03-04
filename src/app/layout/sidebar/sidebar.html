@@ -174,6 +174,21 @@
               <span class="transition-label ms-2">{{ t().admin.sidebar.notices }}</span>
             </a>
           </li>
+
+          <!-- Reservas de Salas -->
+          <li>
+            <a
+              routerLink="/reservas-salas"
+              routerLinkActive="active"
+              class="nav-link d-flex align-items-center py-2 text-nowrap"
+              [title]="isCollapsed ? 'Reservas de Salas' : ''"
+            >
+              <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
+                <i class="bi bi-calendar-event"></i>
+              </div>
+              <span class="transition-label ms-2">Reservas de Salas</span>
+            </a>
+          </li>
         </ul>
       </div>
     </li>
