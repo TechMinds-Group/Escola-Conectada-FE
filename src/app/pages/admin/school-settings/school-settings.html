@@ -1,110 +1,105 @@
-<div class="container-fluid py-4">
-  <div class="row justify-content-center">
-    <div class="col-12 col-md-8 col-lg-6">
-      <!-- Header -->
-      <div class="text-center mb-5 animate-slide-down">
-        <h2 class="fw-bold text-main mb-1">Configurações da Instituição</h2>
-        <p class="text-muted small">Defina a identidade da sua escola no sistema.</p>
-      </div>
+<div class="container-fluid py-4 pb-5">
+  <!-- Sticky Header -->
+  <div class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header">
+    <div>
+      <h2 class="fw-bold mb-0 text-dark fs-4">Configurações da Instituição</h2>
+      <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+        Identidade e Dados Cadastrais
+      </p>
+    </div>
+  </div>
 
-      <!-- Form Card -->
-      <div
-        class="card bg-surface border-theme shadow-lg rounded-4 overflow-hidden animate-fade-in-up"
-      >
-        <!-- Logo Upload Area -->
-        <div
-          class="bg-light-alpha border-bottom border-theme p-5 text-center position-relative group-hover-light cursor-pointer"
-        >
-          <div
-            class="d-flex flex-column align-items-center justify-content-center text-muted gap-2"
-          >
-            <div class="icon-circle bg-surface border-theme rounded-circle p-4 mb-2 shadow-sm">
-              <i class="bi bi-cloud-arrow-up-fill fs-2 text-primary"></i>
-            </div>
-            <h6 class="fw-bold mb-0">Arraste sua logo aqui</h6>
-            <small>Ou clique para selecionar (PNG, JPG)</small>
-          </div>
-          <input
-            type="file"
-            class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer"
-          />
-        </div>
-
-        <div class="card-body p-4 p-md-5">
-          <form [formGroup]="form" class="d-flex flex-column gap-4">
+  <div class="row justify-content-center animate-fade-in-up">
+    <div class="col-12 col-xl-8">
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="card-body p-4 p-lg-5">
+          <form [formGroup]="form" class="row g-4">
             <!-- Identity Section -->
-            <div>
-              <h6 class="text-xs fw-bold text-muted text-uppercase mb-3 tracking-tight">
-                Identidade Visual
+            <div class="col-12">
+              <h6 class="xx-small text-primary fw-bold text-uppercase mb-4 tracking-widest">
+                <i class="bi bi-building me-2"></i>Identidade Visual
               </h6>
+
               <div class="row g-3">
                 <div class="col-12">
-                  <label class="form-label text-muted small fw-bold">Nome da Instituição</label>
-                  <input
-                    formControlName="name"
-                    type="text"
-                    class="form-control bg-light-alpha border-theme text-main p-3"
-                    placeholder="Ex: Escola Conectada"
-                  />
-                </div>
-                <div class="col-12">
-                  <label class="form-label text-muted small fw-bold">Slogan (Opcional)</label>
-                  <input
-                    formControlName="slogan"
-                    type="text"
-                    class="form-control bg-light-alpha border-theme text-main p-3"
-                    placeholder="Ex: Futuro em cada detalhe"
-                  />
+                  <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
+                    >Nome da Instituição</label
+                  >
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-fonts text-primary"></i></span>
+                    <input
+                      formControlName="name"
+                      type="text"
+                      class="form-control fw-bold py-2"
+                      readonly
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <hr class="border-theme opacity-50 my-0" />
-
-            <!-- Contact Section -->
-            <div>
-              <h6 class="text-xs fw-bold text-muted text-uppercase mb-3 tracking-tight">
-                Dados Cadastrais
-              </h6>
-              <div class="row g-3">
-                <div class="col-12">
-                  <label class="form-label text-muted small fw-bold">CNPJ</label>
-                  <input
-                    formControlName="cnpj"
-                    type="text"
-                    class="form-control bg-light-alpha border-theme text-main p-3"
-                    placeholder="00.000.000/0001-00"
-                  />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-bold">E-mail de Contato</label>
-                  <input
-                    formControlName="email"
-                    type="email"
-                    class="form-control bg-light-alpha border-theme text-main p-3"
-                    placeholder="contato@escola.com"
-                  />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-muted small fw-bold">Telefone</label>
-                  <input
-                    formControlName="phone"
-                    type="tel"
-                    class="form-control bg-light-alpha border-theme text-main p-3"
-                    placeholder="(00) 0000-0000"
-                  />
-                </div>
-              </div>
+            <div class="col-12 py-2">
+              <hr class="opacity-10" />
             </div>
 
-            <div class="mt-4">
-              <button
-                (click)="save()"
-                [disabled]="form.invalid"
-                class="btn btn-primary w-100 py-3 fw-bold shadow-sm hover-lift"
-              >
-                Salvar Alterações
-              </button>
+            <!-- Registration Data -->
+            <div class="col-12">
+              <h6 class="xx-small text-primary fw-bold text-uppercase mb-4 tracking-widest">
+                <i class="bi bi-file-earmark-text me-2"></i>Dados Cadastrais
+              </h6>
+
+              <div class="row g-4">
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
+                    >CNPJ</label
+                  >
+                  <div class="input-group">
+                    <span class="input-group-text"
+                      ><i class="bi bi-card-text text-primary"></i
+                    ></span>
+                    <input
+                      formControlName="cnpj"
+                      type="text"
+                      class="form-control fw-bold py-2"
+                      readonly
+                    />
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
+                    >E-mail Administrativo</label
+                  >
+                  <div class="input-group">
+                    <span class="input-group-text"
+                      ><i class="bi bi-envelope text-primary"></i
+                    ></span>
+                    <input
+                      formControlName="email"
+                      type="email"
+                      class="form-control fw-bold py-2"
+                      readonly
+                    />
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
+                    >Telefone Principal</label
+                  >
+                  <div class="input-group">
+                    <span class="input-group-text"
+                      ><i class="bi bi-telephone text-primary"></i
+                    ></span>
+                    <input
+                      formControlName="phone"
+                      type="tel"
+                      class="form-control fw-bold py-2"
+                      readonly
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </form>
         </div>

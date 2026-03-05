@@ -245,6 +245,7 @@ export class SchoolDataService {
         this.loadEvents(),
         this.loadTimeGrids(),
         this.loadAvisos(),
+        this.loadSchoolInfo(),
       ]);
     } catch (err) {
       console.error('[SchoolDataService] Error loading all data:', err);
@@ -357,7 +358,6 @@ export class SchoolDataService {
   ]);
   readonly schoolInfo = signal({
     name: 'Escola Conectada Elite',
-    slogan: 'Tecnologia a serviço da educação',
     cnpj: '00.000.000/0001-00',
     email: 'contato@escolaelite.com.br',
     phone: '(11) 5555-4444',
@@ -612,8 +612,30 @@ export class SchoolDataService {
   }
 
   // School Settings
-  updateSchoolInfo(info: any) {
-    this.schoolInfo.update((curr) => ({ ...curr, ...info }));
+  async loadSchoolInfo() {
+    try {
+      const res = await firstValueFrom(this.http.get<any>(`${this.apiUrl}/Unidades/me`));
+      if (res) {
+        this.schoolInfo.set({
+          name: res.name,
+          cnpj: res.cnpj,
+          email: res.email,
+          phone: res.phone,
+        });
+      }
+    } catch (err) {
+      console.error('[SchoolDataService] Error loading school info:', err);
+    }
+  }
+
+  async updateSchoolInfo(info: any) {
+    try {
+      await firstValueFrom(this.http.put<any>(`${this.apiUrl}/Unidades/me`, info));
+      await this.loadSchoolInfo();
+    } catch (err) {
+      console.error('[SchoolDataService] Error updating school info:', err);
+      throw err;
+    }
   }
 
   // Events

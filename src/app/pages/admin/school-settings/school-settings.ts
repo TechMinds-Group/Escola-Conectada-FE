@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { SchoolDataService } from '../../../core/services/school-data';
@@ -17,16 +17,44 @@ export class SchoolSettings {
 
   form = this.fb.group({
     name: [this.info().name, Validators.required],
-    slogan: [this.info().slogan],
     cnpj: [this.info().cnpj],
     email: [this.info().email, [Validators.required, Validators.email]],
     phone: [this.info().phone],
   });
 
-  save() {
+  constructor() {
+    // Re-initialize form when data arrives
+    effect(() => {
+      const data = this.info();
+      this.form.patchValue(
+        {
+          name: data.name,
+          cnpj: data.cnpj,
+          email: data.email,
+          phone: data.phone,
+        },
+        { emitEvent: false },
+      );
+    });
+  }
+
+  async save() {
     if (this.form.valid) {
-      this.schoolData.updateSchoolInfo(this.form.value);
-      alert('Configurações salvas com sucesso!');
+      try {
+        await this.schoolData.updateSchoolInfo(this.form.value);
+        alert('Configurações salvas com sucesso!');
+      } catch (err) {
+        alert('Erro ao salvar as configurações.');
+      }
     }
+  }
+
+  resetForm() {
+    this.form.reset({
+      name: this.info().name,
+      cnpj: this.info().cnpj,
+      email: this.info().email,
+      phone: this.info().phone,
+    });
   }
 }
