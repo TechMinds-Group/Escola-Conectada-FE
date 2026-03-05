@@ -45,14 +45,12 @@
                   <th>CNPJ</th>
                   <th>Expiração</th>
                   <th>Status</th>
-                  <th class="text-end pe-4">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let u of unidades()">
                   <td class="ps-4">
                     <div class="fw-bold">{{ u.nome }}</div>
-                    <div class="text-muted xx-small">ID: {{ u.id }}</div>
                   </td>
                   <td>
                     <code>{{ u.identificador }}</code>
@@ -81,11 +79,6 @@
                       {{ u.ativo ? 'ATIVO' : 'BLOQUEADO' }}
                     </span>
                   </td>
-                  <td class="text-end pe-4">
-                    <button class="btn btn-icon-hover" (click)="editUnidade(u)" title="Editar">
-                      <i class="bi bi-pencil-square"></i>
-                    </button>
-                  </td>
                 </tr>
               </tbody>
             </table>
@@ -101,42 +94,29 @@
       <!-- Create New License -->
       <div class="col-lg-4">
         <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-          <h5 class="fw-bold mb-4">Gerar Nova Chave</h5>
+          <h5 class="fw-bold mb-4">Ativar Licença</h5>
           <form (submit)="saveLicenca()">
-            <div class="mb-3">
-              <label class="form-label small fw-bold text-uppercase opacity-75">Chave</label>
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-uppercase opacity-75"
+                >Chave de Ativação</label
+              >
               <div class="input-group">
                 <input
                   type="text"
                   [(ngModel)]="newLicenca().chave"
                   name="chave"
                   class="form-control"
-                  placeholder="Aguardando geração..."
+                  placeholder="Cole sua chave de ativação aqui..."
                   required
                 />
-                <button class="btn btn-outline-primary" type="button" (click)="generateKey()">
-                  <i class="bi bi-arrow-repeat"></i>
-                </button>
               </div>
-            </div>
-            <div class="mb-4">
-              <label class="form-label small fw-bold text-uppercase opacity-75"
-                >Dias de Validade</label
-              >
-              <input
-                type="number"
-                [(ngModel)]="newLicenca().diasValidade"
-                name="dias"
-                class="form-control"
-                required
-              />
             </div>
             <button
               type="submit"
               class="btn btn-primary w-100 py-3 fw-bold rounded-3"
               [disabled]="!newLicenca().chave"
             >
-              CRIAR LICENÇA
+              ATIVAR CHAVE
             </button>
           </form>
         </div>
@@ -153,7 +133,6 @@
                   <th>Duração</th>
                   <th>Uso</th>
                   <th>Data Uso</th>
-                  <th class="text-end pe-4">Ação</th>
                 </tr>
               </thead>
               <tbody>
@@ -171,89 +150,10 @@
                     >
                   </td>
                   <td>{{ (l.dataUtilizacao | date: 'dd/MM/yyyy') || '---' }}</td>
-                  <td class="text-end pe-4">
-                    <button
-                      class="btn btn-link text-danger p-0"
-                      (click)="deleteLicenca(l.id)"
-                      title="Deletar"
-                    >
-                      <i class="bi bi-trash3"></i>
-                    </button>
-                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Edit Unidade Modal -->
-  <div *ngIf="editingUnidade()" class="modal-backdrop fade show"></div>
-  <div *ngIf="editingUnidade()" class="modal fade show d-block" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 rounded-4 shadow-lg p-3">
-        <div class="modal-header border-0">
-          <h5 class="modal-title fw-bold">Editar Unidade</h5>
-          <button type="button" class="btn-close" (click)="editingUnidade.set(null)"></button>
-        </div>
-        <div class="modal-body py-0">
-          <form (submit)="saveUnidade()">
-            <div class="mb-3">
-              <label class="form-label small fw-bold opacity-75">Nome</label>
-              <input
-                type="text"
-                [(ngModel)]="editingUnidade()!.nome"
-                name="editNome"
-                class="form-control"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-bold opacity-75">Identificador (Slug)</label>
-              <input
-                type="text"
-                [(ngModel)]="editingUnidade()!.identificador"
-                name="editIden"
-                class="form-control"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-bold opacity-75">Documento (CNPJ)</label>
-              <input
-                type="text"
-                [(ngModel)]="editingUnidade()!.documento"
-                name="editDoc"
-                class="form-control"
-              />
-            </div>
-            <div class="form-check form-switch mb-4">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                [(ngModel)]="editingUnidade()!.ativo"
-                name="editAtivo"
-                id="editAtivo"
-              />
-              <label class="form-check-label small fw-bold opacity-75" for="editAtivo"
-                >Unidade Ativa</label
-              >
-            </div>
-            <div class="modal-footer border-0 px-0">
-              <button
-                type="button"
-                class="btn btn-light rounded-3 px-4"
-                (click)="editingUnidade.set(null)"
-              >
-                Cancelar
-              </button>
-              <button type="submit" class="btn btn-primary rounded-3 px-4 fw-bold">
-                Salvar Alterações
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     </div>

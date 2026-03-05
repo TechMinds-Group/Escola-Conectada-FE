@@ -8,16 +8,18 @@ export interface Unidade {
   identificador: string;
   documento: string | null;
   ativo: boolean;
-  dataCadastro: string;
-  dataExpiracao: string | null;
+  dataCadastro?: string;
+  dataExpiracao?: string | null;
 }
+
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UnidadeService {
   private http = inject(HttpClient);
-  private readonly baseUrl = '/api/Unidades';
+  private readonly baseUrl = `${environment.apiUrl}/Unidades`;
 
   list(): Observable<Unidade[]> {
     return this.http.get<Unidade[]>(this.baseUrl);

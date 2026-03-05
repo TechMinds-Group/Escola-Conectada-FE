@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { SchoolDataService } from '../../../core/services/school-data';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -10,18 +10,21 @@ import { SchoolDataService } from '../../../core/services/school-data';
   templateUrl: './user-profile.html',
 })
 export class UserProfile {
-  private schoolData = inject(SchoolDataService);
+  private auth = inject(AuthService);
   private fb = inject(FormBuilder);
 
-  user = this.schoolData.currentUser;
-  currentTab = signal<'personal' | 'security' | 'preferences'>('personal');
+  get user() {
+    return this.auth.getCurrentUser();
+  }
+
+  currentTab = signal<'personal' | 'security'>('personal');
 
   // Forms
   personalForm = this.fb.group({
-    name: [this.user().name, Validators.required],
-    email: [this.user().email, [Validators.required, Validators.email]],
-    phone: [this.user().phone],
-    role: [{ value: this.user().role, disabled: true }],
+    name: [this.user?.nome || this.user?.name || this.user?.fullName || '', Validators.required],
+    email: [this.user?.email || '', [Validators.required, Validators.email]],
+    phone: [''],
+    role: [{ value: 'Administrador', disabled: true }],
   });
 
   securityForm = this.fb.group({
@@ -32,6 +35,9 @@ export class UserProfile {
 
   // Computed State
   passwordStrength = signal(0); // 0-4
+  loading = signal(false);
+  errorMessage = signal<string | null>(null);
+  successMessage = signal<string | null>(null);
 
   onPasswordInput() {
     const pass = this.securityForm.get('newPassword')?.value || '';
@@ -43,37 +49,57 @@ export class UserProfile {
     this.passwordStrength.set(strength);
   }
 
-  setTab(tab: 'personal' | 'security' | 'preferences') {
+  setTab(tab: 'personal' | 'security') {
     this.currentTab.set(tab);
   }
 
-  toggle2FA() {
-    // Mock toggle
-    this.user().security.twoFactorEnabled = !this.user().security.twoFactorEnabled;
-  }
-
-  togglePreference(key: 'emailAlerts' | 'weeklyReports' | 'notificationSounds') {
-    // Mutate the signal value directly for this mock (in real app use update or immutable spread)
-    const prefs = this.user().preferences;
-    prefs[key] = !prefs[key];
-  }
-
-  terminateSession(id: number) {
-    alert(`Sessão ${id} encerrada.`);
-  }
-
-  savePersonal() {
+  async savePersonal() {
     if (this.personalForm.valid && this.personalForm.dirty) {
-      alert('Dados pessoais atualizados com sucesso!');
-      this.personalForm.markAsPristine();
+      this.loading.set(true);
+      this.errorMessage.set(null);
+      this.successMessage.set(null);
+
+      try {
+        const name = this.personalForm.get('name')?.value || '';
+        await this.auth.updateProfile(name);
+        this.successMessage.set('Perfil atualizado com sucesso!');
+        this.personalForm.markAsPristine();
+      } catch (error: any) {
+        this.errorMessage.set(error.error?.message || 'Erro ao atualizar perfil.');
+      } finally {
+        this.loading.set(false);
+      }
     }
   }
 
-  saveSecurity() {
+  async saveSecurity() {
     if (this.securityForm.valid) {
-      alert('Senha alterada com sucesso!');
-      this.securityForm.reset();
-      this.passwordStrength.set(0);
+      this.loading.set(true);
+      this.errorMessage.set(null);
+      this.successMessage.set(null);
+
+      const current = this.securityForm.get('currentPassword')?.value || '';
+      const newPass = this.securityForm.get('newPassword')?.value || '';
+      const confirm = this.securityForm.get('confirmPassword')?.value || '';
+
+      if (newPass !== confirm) {
+        this.errorMessage.set('As senhas não coincidem.');
+        this.loading.set(false);
+        return;
+      }
+
+      try {
+        await this.auth.changePassword(current, newPass);
+        this.successMessage.set('Senha alterada com sucesso!');
+        this.securityForm.reset();
+        this.passwordStrength.set(0);
+      } catch (error: any) {
+        this.errorMessage.set(
+          error.error?.message || 'Erro ao alterar senha. Verifique se a senha atual está correta.',
+        );
+      } finally {
+        this.loading.set(false);
+      }
     }
   }
 }

@@ -1,44 +1,142 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { catchError, tap, of, Observable, lastValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  private http = inject(HttpClient);
   private router = inject(Router);
+  private apiUrl = `${environment.apiUrl}/Account`;
 
   // Signal to track authentication state
   private authenticated = signal<boolean>(this.checkToken());
+  private currentUser = signal<any>(this.getUserFromStorage());
 
-  constructor() {}
+  constructor() {
+    // Check for session timeout on load
+    if (this.authenticated()) {
+      this.setupSessionTimeout();
+    }
+  }
 
   isAuthenticated() {
-    return this.authenticated();
+    return this.authenticated() && !this.isTokenExpired();
+  }
+
+  getCurrentUser() {
+    return this.currentUser();
+  }
+
+  private isTokenExpired(): boolean {
+    const token = localStorage.getItem('ec_token');
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (!payload.exp) return false;
+
+      const expirationDate = new Date(0);
+      expirationDate.setUTCSeconds(payload.exp);
+
+      return expirationDate.valueOf() <= new Date().valueOf();
+    } catch (e) {
+      return true;
+    }
   }
 
   private checkToken(): boolean {
-    return !!localStorage.getItem('ec_token');
+    const token = localStorage.getItem('ec_token');
+    return !!token && !this.isTokenExpired();
   }
 
-  login(email: string, password: string, tenantId: string) {
-    // Mock logic: e-mail qualquer + senha 'admin123'
-    if (password === 'admin123') {
-      const mockToken = 'mock-jwt-token-' + Math.random().toString(36).substring(7);
-      localStorage.setItem('ec_token', mockToken);
-      localStorage.setItem('ec_tenant_id', tenantId);
-      localStorage.setItem('ec_user_email', email);
+  private getUserFromStorage(): any {
+    const user = localStorage.getItem('ec_user');
+    return user ? JSON.parse(user) : null;
+  }
 
-      this.authenticated.set(true);
-      return true;
+  async login(email: string, password: string, tenantId: string): Promise<boolean> {
+    try {
+      // Ensure tenantId is in localStorage BEFORE the request so interceptor picks it up
+      localStorage.setItem('ec_tenant_id', tenantId);
+
+      const response = await lastValueFrom(
+        this.http.post<any>(`${this.apiUrl}/login`, { email, password, tenantId }),
+      );
+
+      if (response && response.token) {
+        localStorage.setItem('ec_token', response.token);
+        localStorage.setItem('ec_user', JSON.stringify(response.user));
+
+        this.authenticated.set(true);
+        this.currentUser.set(response.user);
+
+        this.setupSessionTimeout();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
-    return false;
+  }
+
+  private setupSessionTimeout() {
+    // Simple client-side timeout: 30 minutes
+    // In a real app, we might check JWT 'exp' claim or listen to 401s
+    setTimeout(
+      () => {
+        if (this.isAuthenticated()) {
+          console.warn('Session expired (client-side timeout)');
+          this.logout();
+        }
+      },
+      30 * 60 * 1000,
+    );
+  }
+
+  async updateProfile(name: string): Promise<boolean> {
+    try {
+      await lastValueFrom(this.http.put<any>(`${this.apiUrl}/profile`, { name }));
+
+      const user = this.currentUser();
+      if (user) {
+        user.nome = name;
+        localStorage.setItem('ec_user', JSON.stringify(user));
+        this.currentUser.set({ ...user });
+      }
+      return true;
+    } catch (error) {
+      console.error('Update profile error:', error);
+      throw error;
+    }
+  }
+
+  async changePassword(current: string, newPass: string): Promise<boolean> {
+    try {
+      await lastValueFrom(
+        this.http.post<any>(`${this.apiUrl}/change-password`, {
+          currentPassword: current,
+          newPassword: newPass,
+        }),
+      );
+      return true;
+    } catch (error) {
+      console.error('Change password error:', error);
+      throw error;
+    }
   }
 
   logout() {
     localStorage.removeItem('ec_token');
+    localStorage.removeItem('ec_user');
     localStorage.removeItem('ec_tenant_id');
-    localStorage.removeItem('ec_user_email');
+
     this.authenticated.set(false);
+    this.currentUser.set(null);
     this.router.navigate(['/login']);
   }
 }

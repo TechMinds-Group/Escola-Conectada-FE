@@ -331,6 +331,12 @@ export class SchoolDataService {
     this.schoolAvisos.set(Array.isArray(res) ? res : []);
   }
 
+  async loadUnidades() {
+    const res = await firstValueFrom(this.http.get<any>(`${this.apiUrl}/Unidades`));
+    const data = res && res.data ? res.data : res;
+    this.units.set(Array.isArray(data) ? data : []);
+  }
+
   // Data Signals
   readonly subjects = signal<Subject[]>([]);
   readonly schoolMatrices = signal<SchoolMatrix[]>([]);
@@ -343,6 +349,7 @@ export class SchoolDataService {
   readonly schoolEvents = signal<SchoolEvent[]>([]);
   readonly schoolAvisos = signal<Aviso[]>([]);
   readonly schoolTimeGrids = signal<SchoolTimeGrid[]>([]);
+  readonly units = signal<any[]>([]);
   readonly schoolUsers = signal<any[]>([
     { name: 'Michel Bittencourt', email: 'michel@escola.com.br', role: 'Administrador' },
     { name: 'Ana Silva', email: 'ana.secretaria@escola.com.br', role: 'Secretaria' },

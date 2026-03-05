@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Licenca {
   id: string;
@@ -16,7 +17,7 @@ export interface Licenca {
 })
 export class LicencaService {
   private http = inject(HttpClient);
-  private readonly baseUrl = '/api/Licencas';
+  private readonly baseUrl = `${environment.apiUrl}/Licencas`;
 
   list(): Observable<Licenca[]> {
     return this.http.get<Licenca[]>(this.baseUrl);

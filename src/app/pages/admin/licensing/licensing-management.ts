@@ -18,8 +18,6 @@ export class LicensingManagement implements OnInit {
   licencas = signal<Licenca[]>([]);
   activeTab = signal<'unidades' | 'licencas'>('unidades');
 
-  // Form State
-  editingUnidade = signal<Unidade | null>(null);
   newLicenca = signal({ chave: '', diasValidade: 365 });
 
   ngOnInit() {
@@ -35,37 +33,10 @@ export class LicensingManagement implements OnInit {
     this.activeTab.set(tab);
   }
 
-  editUnidade(u: Unidade) {
-    this.editingUnidade.set({ ...u });
-  }
-
-  saveUnidade() {
-    const u = this.editingUnidade();
-    if (!u) return;
-
-    this.unidadeService.update(u.id, u).subscribe(() => {
-      this.editingUnidade.set(null);
-      this.loadData();
-    });
-  }
-
-  generateKey() {
-    const prefix = 'MICHEL-' + new Date().getFullYear() + '-';
-    // Gera 6 caracteres aleatórios
-    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-    this.newLicenca.update((l) => ({ ...l, chave: prefix + random }));
-  }
-
   saveLicenca() {
     this.licencaService.save(this.newLicenca()).subscribe(() => {
       this.newLicenca.set({ chave: '', diasValidade: 365 });
       this.loadData();
     });
-  }
-
-  deleteLicenca(id: string) {
-    if (confirm('Tem certeza que deseja excluir esta licença?')) {
-      this.licencaService.delete(id).subscribe(() => this.loadData());
-    }
   }
 }

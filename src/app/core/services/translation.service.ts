@@ -1,4 +1,4 @@
-﻿import { Injectable, signal, computed } from '@angular/core';
+﻿import { computed, Injectable, signal } from '@angular/core';
 import { TRANSLATIONS } from '../data/translations';
 
 type Lang = 'pt' | 'es' | 'en';
@@ -35,8 +35,9 @@ export class TranslationService {
   // Since we want reactivity without pipes, we can expose a computed dictionary OR simple method helper.
   // Ideally, use a computed signal that returns the WHOLE dictionary for the current lang.
 
-  dictionary = computed(() => {
-    return TRANSLATIONS[this.currentLang()];
+  dictionary = computed<any>(() => {
+    const lang = this.currentLang();
+    return TRANSLATIONS[lang as Lang];
   });
 
   // Helper to safely access nested properties strings like 'public.headers.studentPortal'

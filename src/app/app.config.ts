@@ -6,6 +6,7 @@ import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 
 import { routes } from './app.routes';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { licenseInterceptor } from './core/interceptors/license.interceptor';
 import { CalendarModule, DateAdapter } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
@@ -17,7 +18,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideAnimationsAsync(),
-    provideHttpClient(withFetch(), withInterceptors([licenseInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor, licenseInterceptor])),
     importProvidersFrom(
       CalendarModule.forRoot({
         provide: DateAdapter,

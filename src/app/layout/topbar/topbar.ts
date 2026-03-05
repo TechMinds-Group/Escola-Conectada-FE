@@ -1,12 +1,12 @@
-﻿import { Component, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
+import { Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TRANSLATIONS } from '../../core/data/translations';
+import { AuthService } from '../../core/services/auth.service';
+import { SearchResult, SearchService } from '../../core/services/search.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { TranslationService } from '../../core/services/translation.service';
-import { TRANSLATIONS } from '../../core/data/translations';
-import { SearchService, SearchResult } from '../../core/services/search.service';
-import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-topbar',

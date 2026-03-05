@@ -108,11 +108,6 @@ export const routes: Routes = [
           import('./pages/admin/user-management/user-management').then((m) => m.UserManagement),
       },
       {
-        path: 'logs',
-        loadComponent: () =>
-          import('./pages/admin/consulta-log/consulta-log').then((m) => m.ConsultaLogComponent),
-      },
-      {
         path: 'school-settings',
         loadComponent: () =>
           import('./pages/admin/school-settings/school-settings').then((m) => m.SchoolSettings),

@@ -44,6 +44,10 @@ export class Sidebar implements OnInit, OnDestroy {
   private sub = new Subscription();
   private auth = inject(AuthService);
 
+  get user() {
+    return this.auth.getCurrentUser();
+  }
+
   logout(event: Event) {
     event.preventDefault();
     this.auth.logout();

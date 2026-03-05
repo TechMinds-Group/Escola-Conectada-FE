@@ -1,4 +1,127 @@
-export const TRANSLATIONS = {
+export interface LangSchema {
+  common: {
+    appName: string;
+    loading: string;
+    languages: {
+      pt: string;
+      es: string;
+      en: string;
+      selectLanguage: string;
+    };
+    shifts: {
+      morning: string;
+      afternoon: string;
+      night: string;
+    };
+  };
+  public: {
+    headers: {
+      studentPortal: string;
+      infoPanel: string;
+      brasiliaTime: string;
+    };
+    search: {
+      placeholder: string;
+      noResults: string;
+    };
+    titles: {
+      todaysSchedule: string;
+      upcomingEvents: string;
+      importantNotices: string;
+      schoolCalendar: string;
+      shiftSchedule: string;
+    };
+    labels: {
+      break: string;
+      room: string;
+      prof: string;
+      activeClassless: string;
+    };
+    data: {
+      schedule: {
+        math: string;
+        port: string;
+        history: string;
+        physics: string;
+        break: string;
+      };
+      notices: {
+        renewalTitle: string;
+        renewalMsg: string;
+        scienceTitle: string;
+        scienceMsg: string;
+        meetingTitle: string;
+        meetingMsg: string;
+      };
+      events: {
+        holiday: string;
+        party: string;
+        academic: string;
+      };
+    };
+  };
+  admin: {
+    sidebar: {
+      dashboard: string;
+      records: string;
+      notices: string;
+      teachers: string;
+      classes: string;
+      rooms: string;
+      matrix: string;
+      subjects: string;
+      calendar: string;
+      settings: string;
+      timeGrids: string;
+      academicParams: string;
+      tvSettings: string;
+      profile: string;
+      schoolSettings: string;
+      licensing: string;
+      logout: string;
+      resetTutorial: string;
+      users: string;
+      tutorial: {
+        sidebarRoomsTitle: string;
+        sidebarRoomsText: string;
+      };
+    };
+    validation: Record<string, string>;
+    teachers: any;
+    classes: any;
+    rooms: any;
+    matrices: any;
+    subjects: any;
+    calendar: any;
+    timegrid: any;
+    academicParams: any;
+    tvConfig: any;
+    notices: any;
+    dashboard: {
+      title: string;
+      subtitle: string;
+      tvMode: string;
+      shiftSelector: string;
+      kpi: Record<string, string>;
+      critical_alerts: any;
+      monitor: any;
+      quickAccess: any;
+      weeklyPreview: {
+        title: string;
+        holiday: string;
+        meeting: string;
+      };
+    };
+  };
+}
+
+export interface Translation {
+  pt: LangSchema;
+  es: LangSchema;
+  en: LangSchema;
+}
+
+export const TRANSLATIONS: Translation = {
   pt: {
     common: {
       appName: 'Escola Conectada',
@@ -81,10 +204,9 @@ export const TRANSLATIONS = {
         tvSettings: 'Configuração da TV',
         profile: 'Minha Conta',
         schoolSettings: 'Configurações da Escola',
-        users: 'Gestão de Usuários',
-        logs: 'Gestão de Logs',
         licensing: 'Gestão de Licenças',
         logout: 'Sair',
+        users: 'Gestão de Usuários',
         resetTutorial: 'Resetar Tutorial',
         tutorial: {
           sidebarRoomsTitle: 'Comece por aqui!',
@@ -751,24 +873,6 @@ export const TRANSLATIONS = {
           meeting: 'Reunião Pedagógica',
         },
       },
-      logs: {
-        title: 'Gestão de Logs',
-        subtitle: 'Auditoria e recuperação de registros.',
-        table: {
-          date: 'Data/Hora',
-          user: 'Usuário',
-          action: 'Ação',
-          entity: 'Entidade',
-          description: 'Descrição',
-          actions: 'Ações',
-          empty: 'Nenhum log encontrado.',
-        },
-        buttons: {
-          restore: 'Reverter',
-        },
-        restoreConfirm:
-          'Deseja reverter esta alteração? Os dados da entidade serão restaurados para o estado deste snapshot.',
-      },
     },
   },
   es: {
@@ -854,7 +958,6 @@ export const TRANSLATIONS = {
         profile: 'Mi Cuenta',
         schoolSettings: 'Ajustes de Escuela',
         users: 'Gestión de Usuarios',
-        logs: 'Gestión de Logs',
         licensing: 'Gestión de Licencias',
         logout: 'Salir',
         resetTutorial: 'Reiniciar Tutorial (Ambientes)',
@@ -1519,24 +1622,6 @@ export const TRANSLATIONS = {
           meeting: 'Reunión Pedagógica',
         },
       },
-      logs: {
-        title: 'Gestión de Logs',
-        subtitle: 'Auditoría y recuperación de registros.',
-        table: {
-          date: 'Fecha/Hora',
-          user: 'Usuario',
-          action: 'Acción',
-          entity: 'Entidad',
-          description: 'Descripción',
-          actions: 'Acciones',
-          empty: 'No se encontraron logs.',
-        },
-        buttons: {
-          restore: 'Revertir',
-        },
-        restoreConfirm:
-          '¿Desea revertir este cambio? Los datos de la entidad serán restaurados al estado de este snapshot.',
-      },
     },
   },
   en: {
@@ -1622,7 +1707,6 @@ export const TRANSLATIONS = {
         profile: 'My Account',
         schoolSettings: 'School Settings',
         users: 'User Management',
-        logs: 'Logs',
         licensing: 'License Management',
         logout: 'Logout',
         resetTutorial: 'Reset Tutorial',
@@ -2288,24 +2372,6 @@ export const TRANSLATIONS = {
           holiday: 'Holiday/Recess',
           meeting: 'Pedagogical Meeting',
         },
-      },
-      logs: {
-        title: 'Logs Management',
-        subtitle: 'Audit and record recovery.',
-        table: {
-          date: 'Date/Time',
-          user: 'User',
-          action: 'Action',
-          entity: 'Entity',
-          description: 'Description',
-          actions: 'Actions',
-          empty: 'No logs found.',
-        },
-        buttons: {
-          restore: 'Revert',
-        },
-        restoreConfirm:
-          'Are you sure you want to revert this change? The entity data will be restored to this snapshot state.',
       },
     },
   },
