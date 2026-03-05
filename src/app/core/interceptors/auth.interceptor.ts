@@ -28,10 +28,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       // 401 Unauthorized handling: Clear session and redirect to login
-      // We skip this logic if we are ALREADY trying to login
+      // Skip if already on login page OR if on the public view (no auth required there)
       const isLoginRequest = req.url.includes('/Account/login');
+      const isPublicView = router.url.startsWith('/view');
 
-      if (error.status === 401 && !isLoginRequest) {
+      if (error.status === 401 && !isLoginRequest && !isPublicView) {
         localStorage.removeItem('ec_token');
         localStorage.removeItem('ec_user');
         localStorage.removeItem('ec_tenant_id');

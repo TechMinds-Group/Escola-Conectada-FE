@@ -40,6 +40,8 @@ export class PublicView implements OnInit, OnDestroy {
   currentScene = signal<'timetable' | 'events' | 'notices'>('timetable');
   currentPage = signal(0);
   currentTime = signal(new Date()); // Clock
+  isEmptyScene = signal(false); // true when the current scene has no data (shows empty-state for 2s)
+  private readonly EMPTY_SCENE_DURATION = 2000; // ms to hold screen when a scene has no data
   private loopInterval: any;
   private clockInterval: any;
   private dataSyncInterval: any;
@@ -178,6 +180,14 @@ export class PublicView implements OnInit, OnDestroy {
     return list.slice(start, start + itemsPerPage);
   });
 
+  /** CSS density class to drive adaptive card content sizing */
+  gridDensity = computed(() => {
+    const count = this.tvClasses().length;
+    if (count === 1) return 'density-1';
+    if (count <= 3) return 'density-sm';
+    return 'density-lg';
+  });
+
   // Grid Calculation for Zero-Scroll scaling
   gridRows = computed(() => {
     const count = this.tvClasses().length;
@@ -216,6 +226,21 @@ export class PublicView implements OnInit, OnDestroy {
       this.currentNoticeIndex.set(0);
       this.runNoticeSequence(0, baseDuration);
     } else {
+      // Events scene
+      const hasEvents = this.upcomingEvents().length > 0;
+
+      if (!hasEvents) {
+        // No events: show empty-state for 2 seconds then skip
+        this.isEmptyScene.set(true);
+        this.loopInterval = setTimeout(() => {
+          this.isEmptyScene.set(false);
+          this.nextScene(current);
+        }, this.EMPTY_SCENE_DURATION);
+        return;
+      }
+
+      this.isEmptyScene.set(false);
+
       // Handle Auto-Scroll for Events (Async calculation)
       if (current === 'events') {
         setTimeout(() => {
@@ -240,9 +265,20 @@ export class PublicView implements OnInit, OnDestroy {
   runNoticeSequence(index: number, baseDuration: number) {
     const total = this.mockNotices().length;
     if (index >= total) {
-      this.nextScene('notices');
+      // No notices at all (index=0 and total=0): show empty-state for 2s
+      if (index === 0) {
+        this.isEmptyScene.set(true);
+        this.loopInterval = setTimeout(() => {
+          this.isEmptyScene.set(false);
+          this.nextScene('notices');
+        }, this.EMPTY_SCENE_DURATION);
+      } else {
+        this.isEmptyScene.set(false);
+        this.nextScene('notices');
+      }
       return;
     }
+    this.isEmptyScene.set(false);
 
     this.currentNoticeIndex.set(index);
 
@@ -268,39 +304,8 @@ export class PublicView implements OnInit, OnDestroy {
   }
 
   checkNoticeScroll(durationMs: number): number {
-    if (!this.noticeContainers?.length || !this.noticeContents?.length) return 0;
-
-    const container = this.noticeContainers.first.nativeElement;
-    const content = this.noticeContents.first.nativeElement;
-
-    // Force layout recalculation (reflow) before measuring
-    void content.offsetHeight;
-
-    // Explicitly reset any previous transform to measure correctly
-    content.style.transition = 'none';
-    content.style.transform = 'translateY(0)';
-
-    // Request animation frame to ensure rendering has caught up after CSS reset
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const containerHeight = container.getBoundingClientRect().height;
-        const contentHeight = content.getBoundingClientRect().height;
-
-        if (contentHeight > containerHeight - 5) {
-          const distance = contentHeight - containerHeight + 80;
-
-          setTimeout(() => {
-            content.style.transition = `transform ${durationMs}ms linear`;
-            content.style.transform = `translateY(-${distance}px)`;
-          }, 2000);
-        }
-      });
-    });
-
-    // Provide a safe estimate back to the sequence runner based on CSS heuristics
-    const approximateHeight = content.scrollHeight;
-    const approximateContainer = container.clientHeight;
-    return approximateHeight > approximateContainer - 5 ? durationMs : 0;
+    // User requested to remove auto-scroll specifically for notices
+    return 0;
   }
 
   nextScene(current: string) {
@@ -339,6 +344,17 @@ export class PublicView implements OnInit, OnDestroy {
     const totalItems = this.relevantClasses().length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
 
+    // No classes for this shift: show empty-state for 2 seconds then move on
+    if (totalItems === 0) {
+      this.isEmptyScene.set(true);
+      this.loopInterval = setTimeout(() => {
+        this.isEmptyScene.set(false);
+        this.nextScene('timetable');
+      }, this.EMPTY_SCENE_DURATION);
+      return;
+    }
+
+    this.isEmptyScene.set(false);
     this.currentPage.set(page);
 
     this.loopInterval = setTimeout(() => {
@@ -411,7 +427,13 @@ export class PublicView implements OnInit, OnDestroy {
     if (!roomId) return '';
     const room = this.schoolData.schoolRooms().find((r) => r.id === roomId);
     if (!room) return roomId;
-    return room.block ? `${room.block} - ${room.name}` : room.name;
+
+    const parts = [];
+    if (room.block) parts.push(room.block);
+    if (room.type) parts.push(room.type);
+    if (room.name) parts.push(room.name);
+
+    return parts.length > 0 ? parts.join(' - ') : roomId;
   }
 
   getCurrentSlot(gridId?: string | null): { index: number; type: string; time: string } | null {

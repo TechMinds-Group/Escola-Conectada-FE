@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslationService } from '../../core/services/translation.service';
 import { AmbienteService } from '../../core/services/ambiente.service';
 import { ProfessorService, Professor } from '../../core/services/professor.service';
+import { ReservaService, Reserva } from '../../core/services/reserva.service';
 import {
   SchoolDataService,
   SchoolRoom,
@@ -12,11 +13,12 @@ import {
 } from '../../core/services/school-data';
 
 interface TimeBlock {
-  id: string; // Time ID e.g., '19:00'
+  id: string;
   label: string;
   slotIndex: number;
-  status: 'Livre' | 'Ocupada';
+  status: 'Livre' | 'Ocupada' | 'Pendente';
   currentTeacher: string | null;
+  reservaId: string | null;
 }
 
 interface RoomDisplay {
@@ -26,34 +28,29 @@ interface RoomDisplay {
   horarios: Record<string, TimeBlock>;
 }
 
-interface PendingRequest {
-  id: number;
-  roomId: string;
-  roomName: string;
-  timeId: string;
-  timeLabel: string;
-  requestingTeacher: string;
-  reason: string;
-}
-
 @Component({
   selector: 'app-reservas-salas',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './reservas-salas.html',
+  styleUrl: './reservas-salas.scss',
 })
 export class ReservasSalas implements OnInit {
   public translation = inject(TranslationService);
   private ambienteService = inject(AmbienteService);
   private professorService = inject(ProfessorService);
+  private reservaService = inject(ReservaService);
   private schoolData = inject(SchoolDataService);
   t = this.translation.dictionary;
 
   // Real Data
   professoresApi = signal<Professor[]>([]);
   schoolRoomsApi = signal<SchoolRoom[]>([]);
+  reservasApi = signal<Reserva[]>([]);
+  isLoadingReservas = signal(false);
+
   schoolClassesApi = computed(() => this.schoolData.schoolClasses());
-  teachersApi = computed(() => this.schoolData.teachers()); // Use SchoolData to map ID to name
+  teachersApi = computed(() => this.schoolData.teachers());
 
   // Time Filter State
   timeGridsApi = computed(() => this.schoolData.schoolTimeGrids());
@@ -62,9 +59,8 @@ export class ReservasSalas implements OnInit {
     const grids = this.timeGridsApi();
     const uniqueShifts = new Set<string>();
     grids.forEach((g) => uniqueShifts.add(g.shift));
+    if (uniqueShifts.size === 0) return ['Manhã', 'Tarde', 'Noite'];
     const defaultShifts = ['Manhã', 'Tarde', 'Noite', 'Integral'];
-    if (uniqueShifts.size === 0) return ['Manhã', 'Tarde', 'Noite']; // Fallback
-
     return Array.from(uniqueShifts).sort(
       (a, b) => defaultShifts.indexOf(a) - defaultShifts.indexOf(b),
     );
@@ -84,7 +80,6 @@ export class ReservasSalas implements OnInit {
     grids.forEach((grid) => {
       const shift = grid.shift;
       if (!menu[shift]) menu[shift] = [];
-
       grid.slots
         .filter((s) => s.type === 'Aula')
         .forEach((slot) => {
@@ -105,8 +100,8 @@ export class ReservasSalas implements OnInit {
       menu[turno].sort((a, b) => a.start.localeCompare(b.start));
     });
 
-    // Fallback if grids are empty but we have turnos
-    if (Object.keys(menu).length === 0 || menu['Manhã']?.length === 0) {
+    // Fallback if grids are empty
+    if (Object.values(menu).every((v) => v.length === 0)) {
       menu['Manhã'] = [
         {
           id: '07:00',
@@ -148,141 +143,159 @@ export class ReservasSalas implements OnInit {
 
   selectedTurno = signal<string>('Manhã');
   selectedTimeId = signal<string>('07:00');
+  selectedDate = signal<string>(new Date().toISOString().split('T')[0]); // YYYY-MM-DD
 
-  // Computed available times for the dropdown
   availableTimes = computed(() => this.horariosMenu()[this.selectedTurno()] || []);
 
-  // We maintain a local overlay of "mock reservations" that override the API schedule
-  localReservations = signal<Record<string, Record<string, string>>>({}); // { [roomId]: { [timeId]: teacherName } }
-
-  // Computed to tie everything together
+  // Computed: derive RoomDisplay from rooms + real reservations
   viewSalas = computed<RoomDisplay[]>(() => {
     const rooms = this.schoolRoomsApi();
     const classes = this.schoolClassesApi();
     const allTeachers = this.teachersApi();
     const turno = this.selectedTurno();
     const timeId = this.selectedTimeId();
+    const reservas = this.reservasApi();
 
     const menu = this.horariosMenu();
-    // Find the slotIndex for the selected time
     const slotDef = (menu[turno] || []).find((t) => t.id === timeId);
     if (!slotDef) return [];
 
-    // Get today's day of week (Map Sunday=0..Saturday=6 to Monday=0..Friday=4). Default Monday if weekend to show data.
     let currentDay = new Date().getDay() - 1;
     if (currentDay < 0 || currentDay > 4) currentDay = 0;
 
     return rooms.map((room) => {
       let isOccupied = false;
       let teacherName: string | null = null;
+      let reservaId: string | null = null;
+      let status: 'Livre' | 'Ocupada' | 'Pendente' = 'Livre';
 
-      // 1. Check Backend Allocations (Grade Escolar)
-      // Find a class physically located in this room during the selected shift
+      // 1. Check grade-based allocations (permanent schedule)
       const classInRoom = classes.find((c) => c.roomId === room.id && c.shift === turno);
       if (classInRoom) {
-        // Find if any teacher is assigned to this day and slot
         const assignment = classInRoom.assignments?.find(
           (a) => a.dayOfWeek === currentDay && a.slotIndex === slotDef.slotIndex,
         );
-
         if (assignment && assignment.teacherId) {
           isOccupied = true;
-          // Find teacher name
+          status = 'Ocupada';
           const t = allTeachers.find((tchr) => tchr.id === assignment.teacherId);
           teacherName = t ? t.name : 'Professor Alocado';
         }
       }
 
-      // 2. Check Local Overrides (Mock Reservations made in this session)
-      const localRoomOverrides = this.localReservations()[room.id];
-      if (localRoomOverrides && localRoomOverrides[timeId]) {
-        isOccupied = true;
-        teacherName = localRoomOverrides[timeId];
+      // 2. Check real reservations from API (override grade if approved)
+      if (!isOccupied) {
+        const reservaForSlot = reservas.find(
+          (r) => r.salaId === room.id && r.horarioInicio === timeId,
+        );
+        if (reservaForSlot) {
+          reservaId = reservaForSlot.id;
+          if (reservaForSlot.status === 'Aprovada') {
+            status = 'Ocupada';
+            isOccupied = true;
+            teacherName = reservaForSlot.professorNome;
+          } else if (reservaForSlot.status === 'Pendente') {
+            status = 'Pendente';
+            teacherName = reservaForSlot.professorNome;
+          }
+        }
       }
 
       const block: TimeBlock = {
         id: timeId,
         label: slotDef.label,
         slotIndex: slotDef.slotIndex,
-        status: isOccupied ? 'Ocupada' : 'Livre',
+        status,
         currentTeacher: teacherName,
+        reservaId,
       };
 
       return {
         id: room.id,
         name: room.name,
         capacity: room.capacity || 0,
-        horarios: {
-          [timeId]: block,
-        },
+        horarios: { [timeId]: block },
       };
     });
   });
 
-  pendencias = signal<PendingRequest[]>([]);
+  // Pending reservations (Pendente status from API)
+  pendencias = computed(() => this.reservasApi().filter((r) => r.status === 'Pendente'));
 
   // Modal State
   isModalOpen = signal(false);
   selectedRoomIdForModal = signal<string | null>(null);
   requestTeacherId = signal('');
   requestReason = signal('');
+  isSubmitting = signal(false);
+  errorMessage = signal<string | null>(null);
 
   constructor() {
-    // Auto-select the first shift if the current one is invalid
+    // Auto-select first shift
     effect(() => {
       const turnos = this.turnos();
-      const currentTurno = this.selectedTurno();
-      if (turnos.length > 0 && !turnos.includes(currentTurno)) {
+      if (turnos.length > 0 && !turnos.includes(this.selectedTurno())) {
         this.selectedTurno.set(turnos[0]);
       }
     });
 
-    // Auto-select the first time slot of the newly selected shift if the current one is invalid
+    // Auto-select first time of selected shift
     effect(() => {
       const turnoFilter = this.selectedTurno();
       const times = this.horariosMenu()[turnoFilter] || [];
-      const currentTime = this.selectedTimeId();
-      if (times.length > 0 && !times.some((t) => t.id === currentTime)) {
+      if (times.length > 0 && !times.some((t) => t.id === this.selectedTimeId())) {
         this.selectedTimeId.set(times[0].id);
       }
     });
   }
 
   ngOnInit() {
-    this.schoolData.loadClasses(); // Ensure latest assignments are loaded
+    this.schoolData.loadClasses();
 
-    // Fetch Rooms from API
     this.ambienteService.list().subscribe({
-      next: (salas) => {
-        this.schoolRoomsApi.set(salas);
-      },
+      next: (salas) => this.schoolRoomsApi.set(salas),
       error: (err) => console.error('Erro ao listar salas', err),
     });
 
-    // Fetch Teachers from API
     this.professorService.getAll().subscribe({
-      next: (profs) => {
-        this.professoresApi.set(profs);
-      },
+      next: (profs) => this.professoresApi.set(profs),
       error: (err) => console.error('Erro ao listar professores', err),
+    });
+
+    this.loadReservas();
+  }
+
+  loadReservas() {
+    this.isLoadingReservas.set(true);
+    this.reservaService.list(this.selectedDate()).subscribe({
+      next: (reservas) => {
+        this.reservasApi.set(reservas);
+        this.isLoadingReservas.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar reservas', err);
+        this.isLoadingReservas.set(false);
+      },
     });
   }
 
   onTurnoChange(newTurno: string) {
     this.selectedTurno.set(newTurno);
-    // Reset the time block to the first available in that turno
     const available = this.horariosMenu()[newTurno];
-    if (available && available.length > 0) {
-      this.selectedTimeId.set(available[0].id);
-    } else {
-      this.selectedTimeId.set('');
-    }
+    if (available?.length > 0) this.selectedTimeId.set(available[0].id);
+    else this.selectedTimeId.set('');
+  }
+
+  onDateChange(date: string) {
+    this.selectedDate.set(date);
+    this.loadReservas();
   }
 
   openRequestModal(roomId: string) {
     this.selectedRoomIdForModal.set(roomId);
     this.requestTeacherId.set('');
     this.requestReason.set('');
+    this.errorMessage.set(null);
     this.isModalOpen.set(true);
   }
 
@@ -298,58 +311,54 @@ export class ReservasSalas implements OnInit {
 
     if (!roomId || !teacherId) return;
 
-    const teacher = this.professoresApi().find((p) => p.id === teacherId);
-    if (!teacher) return;
-
-    const room = this.schoolRoomsApi().find((r) => r.id === roomId);
-    if (!room) return;
-
     const slotDef = (this.horariosMenu()[this.selectedTurno()] || []).find((t) => t.id === timeId);
     if (!slotDef) return;
 
-    // Is the room free or occupied?
-    // If we only wanted "Solicitar" for occupied, and "Reservar" for Free, we determine here
-    // But both go through the same modal as per user instruction for the lock.
+    this.isSubmitting.set(true);
+    this.errorMessage.set(null);
 
-    const newRequest: PendingRequest = {
-      id: Date.now(),
-      roomId: room.id,
-      roomName: room.name,
-      timeId: timeId,
-      timeLabel: slotDef.label,
-      requestingTeacher: teacher.name,
-      reason: this.requestReason() || 'Reserva Direta',
-    };
-
-    console.log('[API Simulação] Reserva/Solicitação Registrada:', newRequest);
-
-    // Instead of immediate mock override, add to pending panel for visual demonstration
-    this.pendencias.update((p) => [...p, newRequest]);
-    this.closeModal();
-  }
-
-  acceptRequest(requestId: number) {
-    const request = this.pendencias().find((p) => p.id === requestId);
-    if (!request) return;
-
-    // Apply Local Override
-    this.localReservations.update((current) => {
-      const roomReservations = current[request.roomId] || {};
-      return {
-        ...current,
-        [request.roomId]: {
-          ...roomReservations,
-          [request.timeId]: request.requestingTeacher,
+    this.reservaService
+      .create({
+        salaId: roomId,
+        professorId: teacherId,
+        data: this.selectedDate(),
+        horarioInicio: slotDef.start,
+        horarioFim: slotDef.end,
+        motivo: this.requestReason() || 'Reserva Direta',
+      })
+      .subscribe({
+        next: () => {
+          this.closeModal();
+          this.loadReservas();
+          this.isSubmitting.set(false);
         },
-      };
-    });
-
-    // Remove from pending panel
-    this.pendencias.update((p) => p.filter((req) => req.id !== requestId));
+        error: (err) => {
+          const msg = err?.error?.message || 'Erro ao registrar reserva.';
+          this.errorMessage.set(msg);
+          this.isSubmitting.set(false);
+        },
+      });
   }
 
-  rejectRequest(requestId: number) {
-    this.pendencias.update((p) => p.filter((req) => req.id !== requestId));
+  acceptRequest(reservaId: string) {
+    this.reservaService.aprovar(reservaId).subscribe({
+      next: () => this.loadReservas(),
+      error: (err) => console.error('Erro ao aprovar reserva', err),
+    });
+  }
+
+  rejectRequest(reservaId: string) {
+    this.reservaService.recusar(reservaId).subscribe({
+      next: () => this.loadReservas(),
+      error: (err) => console.error('Erro ao recusar reserva', err),
+    });
+  }
+
+  deleteReserva(reservaId: string) {
+    this.reservaService.delete(reservaId).subscribe({
+      next: () => this.loadReservas(),
+      error: (err) => console.error('Erro ao excluir reserva', err),
+    });
   }
 
   getSelectedRoomName(): string {

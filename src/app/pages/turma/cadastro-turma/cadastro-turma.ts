@@ -178,7 +178,8 @@ export class CadastroTurma implements OnInit {
 
   constructor() {
     this.classForm = this.fb.group({
-      nome: ['', Validators.required],
+      nome: ['', [Validators.required, Validators.maxLength(25)]],
+
       ano: [new Date().getFullYear(), Validators.required],
       turno: ['Manhã', Validators.required],
       matrizId: [null, Validators.required],

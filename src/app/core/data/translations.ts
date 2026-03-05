@@ -14,6 +14,37 @@ export interface LangSchema {
       night: string;
     };
   };
+  reservas: {
+    title: string;
+    subtitle: string;
+    pendingAlert: string;
+    buttons: {
+      new: string;
+      accept: string;
+      reject: string;
+      cancel: string;
+      reserve: string;
+      occupied: string;
+    };
+    table: {
+      room: string;
+      time: string;
+      status: string;
+      professor: string;
+      actions: string;
+      empty: string;
+    };
+    filters: {
+      date: string;
+      shift: string;
+      time: string;
+    };
+    status: {
+      free: string;
+      occupied: string;
+      pending: string;
+    };
+  };
   public: {
     headers: {
       studentPortal: string;
@@ -136,6 +167,37 @@ export const TRANSLATIONS: Translation = {
         morning: 'Manhã',
         afternoon: 'Tarde',
         night: 'Noite',
+      },
+    },
+    reservas: {
+      title: 'Reservas de Salas',
+      subtitle: 'Gerencie reservas e solicitações de uso por horário.',
+      pendingAlert: 'Solicitações Pendentes',
+      buttons: {
+        new: 'Nova Reserva',
+        accept: 'Aceitar',
+        reject: 'Recusar',
+        cancel: 'Cancelar Solicitação',
+        reserve: 'Reservar este horário',
+        occupied: 'Sala Ocupada',
+      },
+      table: {
+        room: 'Ambiente',
+        time: 'Horário',
+        status: 'Status',
+        professor: 'Professor',
+        actions: 'Ações',
+        empty: 'Nenhum ambiente encontrado.',
+      },
+      filters: {
+        date: 'Data',
+        shift: 'Turno',
+        time: 'Horário',
+      },
+      status: {
+        free: 'Livre',
+        occupied: 'Ocupada',
+        pending: 'Pendente',
       },
     },
     public: {
@@ -891,6 +953,37 @@ export const TRANSLATIONS: Translation = {
         night: 'Noche',
       },
     },
+    reservas: {
+      title: 'Reservas de Salas',
+      subtitle: 'Gestione reservas y solicitudes de uso por horario.',
+      pendingAlert: 'Solicitudes Pendientes',
+      buttons: {
+        new: 'Nueva Reserva',
+        accept: 'Aceptar',
+        reject: 'Rechazar',
+        cancel: 'Cancelar Solicitud',
+        reserve: 'Reservar este horario',
+        occupied: 'Sala Ocupada',
+      },
+      table: {
+        room: 'Ambiente',
+        time: 'Horario',
+        status: 'Estado',
+        professor: 'Profesor',
+        actions: 'Acciones',
+        empty: 'No se encontraron ambientes.',
+      },
+      filters: {
+        date: 'Fecha',
+        shift: 'Turno',
+        time: 'Horario',
+      },
+      status: {
+        free: 'Libre',
+        occupied: 'Ocupada',
+        pending: 'Pendiente',
+      },
+    },
     public: {
       headers: {
         studentPortal: 'Portal del Estudiante',
@@ -1638,6 +1731,37 @@ export const TRANSLATIONS: Translation = {
         morning: 'Morning',
         afternoon: 'Afternoon',
         night: 'Evening',
+      },
+    },
+    reservas: {
+      title: 'Room Reservations',
+      subtitle: 'Manage reservations and requests for use by schedule.',
+      pendingAlert: 'Pending Requests',
+      buttons: {
+        new: 'New Reservation',
+        accept: 'Accept',
+        reject: 'Reject',
+        cancel: 'Cancel Request',
+        reserve: 'Reserve this time',
+        occupied: 'Room Occupied',
+      },
+      table: {
+        room: 'Room',
+        time: 'Time',
+        status: 'Status',
+        professor: 'Professor',
+        actions: 'Actions',
+        empty: 'No rooms found.',
+      },
+      filters: {
+        date: 'Date',
+        shift: 'Shift',
+        time: 'Time',
+      },
+      status: {
+        free: 'Free',
+        occupied: 'Occupied',
+        pending: 'Pending',
       },
     },
     public: {
