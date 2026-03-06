@@ -22,7 +22,7 @@
         <img
           [src]="
             'https://ui-avatars.com/api/?name=' +
-            (user?.nome || user?.name || user?.fullName || 'Usuário') +
+            (user?.nome || 'Usuário') +
             '&background=0D8ABC&color=fff'
           "
           class="rounded-circle border border-4 border-surface shadow-sm position-relative z-1"
@@ -45,7 +45,7 @@
           class="d-flex flex-column flex-md-row align-items-center justify-content-center justify-content-md-start gap-2 mb-2"
         >
           <h2 class="fw-bold text-main mb-0">
-            {{ user?.nome || user?.name || user?.fullName || 'Usuário' }}
+            {{ user?.nome || 'Usuário' }}
           </h2>
         </div>
       </div>

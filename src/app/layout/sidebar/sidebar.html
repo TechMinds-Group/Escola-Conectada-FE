@@ -181,12 +181,12 @@
               routerLink="/reservas-salas"
               routerLinkActive="active"
               class="nav-link d-flex align-items-center py-2 text-nowrap"
-              [title]="isCollapsed ? 'Reservas de Salas' : ''"
+              [title]="isCollapsed ? t().admin.sidebar.reservasSalas : ''"
             >
               <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
                 <i class="bi bi-calendar-event"></i>
               </div>
-              <span class="transition-label ms-2">Reservas de Salas</span>
+              <span class="transition-label ms-2">{{ t().admin.sidebar.reservasSalas }}</span>
             </a>
           </li>
         </ul>
@@ -266,7 +266,7 @@
       <img
         [src]="
           'https://ui-avatars.com/api/?name=' +
-          (user?.nome || user?.name || user?.fullName || 'User') +
+          (user?.nome || 'User') +
           '&background=0D8ABC&color=fff'
         "
         alt=""
@@ -277,8 +277,9 @@
       @if (!isCollapsed) {
         <div class="ms-3 transition-label d-flex flex-column text-start" style="line-height: 1.2">
           <strong class="text-main text-truncate" style="max-width: 140px">{{
-            user?.nome || user?.name || user?.fullName || 'Usuário'
+            user?.nome || 'Usuário'
           }}</strong>
+          <small class="text-primary xx-small fw-bold">{{ user?.roles?.[0] || 'Usuário' }}</small>
           <small class="text-muted xx-small">{{ user?.email || 'email@escola.com.br' }}</small>
         </div>
       }
@@ -291,9 +292,9 @@
     >
       <li class="px-3 py-2">
         <div class="fw-bold text-main">
-          {{ user?.nome || user?.name || user?.fullName || 'Usuário' }}
+          {{ user?.nome || 'Usuário' }}
         </div>
-        <div class="text-muted xx-small">{{ user?.role || 'Usuário' }}</div>
+        <div class="text-primary xx-small fw-bold">{{ user?.roles?.[0] || 'Usuário' }}</div>
       </li>
       <li><hr class="dropdown-divider border-theme opacity-50 my-2" /></li>
 

@@ -4,6 +4,14 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { catchError, tap, of, Observable, lastValueFrom } from 'rxjs';
 
+export interface User {
+  id: string;
+  nome: string;
+  email: string;
+  roles: string[];
+  tenantId: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -14,7 +22,7 @@ export class AuthService {
 
   // Signal to track authentication state
   private authenticated = signal<boolean>(this.checkToken());
-  private currentUser = signal<any>(this.getUserFromStorage());
+  public currentUser = signal<User | null>(this.getUserFromStorage());
 
   constructor() {
     // Check for session timeout on load
@@ -53,9 +61,19 @@ export class AuthService {
     return !!token && !this.isTokenExpired();
   }
 
-  private getUserFromStorage(): any {
+  private getUserFromStorage(): User | null {
     const user = localStorage.getItem('ec_user');
     return user ? JSON.parse(user) : null;
+  }
+
+  hasRole(role: string): boolean {
+    const user = this.currentUser();
+    return !!user && user.roles.includes(role);
+  }
+
+  hasAnyRole(roles: string[]): boolean {
+    const user = this.currentUser();
+    return !!user && roles.some((r) => user.roles.includes(r));
   }
 
   async login(email: string, password: string, tenantId: string): Promise<boolean> {

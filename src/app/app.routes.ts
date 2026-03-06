@@ -67,7 +67,7 @@ export const routes: Routes = [
       { path: 'classes', component: ConsultaTurma },
       { path: 'classes/new', component: CadastroTurma },
       { path: 'classes/edit/:id', component: CadastroTurma },
-      // Reservas de Salas
+      // Reservas de Ambientes
       { path: 'reservas-salas', component: ReservasSalas },
       // Ambientes
       { path: 'ambientes', component: ConsultaAmbiente },

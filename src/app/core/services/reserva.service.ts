@@ -13,7 +13,7 @@ export interface Reserva {
   horarioInicio: string;
   horarioFim: string;
   motivo: string;
-  status: 'Pendente' | 'Aprovada' | 'Recusada';
+  status: 'Pendente' | 'Aprovada' | 'Recusada' | 'Cancelada';
   createdAt: string;
 }
 
@@ -26,6 +26,16 @@ export interface CreateReservaPayload {
   motivo: string;
 }
 
+export interface AmbienteDisponibilidade {
+  salaId: string;
+  salaNome: string;
+  bloco: string;
+  recursos: string[];
+  statusOcupacao: 'Livre' | 'Ocupado' | 'Solicitado';
+  professorNome: string | null;
+  capacidade: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ReservaService {
   private http = inject(HttpClient);
@@ -36,6 +46,11 @@ export class ReservaService {
     if (data) params = params.set('data', data);
     if (salaId) params = params.set('salaId', salaId);
     return this.http.get<Reserva[]>(this.baseUrl, { params });
+  }
+
+  getStatusAmbientes(data: string, turno: string): Observable<AmbienteDisponibilidade[]> {
+    const params = new HttpParams().set('data', data).set('turno', turno);
+    return this.http.get<AmbienteDisponibilidade[]>(`${this.baseUrl}/disponibilidade`, { params });
   }
 
   create(payload: CreateReservaPayload): Observable<any> {
@@ -52,5 +67,9 @@ export class ReservaService {
 
   delete(id: string): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}/${id}`);
+  }
+
+  aceitarSolicitacao(notificacaoId: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/aceitar-solicitacao/${notificacaoId}`, {});
   }
 }

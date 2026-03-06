@@ -21,10 +21,10 @@ export class UserProfile {
 
   // Forms
   personalForm = this.fb.group({
-    name: [this.user?.nome || this.user?.name || this.user?.fullName || '', Validators.required],
+    name: [this.user?.nome || '', Validators.required],
     email: [this.user?.email || '', [Validators.required, Validators.email]],
     phone: [''],
-    role: [{ value: 'Administrador', disabled: true }],
+    role: [{ value: this.user?.roles?.[0] || 'Usuário', disabled: true }],
   });
 
   securityForm = this.fb.group({

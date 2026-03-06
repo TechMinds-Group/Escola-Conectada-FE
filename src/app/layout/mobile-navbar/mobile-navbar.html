@@ -82,6 +82,28 @@
             <span class="small fw-bold">{{ t().admin.sidebar.calendar }}</span>
           </a>
         </div>
+        <!-- Avisos -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/avisos"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-megaphone fs-3 mb-1 text-danger"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.notices }}</span>
+          </a>
+        </div>
+        <!-- Reservas -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/reservas-salas"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-calendar-check fs-3 mb-1 text-primary"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.reservasSalas }}</span>
+          </a>
+        </div>
       </div>
     </div>
   </div>

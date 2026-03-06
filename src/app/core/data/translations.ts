@@ -112,6 +112,7 @@ export interface LangSchema {
       logout: string;
       resetTutorial: string;
       users: string;
+      reservasSalas: string;
       tutorial: {
         sidebarRoomsTitle: string;
         sidebarRoomsText: string;
@@ -170,7 +171,7 @@ export const TRANSLATIONS: Translation = {
       },
     },
     reservas: {
-      title: 'Reservas de Salas',
+      title: 'Reservas de Ambientes',
       subtitle: 'Gerencie reservas e solicitações de uso por horário.',
       pendingAlert: 'Solicitações Pendentes',
       buttons: {
@@ -179,7 +180,7 @@ export const TRANSLATIONS: Translation = {
         reject: 'Recusar',
         cancel: 'Cancelar Solicitação',
         reserve: 'Reservar este horário',
-        occupied: 'Sala Ocupada',
+        occupied: 'Ambiente Ocupado',
       },
       table: {
         room: 'Ambiente',
@@ -269,6 +270,7 @@ export const TRANSLATIONS: Translation = {
         licensing: 'Gestão de Licenças',
         logout: 'Sair',
         users: 'Gestão de Usuários',
+        reservasSalas: 'Reserva de Ambientes',
         resetTutorial: 'Resetar Tutorial',
         tutorial: {
           sidebarRoomsTitle: 'Comece por aqui!',
@@ -954,16 +956,16 @@ export const TRANSLATIONS: Translation = {
       },
     },
     reservas: {
-      title: 'Reservas de Salas',
+      title: 'Reservas de Ambientes',
       subtitle: 'Gestione reservas y solicitudes de uso por horario.',
-      pendingAlert: 'Solicitudes Pendientes',
+      pendingAlert: 'Solicitudes Pendentes',
       buttons: {
         new: 'Nueva Reserva',
         accept: 'Aceptar',
         reject: 'Rechazar',
         cancel: 'Cancelar Solicitud',
         reserve: 'Reservar este horario',
-        occupied: 'Sala Ocupada',
+        occupied: 'Ambiente Ocupado',
       },
       table: {
         room: 'Ambiente',
@@ -1051,6 +1053,7 @@ export const TRANSLATIONS: Translation = {
         profile: 'Mi Cuenta',
         schoolSettings: 'Ajustes de Escuela',
         users: 'Gestión de Usuarios',
+        reservasSalas: 'Reserva de Ambientes',
         licensing: 'Gestión de Licencias',
         logout: 'Salir',
         resetTutorial: 'Reiniciar Tutorial (Ambientes)',
@@ -1831,6 +1834,7 @@ export const TRANSLATIONS: Translation = {
         profile: 'My Account',
         schoolSettings: 'School Settings',
         users: 'User Management',
+        reservasSalas: 'Room Reservations',
         licensing: 'License Management',
         logout: 'Logout',
         resetTutorial: 'Reset Tutorial',

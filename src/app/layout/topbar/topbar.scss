@@ -31,11 +31,61 @@
 
 .notification-badge {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 8px;
-  height: 8px;
-  padding: 0;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.notification-dropdown {
+  width: 320px;
+  max-width: calc(100vw - 32px); // Prevent leaking on small screens
+  max-height: 480px;
+  display: none;
+  flex-direction: column;
+  z-index: 1050;
+  position: absolute;
+  right: 0; // Align to the right edge of the button
+  left: auto;
+  top: 100%;
+
+  &.show {
+    display: flex;
+  }
+
+  .notification-list {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .dropdown-item {
+    white-space: normal;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+
+    &:hover {
+      background: rgba(var(--lavender-rgb), 0.05);
+    }
+  }
+
+  .unread-bg {
+    background: rgba(var(--lavender-rgb), 0.03);
+    border-left-color: var(--lavender);
+  }
+
+  .unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--lavender);
+    display: inline-block;
+  }
 }
 
 .glass-dropdown {

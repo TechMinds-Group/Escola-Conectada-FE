@@ -31,7 +31,7 @@ export interface TurmaDto {
 })
 export class TurmaService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/Turma`;
+  private apiUrl = `${environment.apiUrl}/Turmas`;
 
   list(): Observable<TurmaDto[]> {
     return this.http.get<TurmaDto[]>(this.apiUrl);

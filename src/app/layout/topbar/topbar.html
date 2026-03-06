@@ -53,12 +53,86 @@
       </div>
 
       <!-- Notifications -->
-      <button class="btn btn-header-action position-relative">
-        <i class="bi bi-bell"></i>
-        <span class="notification-badge bg-danger border border-light rounded-circle">
-          <span class="visually-hidden">New alerts</span>
-        </span>
-      </button>
+      <div class="dropdown">
+        <button
+          class="btn btn-header-action position-relative"
+          (click)="toggleNotifications($event)"
+          aria-expanded="false"
+        >
+          <i class="bi bi-bell"></i>
+          @if (notificationService.unreadCount() > 0) {
+            <span class="notification-badge bg-danger border border-light rounded-circle">
+              {{ notificationService.unreadCount() }}
+            </span>
+          }
+        </button>
+        <div
+          class="dropdown-menu dropdown-menu-end glass-dropdown notification-dropdown border-0 shadow-lg py-0 mt-2"
+          [class.show]="isNotificationOpen()"
+          style="width: 320px; max-height: 400px; overflow-y: auto"
+        >
+          <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-bold">Notificações</h6>
+            <div class="d-flex align-items-center gap-2">
+              <button
+                class="btn btn-link p-0 text-lavender small text-decoration-none"
+                (click)="markAllAsRead($event)"
+              >
+                Marcar todas como lidas
+              </button>
+              @if (notificationService.unreadCount() > 0) {
+                <span class="badge bg-lavender-subtle text-lavender rounded-pill">
+                  {{ notificationService.unreadCount() }} novas
+                </span>
+              }
+            </div>
+          </div>
+
+          <div class="notification-list">
+            @for (notif of notificationService.notificacoes(); track notif.id) {
+              <button
+                class="dropdown-item p-3 border-bottom d-flex flex-column gap-1"
+                [class.unread-bg]="!notif.lida"
+                (click)="handleNotificationClick(notif)"
+              >
+                <div class="d-flex justify-content-between align-items-center w-100">
+                  <span class="fw-bold small" [class.text-main]="!notif.lida">{{
+                    notif.titulo
+                  }}</span>
+                  <small class="text-muted xx-small">{{ notif.dataCriacao | date: 'HH:mm' }}</small>
+                </div>
+                <p class="mb-0 text-muted small text-wrap">{{ getCleanMessage(notif.mensagem) }}</p>
+                @if (hasReservaLink(notif.mensagem)) {
+                  <div class="mt-2 d-flex gap-2">
+                    <button
+                      class="btn btn-sm btn-lavender py-1 px-2 xx-small"
+                      (click)="handleNotificationClick(notif)"
+                    >
+                      Ver Detalhes
+                    </button>
+                    @if (notif.titulo.includes('Solicitação')) {
+                      <button
+                        class="btn btn-sm btn-outline-success py-1 px-2 xx-small"
+                        (click)="acceptRequest(notif, $event)"
+                      >
+                        Aceitar
+                      </button>
+                    }
+                  </div>
+                }
+                @if (!notif.lida) {
+                  <span class="unread-dot bg-lavender"></span>
+                }
+              </button>
+            } @empty {
+              <div class="p-4 text-center text-muted">
+                <i class="bi bi-bell-slash d-block fs-3 mb-2 opacity-50"></i>
+                <p class="small mb-0">Nenhuma notificação</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
 
       <!-- Theme Toggle -->
       <button class="btn btn-header-action" (click)="theme.toggleTheme()">
@@ -167,4 +241,12 @@
       }
     </div>
   </div>
+}
+
+@if (isNotificationOpen()) {
+  <div
+    class="position-fixed top-0 start-0 w-100 h-100"
+    style="z-index: 999; background: transparent"
+    (click)="closeNotifications()"
+  ></div>
 }

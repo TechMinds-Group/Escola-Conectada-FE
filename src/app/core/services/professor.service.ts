@@ -60,7 +60,7 @@ interface CreateProfessorDto {
 })
 export class ProfessorService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/professor`;
+  private apiUrl = `${environment.apiUrl}/Professor`;
 
   getAll(): Observable<Professor[]> {
     return this.http.get<any>(this.apiUrl).pipe(

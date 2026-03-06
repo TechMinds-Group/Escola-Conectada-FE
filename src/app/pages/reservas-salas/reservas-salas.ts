@@ -2,15 +2,24 @@ import { Component, computed, inject, signal, OnInit, effect } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslationService } from '../../core/services/translation.service';
+import { ActivatedRoute } from '@angular/router';
 import { AmbienteService } from '../../core/services/ambiente.service';
 import { ProfessorService, Professor } from '../../core/services/professor.service';
 import { ReservaService, Reserva } from '../../core/services/reserva.service';
+import { AuthService, User } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
 import {
   SchoolDataService,
   SchoolRoom,
   SchoolClass,
   Teacher,
 } from '../../core/services/school-data';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface TimeBlock {
   id: string;
@@ -31,7 +40,14 @@ interface RoomDisplay {
 @Component({
   selector: 'app-reservas-salas',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatInputModule,
+    MatFormFieldModule,
+  ],
   templateUrl: './reservas-salas.html',
   styleUrl: './reservas-salas.scss',
 })
@@ -41,7 +57,18 @@ export class ReservasSalas implements OnInit {
   private professorService = inject(ProfessorService);
   private reservaService = inject(ReservaService);
   private schoolData = inject(SchoolDataService);
+  private authService = inject(AuthService);
+  private notification = inject(NotificationService);
+  private route = inject(ActivatedRoute);
   t = this.translation.dictionary;
+
+  user = computed<User | null>(() => this.authService.currentUser());
+  isAdmin = computed<boolean>(
+    () =>
+      this.user()?.roles?.includes('Administrador') ||
+      this.user()?.roles?.includes('SuperAdmin') ||
+      false,
+  );
 
   // Real Data
   professoresApi = signal<Professor[]>([]);
@@ -145,6 +172,40 @@ export class ReservasSalas implements OnInit {
   selectedTimeId = signal<string>('07:00');
   selectedDate = signal<string>(new Date().toISOString().split('T')[0]); // YYYY-MM-DD
 
+  // Para o MatDatepicker (trabalha com objetos Date)
+  selectedDateObj = computed(() => {
+    const iso = this.selectedDate();
+    return iso ? parseISO(iso) : new Date();
+  });
+
+  displayDate = computed(() => {
+    const date = this.selectedDate();
+    if (!date) return '';
+    const d = parseISO(date);
+    return format(d, 'dd/MM/yyyy');
+  });
+
+  // Availability View Data
+  availabilityData = signal<any[]>([]);
+  isLoadingAvailability = signal(false);
+
+  // Filter by Resources
+  selectedResources = signal<string[]>([]);
+  availableResources = computed(() => {
+    const res = new Set<string>();
+    this.availabilityData().forEach((item) => {
+      item.recursos?.forEach((r: string) => res.add(r));
+    });
+    return Array.from(res).sort();
+  });
+
+  filteredAvailability = computed(() => {
+    const data = this.availabilityData();
+    const resources = this.selectedResources();
+    if (resources.length === 0) return data;
+    return data.filter((item) => resources.every((r) => item.recursos?.includes(r)));
+  });
+
   availableTimes = computed(() => this.horariosMenu()[this.selectedTurno()] || []);
 
   // Computed: derive RoomDisplay from rooms + real reservations
@@ -224,7 +285,7 @@ export class ReservasSalas implements OnInit {
 
   // Modal State
   isModalOpen = signal(false);
-  selectedRoomIdForModal = signal<string | null>(null);
+  selectedRoomForModal = signal<any | null>(null);
   requestTeacherId = signal('');
   requestReason = signal('');
   isSubmitting = signal(false);
@@ -247,6 +308,11 @@ export class ReservasSalas implements OnInit {
         this.selectedTimeId.set(times[0].id);
       }
     });
+
+    // Auto-refresh Availability View when Date or Shift changes
+    effect(() => {
+      this.loadAvailability(this.selectedDate(), this.selectedTurno());
+    });
   }
 
   ngOnInit() {
@@ -254,7 +320,7 @@ export class ReservasSalas implements OnInit {
 
     this.ambienteService.list().subscribe({
       next: (salas) => this.schoolRoomsApi.set(salas),
-      error: (err) => console.error('Erro ao listar salas', err),
+      error: (err) => console.error('Erro ao listar ambientes', err),
     });
 
     this.professorService.getAll().subscribe({
@@ -262,7 +328,55 @@ export class ReservasSalas implements OnInit {
       error: (err) => console.error('Erro ao listar professores', err),
     });
 
+    // Initial loads
     this.loadReservas();
+    this.loadAvailability(this.selectedDate(), this.selectedTurno());
+
+    // Check for reservaId in query params
+    this.route.queryParams.subscribe((params) => {
+      const reservaId = params['reservaId'];
+      if (reservaId) {
+        this.openSelectionByReservaId(reservaId);
+      }
+    });
+  }
+
+  private openSelectionByReservaId(reservaId: string) {
+    // Wait for data to load then find and open
+    effect(
+      () => {
+        const reservas = this.reservasApi();
+        const rooms = this.availabilityData();
+        if (reservas.length > 0 && rooms.length > 0) {
+          const res = reservas.find((r) => r.id === reservaId);
+          if (res) {
+            const room = rooms.find((rm) => rm.salaId === res.salaId);
+            if (room) {
+              this.selectedDate.set(res.data.split('T')[0]);
+              this.selectedTimeId.set(res.horarioInicio);
+              // Additional logic to open modal if needed, but usually just highlighting or selecting is enough
+              // For this UX, let's open the details/modal
+              this.openRequestModal(room);
+            }
+          }
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
+
+  loadAvailability(data: string, turno: string) {
+    this.isLoadingAvailability.set(true);
+    this.reservaService.getStatusAmbientes(data, turno).subscribe({
+      next: (res) => {
+        this.availabilityData.set(res);
+        this.isLoadingAvailability.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar disponibilidade', err);
+        this.isLoadingAvailability.set(false);
+      },
+    });
   }
 
   loadReservas() {
@@ -289,11 +403,73 @@ export class ReservasSalas implements OnInit {
   onDateChange(date: string) {
     this.selectedDate.set(date);
     this.loadReservas();
+    this.loadAvailability(this.selectedDate(), this.selectedTurno());
   }
 
-  openRequestModal(roomId: string) {
-    this.selectedRoomIdForModal.set(roomId);
-    this.requestTeacherId.set('');
+  onDateInputChange(value: string) {
+    if (!value) return;
+
+    // Tentar converter DD/MM/AAAA para YYYY-MM-DD
+    const parts = value.split('/');
+    if (parts.length === 3) {
+      const day = parts[0].padStart(2, '0');
+      const month = parts[1].padStart(2, '0');
+      const year = parts[2];
+
+      if (year.length === 4) {
+        const isoDate = `${year}-${month}-${day}`;
+        // Validar se é uma data real
+        const d = new Date(isoDate + 'T12:00:00'); // Meio-dia para evitar problemas de fuso no parse
+        if (!isNaN(d.getTime())) {
+          this.onDateChange(isoDate);
+          return;
+        }
+      }
+    }
+
+    // Se falhar, reseta
+    this.selectedDate.set(this.selectedDate());
+  }
+
+  onDatePickerChange(date: Date | null) {
+    if (date) {
+      // Ajustar para evitar problemas de timezone ao converter para ISO string
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const isoDate = `${year}-${month}-${day}`;
+      this.onDateChange(isoDate);
+    }
+  }
+
+  onDateInputKeyup(event: any) {
+    const input = event.target;
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 8) value = value.substring(0, 8);
+
+    let formatted = '';
+    if (value.length > 0) {
+      formatted = value.substring(0, 2);
+      if (value.length > 2) {
+        formatted += '/' + value.substring(2, 4);
+        if (value.length > 4) {
+          formatted += '/' + value.substring(4, 8);
+        }
+      }
+    }
+    input.value = formatted;
+  }
+
+  openRequestModal(item: any) {
+    this.selectedRoomForModal.set(item);
+    // Auto-select professor if logged in as Professor
+    const currentUser = this.user();
+    if (currentUser && currentUser.roles?.includes('Professor')) {
+      this.requestTeacherId.set(currentUser.id);
+    } else {
+      this.requestTeacherId.set('');
+    }
+
     this.requestReason.set('');
     this.errorMessage.set(null);
     this.isModalOpen.set(true);
@@ -301,15 +477,15 @@ export class ReservasSalas implements OnInit {
 
   closeModal() {
     this.isModalOpen.set(false);
-    this.selectedRoomIdForModal.set(null);
+    this.selectedRoomForModal.set(null);
   }
 
   submitRequest() {
-    const roomId = this.selectedRoomIdForModal();
+    const room = this.selectedRoomForModal();
     const timeId = this.selectedTimeId();
     const teacherId = this.requestTeacherId();
 
-    if (!roomId || !teacherId) return;
+    if (!room || !teacherId) return;
 
     const slotDef = (this.horariosMenu()[this.selectedTurno()] || []).find((t) => t.id === timeId);
     if (!slotDef) return;
@@ -319,7 +495,7 @@ export class ReservasSalas implements OnInit {
 
     this.reservaService
       .create({
-        salaId: roomId,
+        salaId: room.salaId,
         professorId: teacherId,
         data: this.selectedDate(),
         horarioInicio: slotDef.start,
@@ -327,14 +503,17 @@ export class ReservasSalas implements OnInit {
         motivo: this.requestReason() || 'Reserva Direta',
       })
       .subscribe({
-        next: () => {
+        next: (res: any) => {
           this.closeModal();
           this.loadReservas();
+          this.loadAvailability(this.selectedDate(), this.selectedTurno());
           this.isSubmitting.set(false);
+          this.notification.success(res.message || 'Operação realizada com sucesso!');
         },
-        error: (err) => {
+        error: (err: any) => {
           const msg = err?.error?.message || 'Erro ao registrar reserva.';
           this.errorMessage.set(msg);
+          this.notification.error(msg);
           this.isSubmitting.set(false);
         },
       });
@@ -342,28 +521,39 @@ export class ReservasSalas implements OnInit {
 
   acceptRequest(reservaId: string) {
     this.reservaService.aprovar(reservaId).subscribe({
-      next: () => this.loadReservas(),
+      next: () => {
+        this.loadReservas();
+        this.loadAvailability(this.selectedDate(), this.selectedTurno());
+        this.notification.success('Reserva aprovada!');
+      },
       error: (err) => console.error('Erro ao aprovar reserva', err),
     });
   }
 
   rejectRequest(reservaId: string) {
     this.reservaService.recusar(reservaId).subscribe({
-      next: () => this.loadReservas(),
+      next: () => {
+        this.loadReservas();
+        this.loadAvailability(this.selectedDate(), this.selectedTurno());
+        this.notification.info('Solicitação recusada.');
+      },
       error: (err) => console.error('Erro ao recusar reserva', err),
     });
   }
 
   deleteReserva(reservaId: string) {
     this.reservaService.delete(reservaId).subscribe({
-      next: () => this.loadReservas(),
+      next: () => {
+        this.loadReservas();
+        this.loadAvailability(this.selectedDate(), this.selectedTurno());
+        this.notification.info('Reserva removida.');
+      },
       error: (err) => console.error('Erro ao excluir reserva', err),
     });
   }
 
   getSelectedRoomName(): string {
-    const id = this.selectedRoomIdForModal();
-    return this.schoolRoomsApi().find((r) => r.id === id)?.name || '';
+    return this.selectedRoomForModal()?.salaNome || '';
   }
 
   getSelectedTimeLabel(): string {
