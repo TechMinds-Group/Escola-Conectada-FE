@@ -5,10 +5,11 @@ import { CommonModule } from '@angular/common';
   selector: 'app-button-edit',
   standalone: true,
   imports: [CommonModule],
+  host: { class: 'w-100 d-block d-lg-inline-block' },
   template: `
     <button
       type="button"
-      class="btn btn-primary px-4 fw-bold shadow-sm transition-hover d-flex align-items-center gap-2"
+      class="btn btn-primary w-100 d-flex align-items-center justify-content-center py-2 rounded-3 shadow-sm fw-bold transition-hover gap-2"
       [disabled]="disabled"
       (click)="onClick.emit($event)"
     >

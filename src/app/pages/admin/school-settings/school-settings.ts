@@ -16,9 +16,9 @@ export class SchoolSettings {
   info = this.schoolData.schoolInfo;
 
   form = this.fb.group({
-    name: [this.info().name, Validators.required],
+    name: [this.info().name, [Validators.required, Validators.maxLength(50)]],
     cnpj: [this.info().cnpj],
-    email: [this.info().email, [Validators.required, Validators.email]],
+    email: [this.info().email, [Validators.required, Validators.email, Validators.maxLength(200)]],
     phone: [this.info().phone],
   });
 

@@ -5,12 +5,11 @@ import { CommonModule } from '@angular/common';
   selector: 'app-button-delete',
   standalone: true,
   imports: [CommonModule],
+  host: { class: 'w-100 d-block d-lg-inline-block' },
   template: `
     <button
       type="button"
       [class]="buttonClass"
-      [style.width.px]="variant === 'icon' ? size : null"
-      [style.height.px]="variant === 'icon' ? size : null"
       [disabled]="disabled"
       [title]="title"
       (click)="onClick.emit($event)"
@@ -24,7 +23,6 @@ import { CommonModule } from '@angular/common';
   styles: [
     `
       :host {
-        display: inline-block;
         background: transparent !important;
       }
 
@@ -83,11 +81,11 @@ export class ButtonDeleteComponent {
 
   get buttonClass(): string {
     const base =
-      'btn d-inline-flex align-items-center justify-content-center transition-hover shadow-sm w-100 h-100';
+      'btn w-100 d-flex align-items-center justify-content-center py-2 rounded-3 shadow-sm transition-hover';
     const colorClass = this.isSolid
       ? 'btn-solid-danger'
       : 'btn-outline-danger-custom btn-delete-custom';
-    const variantClass = this.variant === 'icon' ? 'rounded-3 p-0' : 'gap-2 px-3 rounded-3 fw-bold';
+    const variantClass = this.variant === 'icon' ? 'p-0' : 'gap-2 px-3 fw-bold';
     return `${base} ${colorClass} ${variantClass}`;
   }
 

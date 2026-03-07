@@ -1,75 +1,61 @@
-/* Custom Table Header Rounding (Visual Identity) */
-thead th:first-child {
-  border-top-left-radius: 12px;
+/* 1. Animações e Transições (Impossível via Bootstrap puro) */
+.transition-hover {
+  transition: all 0.2s ease-in-out !important;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  }
 }
 
-thead th:last-child {
-  border-top-right-radius: 12px;
-}
-
-/* Dark Mode Overrides */
+/* 2. Suporte a Dark Mode (Focado em Superfícies e Contrastes) */
 :host-context([data-theme='dark']) {
   thead th {
-    background-color: #2c3035 !important;
-    border-bottom: none !important;
-    color: var(--text-primary) !important;
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    color: #e2e8f0 !important;
   }
 
   .progress {
     background-color: rgba(255, 255, 255, 0.05) !important;
   }
 
-  .habilitacao-text {
-    color: var(--text-secondary) !important;
-  }
-
-  .workload-description {
-    color: #000000 !important;
+  .text-dark {
+    color: #f8fafc !important;
   }
 }
 
-.habilitacao-text {
-  color: #000000 !important;
+/* 3. Estilização do Popover de Ajuda (MatMenu) */
+::ng-deep .mat-mdc-menu-panel {
+  border-radius: 12px !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+
+  .mat-mdc-menu-content {
+    background-color: #ffffff !important;
+    padding: 0 !important; // Deixa o controle para o padding que colocamos no HTML
+
+    // Força texto escuro para legibilidade máxima no popover
+    h6,
+    span,
+    p,
+    i:not(.bi-circle-fill) {
+      color: #1e293b !important;
+    }
+  }
 }
 
-.transition-hover {
-  transition: all 0.2s ease-in-out !important;
+/* 4. Pequenos ajustes de legibilidade */
+.extra-small {
+  font-size: 0.7rem;
+}
+.xx-small {
+  font-size: 0.6rem;
+}
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
-  }
+.cursor-pointer {
+  cursor: pointer;
 }
 
 .border-bottom-light {
-  border-bottom: 1px solid var(--border-color) !important;
-}
-
-/* Force Help Popover to be always light with dark text */
-::ng-deep {
-  .modern-help-popover {
-    background-color: #ffffff !important;
-    
-    .mat-mdc-menu-content, 
-    .mat-mdc-menu-content * {
-      background-color: #ffffff !important;
-    }
-
-    /* Force text to be dark slate */
-    h6, span, div {
-      color: #0f172a !important;
-    }
-
-    /* Keep icons as their status colors */
-    i.bi-circle-fill {
-      &.text-primary { color: #0d6efd !important; }
-      &.text-danger { color: #dc2626 !important; }
-      &.text-success { color: #16a34a !important; }
-    }
-    
-    /* Keep primary blue for title if it's explicitly the heading */
-    h6.text-primary {
-      color: #0d6efd !important;
-    }
-  }
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
 }

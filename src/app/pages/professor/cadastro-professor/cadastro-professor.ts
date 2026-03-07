@@ -10,6 +10,7 @@ import {
   signal,
   SimpleChanges,
   ViewChild,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 // Re-save to ensure consistency
@@ -60,7 +61,7 @@ export class CadastroProfessor implements OnInit {
   private confirmationService = inject(ConfirmationService);
 
   // Modal State Control
-  @ViewChild('subjectModal') subjectModal!: ModalManageListComponent;
+  subjectModal = viewChild<ModalManageListComponent>('subjectModal');
   showSubjectManager = signal(false);
 
   // State
@@ -82,12 +83,12 @@ export class CadastroProfessor implements OnInit {
   saveAttempted = signal(false);
 
   teacherForm: FormGroup = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],
+    name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
     email: [
       '',
       [
         Validators.pattern('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$'),
-        Validators.maxLength(150),
+        Validators.maxLength(200),
       ],
     ], // Added Email
     celular: ['', [Validators.required, Validators.minLength(14), Validators.maxLength(20)]],
@@ -256,6 +257,10 @@ export class CadastroProfessor implements OnInit {
       email: formValue.email,
       celular: formValue.celular,
       contractualWorkload: formValue.contractualWorkload,
+      allocatedWorkload: (this.currentAllocations() || []).reduce(
+        (sum, a) => sum + (a.cargaHoraria || 0),
+        0,
+      ),
       mainSubjectId: formValue.mainSubjectId || null,
       secondarySubjectIds: formValue.secondarySubjectIds,
       availability: this.availabilityGrid(),
@@ -335,7 +340,7 @@ export class CadastroProfessor implements OnInit {
 
   closeSubjectManager() {
     this.showSubjectManager.set(false);
-    this.subjectModal?.reset();
+    this.subjectModal()?.reset();
   }
 
   async saveSubject(event: { id?: any; name: string }) {
@@ -369,7 +374,7 @@ export class CadastroProfessor implements OnInit {
         };
         await this.schoolData.addSubject(newSubject);
       }
-      this.subjectModal?.reset();
+      this.subjectModal()?.reset();
     } catch (err) {
       console.error('Erro ao salvar disciplina:', err);
       alert('Ocorreu um erro ao salvar a disciplina.');

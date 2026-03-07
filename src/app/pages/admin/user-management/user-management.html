@@ -170,6 +170,7 @@
               <input
                 formControlName="name"
                 type="text"
+                maxlength="50"
                 class="form-control bg-light-alpha border-theme text-main"
                 placeholder="Ex: Maria Silva"
                 [class.is-invalid]="userForm.get('name')?.invalid && saveAttempted()"
@@ -180,6 +181,7 @@
               <input
                 formControlName="email"
                 type="email"
+                maxlength="200"
                 class="form-control bg-light-alpha border-theme text-main"
                 placeholder="nome@escola.com.br"
                 [class.is-invalid]="userForm.get('email')?.invalid && saveAttempted()"

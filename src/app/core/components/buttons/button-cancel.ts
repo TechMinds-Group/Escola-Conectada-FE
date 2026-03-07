@@ -5,23 +5,18 @@ import { CommonModule } from '@angular/common';
   selector: 'app-button-cancel',
   standalone: true,
   imports: [CommonModule],
+  host: { class: 'w-100 d-block d-lg-inline-block' },
   template: `
     <button
       type="button"
-      class="btn btn-light border px-4 fw-bold transition-hover"
+      class="btn btn-light border w-100 d-flex align-items-center justify-content-center py-2 rounded-3 shadow-sm fw-bold transition-hover"
       [disabled]="disabled"
       (click)="onClick.emit($event)"
     >
       {{ label }}
     </button>
   `,
-  styles: [
-    `
-      :host {
-        display: inline-block;
-      }
-    `,
-  ],
+  styles: [],
 })
 export class ButtonCancelComponent {
   @Input() label: string = 'Cancelar';

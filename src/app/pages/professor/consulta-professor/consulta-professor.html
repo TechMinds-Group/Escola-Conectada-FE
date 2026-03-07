@@ -1,67 +1,50 @@
 <div class="container-fluid py-4 pb-5">
-  <!-- Header -->
-  <div
+  <header
     class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
   >
     <div>
-      <h2 class="fw-bold mb-0 text-primary">{{ t().admin.teachers.title }}</h2>
-      <p class="text-muted mb-0 small">{{ t().admin.teachers.subtitle }}</p>
+      <h2 class="fw-bold mb-0 text-primary fs-3">{{ t().admin.teachers.title }}</h2>
+      <p class="text-muted mb-0 small opacity-75">{{ t().admin.teachers.subtitle }}</p>
     </div>
 
-    <!-- Actions -->
-    <div class="d-flex align-items-center gap-3">
+    <div class="d-none d-md-block">
       <button
-        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold transition-hover"
+        class="btn btn-primary d-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold transition-hover rounded-3"
         (click)="navigateToNew()"
-        id="teachers-new-btn"
-        tourAnchor="teachersNewBtnDesktop"
       >
         <i class="bi bi-plus-lg fs-5"></i>
         {{ t().admin.teachers.buttons.new }}
       </button>
     </div>
 
-    <!-- Mobile FAB -->
-    <div class="d-md-none position-fixed bottom-0 end-0 m-4 z-3 pb-5">
+    <div class="d-md-none position-fixed bottom-0 end-0 m-4 z-3 pb-4">
       <button
-        class="btn btn-primary rounded-circle shadow-lg p-3 d-flex align-items-center justify-content-center transition-hover"
+        class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center transition-hover"
+        style="width: 60px; height: 60px"
         (click)="navigateToNew()"
-        tourAnchor="teachersNewBtnMobile"
       >
-        <i class="bi bi-person-plus fs-3 text-white"></i>
+        <i class="bi bi-person-plus fs-3"></i>
       </button>
     </div>
-  </div>
+  </header>
 
-  <!-- WEB VIEW: PREMIUM FRAMELESS TABLE -->
-  <div class="card border-0 shadow-sm rounded-4 overflow-hidden d-none d-md-block bg-white">
+  <main class="card border-0 shadow-sm rounded-4 overflow-hidden d-none d-md-block bg-white">
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">
-        <thead class="bg-light">
-          <tr>
-            <th class="border-0 ps-4 py-3 text-muted small fw-bold text-uppercase w-25">
-              <span tourAnchor="teacherTableColName">{{ t().admin.teachers.table.teacher }}</span>
-            </th>
-            <th class="border-0 py-3 text-muted small fw-bold text-uppercase w-25">
-              <span tourAnchor="teacherTableColSubjects">{{
-                t().admin.teachers.table.subjects
-              }}</span>
-            </th>
-            <th class="border-0 py-3 text-muted small fw-bold text-uppercase w-25">
-              <div class="d-flex align-items-center gap-2" tourAnchor="teacherTableColWorkload">
+        <thead class="bg-light bg-opacity-50">
+          <tr class="text-muted small text-uppercase fw-bold tracking-wider">
+            <th class="border-0 ps-4 py-3">{{ t().admin.teachers.table.teacher }}</th>
+            <th class="border-0 py-3">{{ t().admin.teachers.table.subjects }}</th>
+            <th class="border-0 py-3">
+              <div class="d-flex align-items-center gap-2">
                 {{ t().admin.teachers.table.workload }}
-                <button
-                  class="btn btn-link p-0 text-muted border-0 text-decoration-none"
+                <i
+                  class="bi bi-question-circle text-muted cursor-pointer"
                   [matMenuTriggerFor]="helpMenu"
-                  (click)="$event.stopPropagation()"
-                >
-                  <i class="bi bi-question-circle-fill"></i>
-                </button>
+                ></i>
               </div>
             </th>
-            <th class="border-0 py-3 text-muted small fw-bold text-uppercase text-center w-25">
-              <span tourAnchor="teacherTableColStatus">Status</span>
-            </th>
+            <th class="border-0 py-3 text-center">Status</th>
           </tr>
         </thead>
         <tbody class="border-top-0">
@@ -75,49 +58,48 @@
                   <div class="position-relative">
                     <img
                       [src]="teacher.avatar"
-                      class="rounded-circle border"
-                      width="40"
-                      height="40"
+                      class="rounded-circle border shadow-xs"
+                      width="42"
+                      height="42"
                       alt="Avatar"
                     />
-                    @if (teacher.isOverloaded || teacher.isFull) {
-                      <span
-                        class="position-absolute bottom-0 end-0 p-1 border border-white rounded-circle shadow-sm"
-                        [class.bg-danger]="teacher.isOverloaded"
-                        [class.bg-primary]="teacher.isFull && !teacher.isOverloaded"
-                      ></span>
-                    }
+                    <span
+                      class="position-absolute bottom-0 end-0 p-1 border border-white rounded-circle shadow-sm"
+                      [class.bg-danger]="teacher.isOverloaded"
+                      [class.bg-primary]="teacher.isFull && !teacher.isOverloaded"
+                      [class.bg-success]="!teacher.isOverloaded && !teacher.isFull"
+                    >
+                    </span>
                   </div>
                   <div>
-                    <div class="fw-bold text-dark">{{ teacher.name }}</div>
-                    <div class="xx-small text-muted text-uppercase fw-semibold tracking-wider">
+                    <div class="fw-bold text-dark lh-1 mb-1">{{ teacher.name }}</div>
+                    <div class="extra-small text-muted text-uppercase fw-semibold tracking-wider">
                       {{ teacher.mainSubject?.name || t().admin.teachers.badges.noSubject }}
                     </div>
                   </div>
                 </div>
               </td>
+
               <td class="py-3">
                 <div class="d-flex flex-wrap gap-1">
                   @for (sub of teacher.secondarySubjects.slice(0, 2); track sub?.id) {
-                    <span class="badge rounded-pill bg-light border-0 px-3 py-2 habilitacao-text">
+                    <span
+                      class="badge rounded-pill bg-light text-dark border border-light-subtle px-2 py-1 fw-medium"
+                    >
                       {{ sub?.name }}
                     </span>
-                  } @empty {
-                    <span class="small habilitacao-text">-</span>
                   }
                   @if (teacher.secondarySubjects.length > 2) {
-                    <span class="small habilitacao-text"
+                    <span class="extra-small text-muted fw-bold ms-1"
                       >+{{ teacher.secondarySubjects.length - 2 }}</span
                     >
                   }
                 </div>
               </td>
-              <td class="py-3">
-                <div class="d-flex align-items-center gap-2">
-                  <div
-                    class="progress flex-grow-1"
-                    [title]="teacher.allocatedWorkload + 'h / ' + teacher.contractualWorkload + 'h'"
-                  >
+
+              <td class="py-3" style="min-width: 180px">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="progress flex-grow-1 bg-light" style="height: 8px">
                     <div
                       class="progress-bar rounded-pill"
                       role="progressbar"
@@ -127,65 +109,70 @@
                       [style.width.%]="teacher.usagePercentage"
                     ></div>
                   </div>
-                  <div class="d-flex flex-column align-items-end" style="min-width: 45px">
-                    <span
+                  <div class="text-end" style="min-width: 50px">
+                    <div
                       class="small fw-bold lh-1"
                       [class.text-danger]="teacher.isOverloaded"
-                      [class.text-primary]="teacher.isFull && !teacher.isOverloaded"
                       [class.text-success]="!teacher.isOverloaded && !teacher.isFull"
                     >
                       {{ teacher.usagePercentage }}%
-                    </span>
-                    <span class="xx-small text-muted fw-medium mt-1">
+                    </div>
+                    <div class="xx-small text-muted fw-medium">
                       {{ teacher.allocatedWorkload }}/{{ teacher.contractualWorkload }}h
-                    </span>
+                    </div>
                   </div>
                 </div>
               </td>
-              <td class="text-center py-3">
-                @if (teacher.isOverloaded) {
-                  <span class="badge rounded-pill px-3 py-2 border-0 bg-danger-subtle text-danger">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                    {{ t().admin.teachers.badges.overloaded }}
-                  </span>
-                } @else if (teacher.isFull) {
-                  <span
-                    class="badge rounded-pill px-3 py-2 border-0 bg-primary-subtle text-primary"
-                  >
-                    <i class="bi bi-info-circle-fill me-1"></i>
-                    {{ t().admin.teachers.badges.full }}
-                  </span>
-                } @else {
-                  <span
-                    class="badge rounded-pill px-3 py-2 border-0 bg-success-subtle text-success"
-                  >
-                    <i class="bi bi-check-circle-fill me-1"></i>
-                    {{ t().admin.teachers.badges.available }}
-                  </span>
-                }
+
+              <td class="text-center py-3 pe-4">
+                <span
+                  class="badge rounded-pill px-3 py-2 border fw-bold"
+                  [class.bg-danger-subtle]="teacher.isOverloaded"
+                  [class.text-danger]="teacher.isOverloaded"
+                  [class.border-danger-subtle]="teacher.isOverloaded"
+                  [class.bg-primary-subtle]="teacher.isFull && !teacher.isOverloaded"
+                  [class.text-primary]="teacher.isFull && !teacher.isOverloaded"
+                  [class.border-primary-subtle]="teacher.isFull && !teacher.isOverloaded"
+                  [class.bg-success-subtle]="!teacher.isOverloaded && !teacher.isFull"
+                  [class.text-success]="!teacher.isOverloaded && !teacher.isFull"
+                  [class.border-success-subtle]="!teacher.isOverloaded && !teacher.isFull"
+                >
+                  <i
+                    class="bi me-1"
+                    [class.bi-exclamation-triangle-fill]="teacher.isOverloaded"
+                    [class.bi-info-circle-fill]="teacher.isFull"
+                    [class.bi-check-circle-fill]="!teacher.isOverloaded && !teacher.isFull"
+                  ></i>
+                  {{
+                    teacher.isOverloaded
+                      ? t().admin.teachers.badges.overloaded
+                      : teacher.isFull
+                        ? t().admin.teachers.badges.full
+                        : t().admin.teachers.badges.available
+                  }}
+                </span>
               </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="4" class="text-center py-5 text-muted">
-                <i class="bi bi-person-x fs-2 d-block mb-2 opacity-50"></i>
-                {{ t().admin.teachers.table.empty }}
+              <td colspan="4" class="text-center py-5 text-muted opacity-50">
+                <i class="bi bi-person-x fs-1 d-block mb-3"></i>
+                <p class="mb-0 fw-medium">{{ t().admin.teachers.table.empty }}</p>
               </td>
             </tr>
           }
         </tbody>
       </table>
     </div>
-  </div>
+  </main>
 
-  <!-- MOBILE VIEW: CARDS -->
   <div class="d-md-none d-flex flex-column gap-3">
     @for (teacher of teachers(); track teacher.id) {
       <div
-        class="card border-0 shadow-sm rounded-4 p-3 bg-white transition-hover position-relative"
+        class="card border-0 shadow-sm rounded-4 p-3 bg-white transition-hover"
         (click)="navigateToEdit(teacher.id)"
       >
-        <div class="d-flex align-items-start gap-3 mb-3">
+        <div class="d-flex align-items-center gap-3 mb-3">
           <div class="position-relative">
             <img
               [src]="teacher.avatar"
@@ -194,84 +181,44 @@
               height="48"
               alt="Avatar"
             />
-            @if (teacher.isOverloaded || teacher.isFull) {
-              <span
-                class="position-absolute bottom-0 end-0 p-1 border border-white rounded-circle shadow-sm"
-                [class.bg-danger]="teacher.isOverloaded"
-                [class.bg-primary]="teacher.isFull && !teacher.isOverloaded"
-              ></span>
-            } @else {
-              <span
-                class="position-absolute bottom-0 end-0 p-1 border border-white rounded-circle shadow-sm bg-success"
-              ></span>
-            }
+            <span
+              class="position-absolute bottom-0 end-0 p-1 border border-white rounded-circle shadow-sm"
+              [class.bg-danger]="teacher.isOverloaded"
+              [class.bg-success]="!teacher.isOverloaded"
+            ></span>
           </div>
-          <div class="flex-grow-1 min-w-0">
-            <h6 class="fw-bold text-dark mb-0 text-truncate">{{ teacher.name }}</h6>
-            <div class="xx-small text-muted text-uppercase fw-semibold mt-1">
-              {{ teacher.mainSubject?.name || t().admin.teachers.badges.noSubject }}
+          <div class="flex-grow-1">
+            <h6 class="fw-bold text-dark mb-0">{{ teacher.name }}</h6>
+            <div class="extra-small text-muted text-uppercase fw-bold">
+              {{ teacher.mainSubject?.name }}
             </div>
           </div>
         </div>
 
         <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
-          <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-clock text-muted small"></i>
-            <span
-              class="small fw-bold"
-              [class.text-danger]="teacher.isOverloaded"
-              [class.text-primary]="teacher.isFull && !teacher.isOverloaded"
-              [class.text-success]="!teacher.isOverloaded && !teacher.isFull"
-            >
-              {{ teacher.usagePercentage }}% ({{ teacher.allocatedWorkload }}/{{
-                teacher.contractualWorkload
-              }}h)
-            </span>
+          <div class="small fw-bold" [class.text-danger]="teacher.isOverloaded">
+            <i class="bi bi-clock-history me-1"></i> {{ teacher.usagePercentage }}% Uso
           </div>
-          @if (teacher.isOverloaded) {
-            <span class="badge rounded-pill px-3 py-2 border-0 small bg-danger-subtle text-danger">
-              {{ t().admin.teachers.badges.overloaded }}
-            </span>
-          } @else if (teacher.isFull) {
-            <span
-              class="badge rounded-pill px-3 py-2 border-0 small bg-primary-subtle text-primary"
-            >
-              {{ t().admin.teachers.badges.full }}
-            </span>
-          } @else {
-            <span
-              class="badge rounded-pill px-3 py-2 border-0 small bg-success-subtle text-success"
-            >
-              {{ t().admin.teachers.badges.available }}
-            </span>
-          }
+          <span
+            class="badge rounded-pill px-3 py-1 border-0 extra-small fw-bold"
+            [class.bg-danger-subtle]="teacher.isOverloaded"
+            [class.text-danger]="teacher.isOverloaded"
+            [class.bg-success-subtle]="!teacher.isOverloaded"
+            [class.text-success]="!teacher.isOverloaded"
+          >
+            {{ teacher.isOverloaded ? 'Sobrecarga' : 'Disponível' }}
+          </span>
         </div>
-      </div>
-    } @empty {
-      <div class="text-center py-5 text-muted">
-        <i class="bi bi-person-x fs-2 d-block mb-2 opacity-50"></i>
-        {{ t().admin.teachers.table.empty }}
       </div>
     }
   </div>
 
-  <!-- Shared Help Menu -->
-  <mat-menu #helpMenu="matMenu" xPosition="before" class="modern-help-popover">
-    <div class="px-3 py-2" (click)="$event.stopPropagation()">
-      <h6 class="fw-bold text-primary mb-2">{{ t().admin.teachers.table.workload }}</h6>
-
-      <div class="d-flex align-items-center gap-2 mb-1 small">
-        <i class="bi bi-circle-fill text-primary small"></i>
-        <span class="workload-description">{{ t().admin.teachers.workload.occupied }}</span>
-      </div>
-      <div class="d-flex align-items-center gap-2 mb-1 small">
-        <i class="bi bi-circle-fill text-danger small"></i>
-        <span class="workload-description">{{ t().admin.teachers.badges.overloaded }}</span>
-      </div>
-      <div class="d-flex align-items-center gap-2 small">
-        <i class="bi bi-circle-fill text-success small"></i>
-        <span class="workload-description">{{ t().admin.teachers.workload.free }}</span>
-      </div>
+  <mat-menu #helpMenu="matMenu" xPosition="before">
+    <div class="px-3 py-2" style="max-width: 220px">
+      <h6 class="fw-bold text-primary small mb-2">Entenda a Carga Horária</h6>
+      <p class="extra-small text-muted mb-0 lh-sm">
+        A barra indica o quanto da carga contratual já foi ocupada por alocações em turmas.
+      </p>
     </div>
   </mat-menu>
 </div>

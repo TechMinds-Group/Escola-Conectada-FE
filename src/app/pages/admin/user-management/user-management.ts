@@ -18,8 +18,8 @@ export class UserManagement {
   saveAttempted = signal(false);
 
   userForm: FormGroup = this.fb.group({
-    name: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
+    name: ['', [Validators.required, Validators.maxLength(50)]],
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(200)]],
     role: ['Coordenador', Validators.required],
   });
 

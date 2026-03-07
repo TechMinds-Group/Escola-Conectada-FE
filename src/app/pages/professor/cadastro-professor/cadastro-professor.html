@@ -1,50 +1,70 @@
 <div class="container-fluid py-4 pb-5">
-  <!-- Sticky Header & Action Bar -->
-  <div class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn transition-hover btn-back-header" (click)="onCancel()">
-          <i class="bi bi-arrow-left"></i>
-        </button>
-        <div>
-          <h2 class="fw-bold mb-0 text-dark fs-4">
-            {{ teacherId ? t().admin.teachers.buttons.edit : t().admin.teachers.buttons.new }}
-          </h2>
-          <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
-            {{ teacherId ? 'Editando professor' : 'Cadastro de novo colaborador' }}
-          </p>
+  <header
+    class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header border-bottom border-light"
+  >
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-lg-auto">
+        <div class="d-flex align-items-center gap-3">
+          <button
+            class="btn transition-hover border-0 shadow-sm bg-white rounded-3 p-2"
+            (click)="onCancel()"
+            title="Voltar"
+          >
+            <i class="bi bi-arrow-left fs-5 text-primary"></i>
+          </button>
+          <div>
+            <h2 class="fw-bold mb-0 text-dark fs-4 text-truncate" style="max-width: 300px">
+              {{ teacherId ? t().admin.teachers.buttons.edit : t().admin.teachers.buttons.new }}
+            </h2>
+            <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+              {{ teacherId ? 'Editando professor' : 'Cadastro de novo colaborador' }}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div
-        class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 action-bar-buttons"
-      >
-        @if (teacherId) {
-          <app-button-delete (onClick)="deleteTeacher()"></app-button-delete>
-          <div class="vr mx-2 opacity-25 d-none d-lg-block"></div>
-        }
+      <div class="col-12 col-lg-auto ms-auto">
+        <div class="row g-2 justify-content-end align-items-center">
+          @if (teacherId) {
+            <div class="col-12 col-lg-auto order-3 order-lg-1">
+              <app-button-delete (onClick)="deleteTeacher()" [isSolid]="true"></app-button-delete>
+            </div>
+            <div class="col-auto d-none d-lg-block order-2">
+              <div class="vr opacity-25" style="height: 30px"></div>
+            </div>
+          }
 
-        @if (isViewMode()) {
-          <app-button-edit (onClick)="enableEdit()"></app-button-edit>
-        } @else {
-          <app-button-cancel (onClick)="onCancel()"></app-button-cancel>
-          <app-button-save (onClick)="onSubmit()" [isSubmitting]="isSubmitting()"></app-button-save>
-        }
+          @if (isViewMode()) {
+            <div class="col-12 col-lg-auto order-1 order-lg-3">
+              <app-button-edit (onClick)="enableEdit()"></app-button-edit>
+            </div>
+          } @else {
+            <div class="col-12 col-lg-auto order-2 order-lg-2">
+              <app-button-cancel (onClick)="onCancel()"></app-button-cancel>
+            </div>
+            <div class="col-12 col-lg-auto order-1 order-lg-3">
+              <app-button-save
+                (onClick)="onSubmit()"
+                [isSubmitting]="isSubmitting()"
+              ></app-button-save>
+            </div>
+          }
+        </div>
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- Main Content Area -->
-  <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
-    <!-- Tabs Header -->
-    <ul class="nav nav-pills nav-fill gap-2 p-1 bg-light rounded-3 mb-4 border" role="tablist">
-      <li class="nav-item">
+  <main class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white">
+    <ul
+      class="nav nav-pills flex-column flex-lg-row gap-2 p-1 bg-light rounded-3 mb-4 border"
+      role="tablist"
+    >
+      <li class="nav-item col-12 col-lg-auto flex-lg-fill">
         <button
-          class="nav-link rounded-3 small fw-bold text-secondary"
+          class="nav-link w-100 rounded-3 small fw-bold py-2"
           [class.active]="activeTab() === 'info'"
           [class.text-danger]="isInfoInvalid"
           (click)="setActiveTab('info')"
-          tourAnchor="teacherInfoTab"
         >
           {{ t().admin.teachers.form.tabs.info }}
           @if (isInfoInvalid) {
@@ -52,23 +72,21 @@
           }
         </button>
       </li>
-      <li class="nav-item">
+      <li class="nav-item col-12 col-lg-auto flex-lg-fill">
         <button
-          class="nav-link rounded-3 small fw-bold text-secondary"
+          class="nav-link w-100 rounded-3 small fw-bold py-2"
           [class.active]="activeTab() === 'subjects'"
           (click)="setActiveTab('subjects')"
-          tourAnchor="teacherSubjectsTab"
         >
           {{ t().admin.teachers.form.tabs.subjects }}
         </button>
       </li>
-      <li class="nav-item">
+      <li class="nav-item col-12 col-lg-auto flex-lg-fill">
         <button
-          class="nav-link rounded-3 small fw-bold text-secondary"
+          class="nav-link w-100 rounded-3 small fw-bold py-2"
           [class.active]="activeTab() === 'availability'"
           [class.text-danger]="isAvailabilityInvalid"
           (click)="setActiveTab('availability')"
-          tourAnchor="teacherAvailabilityTab"
         >
           {{ t().admin.teachers.form.tabs.availability }}
           @if (isAvailabilityInvalid) {
@@ -79,127 +97,84 @@
     </ul>
 
     <form [formGroup]="teacherForm">
-      <!-- TAB 1: INFO & CONTRACT -->
       @if (activeTab() === 'info') {
         <div class="animate-in">
-          <div class="row g-4 mb-4">
+          <div class="row g-3">
             <div class="col-12">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                {{ t().admin.teachers.form.name }} <span class="text-danger">*</span>
-              </label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-person text-primary"></i></span>
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
+                >Nome Completo</label
+              >
+              <div class="input-group shadow-xs">
+                <span class="input-group-text">
+                  <i class="bi bi-person text-primary"></i>
+                </span>
                 <input
                   type="text"
                   class="form-control fw-bold py-2"
                   formControlName="name"
-                  maxlength="150"
                   placeholder="Ex: Ricardo Oliveira"
-                  tourAnchor="teacherNameInput"
+                  maxlength="50"
                   [class.is-invalid]="teacherForm.get('name')?.invalid && saveAttempted()"
                 />
               </div>
-              @if (teacherForm.get('name')?.invalid && saveAttempted()) {
-                <div class="text-danger small mt-1">
-                  @if (teacherForm.get('name')?.hasError('required')) {
-                    {{ t().admin.validation.required }}
-                  }
-                  @if (teacherForm.get('name')?.hasError('minlength')) {
-                    {{ t().admin.validation.minLength }}
-                  }
-                </div>
-              }
             </div>
 
-            <div class="col-12 col-md-6">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                {{ t().admin.teachers.form.phone }} <span class="text-danger">*</span>
-              </label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-telephone text-primary"></i></span>
+            <div class="col-12 col-lg-6">
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
+                >Celular</label
+              >
+              <div class="input-group shadow-xs">
+                <span class="input-group-text">
+                  <i class="bi bi-telephone text-primary"></i>
+                </span>
                 <input
                   type="text"
                   class="form-control fw-bold py-2"
                   formControlName="celular"
                   appMask="phone"
-                  maxlength="20"
                   placeholder="(11) 99999-9999"
-                  tourAnchor="teacherCelularInput"
                   [class.is-invalid]="teacherForm.get('celular')?.invalid && saveAttempted()"
                 />
               </div>
-              @if (teacherForm.get('celular')?.invalid && saveAttempted()) {
-                <div class="text-danger small mt-1">
-                  @if (teacherForm.get('celular')?.hasError('required')) {
-                    {{ t().admin.validation.required }}
-                  }
-                  @if (teacherForm.get('celular')?.hasError('minlength')) {
-                    {{ t().admin.validation.minLength }}
-                  }
-                </div>
-              }
             </div>
 
-            <div class="col-12 col-md-6">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">{{
-                t().admin.teachers.form.email
-              }}</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-envelope text-primary"></i></span>
+            <div class="col-12 col-lg-6">
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
+                >E-mail</label
+              >
+              <div class="input-group shadow-xs">
+                <span class="input-group-text">
+                  <i class="bi bi-envelope text-primary"></i>
+                </span>
                 <input
                   type="email"
                   class="form-control fw-bold py-2"
                   formControlName="email"
-                  maxlength="150"
                   placeholder="email@escola.com"
-                  tourAnchor="teacherEmailInput"
-                  [class.is-invalid]="teacherForm.get('email')?.invalid && saveAttempted()"
+                  maxlength="200"
                 />
               </div>
-              @if (teacherForm.get('email')?.invalid && saveAttempted()) {
-                <div class="text-danger small mt-1">
-                  @if (teacherForm.get('email')?.hasError('pattern')) {
-                    {{ t().admin.validation.invalidEmail }}
-                  }
-                  @if (teacherForm.get('email')?.hasError('maxlength')) {
-                    {{ t().admin.validation.maxLength }}
-                  }
-                </div>
-              }
             </div>
-          </div>
 
-          <hr class="my-4 border-dashed opacity-25" />
+            <div class="col-12"><hr class="my-3 border-dashed opacity-25" /></div>
 
-          <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">
-            {{ t().admin.teachers.form.sections.contract }}
-          </h6>
-
-          <div class="row g-4">
             <div class="col-12 col-lg-8">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                {{ t().admin.teachers.form.mainSubject }} <span class="text-danger">*</span>
-              </label>
-              <div class="d-flex align-items-start gap-2">
-                <div class="flex-grow-1">
-                  <select
-                    class="form-select fw-bold py-2"
-                    formControlName="mainSubjectId"
-                    tourAnchor="teacherMainSubjectSelect"
-                    [class.is-invalid]="
-                      teacherForm.get('mainSubjectId')?.invalid && saveAttempted()
-                    "
-                  >
-                    <option [ngValue]="null">Selecione uma disciplina...</option>
-                    @for (subject of availableSubjects(); track subject.id) {
-                      <option [value]="subject.id">{{ subject.name }}</option>
-                    }
-                  </select>
-                </div>
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
+                >Disciplina Principal</label
+              >
+              <div class="d-flex gap-2">
+                <select
+                  class="form-select fw-bold py-2 rounded-3 shadow-xs"
+                  formControlName="mainSubjectId"
+                >
+                  <option [ngValue]="null">Selecione...</option>
+                  @for (subject of availableSubjects(); track subject.id) {
+                    <option [value]="subject.id">{{ subject.name }}</option>
+                  }
+                </select>
                 <button
-                  class="btn btn-outline-primary rounded-3 d-flex align-items-center justify-content-center btn-height-40 flex-shrink-0"
                   type="button"
-                  title="Gerenciar Disciplinas"
+                  class="btn btn-outline-primary rounded-3 shadow-sm btn-gear-standard flex-shrink-0 d-flex align-items-center justify-content-center p-0"
                   (click)="openSubjectManager()"
                   [disabled]="isViewMode()"
                 >
@@ -209,250 +184,119 @@
             </div>
 
             <div class="col-12 col-lg-4">
-              <label
-                class="form-label small fw-bold text-muted text-uppercase tracking-wider d-flex align-items-center gap-2"
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
+                >Carga Horária Contratual</label
               >
-                {{ t().admin.teachers.form.workload }}
-                <button
-                  class="btn btn-link p-0 text-muted border-0 text-decoration-none"
-                  [matMenuTriggerFor]="workloadHelp"
-                  (click)="$event.stopPropagation()"
-                >
-                  <i class="bi bi-question-circle-fill"></i>
-                </button>
-              </label>
-              <div class="input-group">
-                <span class="input-group-text"
-                  ><i class="bi bi-clock-history text-primary"></i
-                ></span>
+              <div class="input-group shadow-xs">
+                <span class="input-group-text">
+                  <i class="bi bi-clock-history text-primary"></i>
+                </span>
                 <input
                   type="number"
                   class="form-control fw-bold py-2"
                   formControlName="contractualWorkload"
-                  max="999"
-                  oninput="if (this.value.length > 3) this.value = this.value.slice(0, 3);"
-                  tourAnchor="teacherWorkloadInput"
                 />
-                <span class="input-group-text small">horas</span>
+                <span class="input-group-text bg-light rounded-end-3 small fw-bold">horas</span>
+              </div>
+            </div>
+
+            <div class="col-12 mt-3">
+              <div
+                class="p-3 rounded-4 bg-primary-subtle border-0 d-flex align-items-center gap-3 estimate-box-container"
+              >
+                <div
+                  class="bg-white text-primary d-flex align-items-center justify-content-center shadow-sm estimate-icon-box flex-shrink-0"
+                  style="width: 44px; height: 44px"
+                >
+                  <i class="bi bi-lightning-charge-fill fs-5"></i>
+                </div>
+                <div>
+                  <p class="mb-0 small fw-bold text-primary estimate-title">
+                    Estimativa de Hora-Atividade (1/3)
+                  </p>
+                  <p class="mb-0 extra-small text-primary-emphasis opacity-75 estimate-description">
+                    Aproximadamente <strong>{{ activityHours() }}h</strong> para planejamento e
+                    reuniões pedagógicas.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-
-          <div
-            class="mt-4 p-3 rounded-4 bg-primary-subtle border-0 d-flex align-items-center gap-3"
-          >
-            <div
-              class="icon-container bg-white text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm"
-              style="width: 40px; height: 40px"
-            >
-              <i class="bi bi-info-circle fs-5"></i>
-            </div>
-            <div>
-              <p class="mb-0 small fw-bold text-primary">Hora-Atividade (1/3)</p>
-              <p class="mb-0 extra-small text-primary opacity-75">
-                <strong>{{ activityHours() }}h</strong> reservadas para planejamento e reuniões.
-              </p>
-            </div>
-          </div>
         </div>
-
-        <mat-menu #workloadHelp="matMenu" xPosition="after">
-          <div class="px-3 py-2" style="max-width: 250px" (click)="$event.stopPropagation()">
-            <p class="small text-muted mb-0 text-wrap lh-sm">
-              {{ t().admin.teachers.form.hints.workloadHelp }}
-            </p>
-          </div>
-        </mat-menu>
       }
 
-      <!-- TAB 2: SUBJECTS & ALLOCATIONS -->
       @if (activeTab() === 'subjects') {
         <div class="animate-in">
-          <div class="mb-4">
-            <label
-              class="form-label small fw-bold text-muted text-uppercase tracking-wider d-block mb-3"
-            >
-              {{ t().admin.teachers.form.sections.extraSubjects }}
-            </label>
-            <p class="small text-muted mb-4 opacity-75">
-              {{ t().admin.teachers.form.hints.extraSubjects }}
-            </p>
-
-            <div class="d-flex flex-wrap gap-2" tourAnchor="teacherExtraSubjectsOptions">
-              @for (subject of availableSubjects(); track subject.id) {
-                <button
-                  type="button"
-                  class="btn btn-sm rounded-2 transition-hover border px-3 py-2"
-                  [class.btn-primary]="isSubjectSelected(subject.id)"
-                  [class.btn-white]="!isSubjectSelected(subject.id)"
-                  [class.bg-white]="!isSubjectSelected(subject.id)"
-                  [class.text-muted]="!isSubjectSelected(subject.id)"
-                  [class.opacity-50]="subject.id === teacherForm.get('mainSubjectId')?.value"
-                  [disabled]="
-                    isViewMode() || subject.id === teacherForm.get('mainSubjectId')?.value
-                  "
-                  (click)="toggleSecondarySubject(subject.id)"
-                >
-                  {{ subject.name }}
-                  @if (isSubjectSelected(subject.id)) {
-                    <i class="bi bi-check-lg ms-1"></i>
-                  }
-                </button>
-              }
-            </div>
-          </div>
-
-          <hr class="my-4 border-dashed opacity-25" />
-
-          <div>
-            <label
-              class="form-label small fw-bold text-muted text-uppercase tracking-wider d-block mb-3"
-            >
-              {{ t().admin.teachers.form.sections.allocations }}
-            </label>
-
-            @if (currentAllocations().length === 0) {
-              <div
-                class="text-center py-5 text-muted bg-light rounded-4 border-dashed border-2 opacity-75"
+          <label class="form-label small fw-bold text-muted text-uppercase mb-3"
+            >Habilitações e Disciplinas Extras</label
+          >
+          <div class="d-flex flex-wrap gap-2">
+            @for (subject of availableSubjects(); track subject.id) {
+              <button
+                type="button"
+                class="btn btn-sm rounded-pill px-3 py-2 border transition-hover"
+                [class.btn-primary]="isSubjectSelected(subject.id)"
+                [class.bg-white]="!isSubjectSelected(subject.id)"
+                [disabled]="isViewMode() || subject.id === teacherForm.get('mainSubjectId')?.value"
+                (click)="toggleSecondarySubject(subject.id)"
               >
-                <i class="bi bi-calendar-x fs-1 opacity-25 d-block mb-2"></i>
-                <p class="mb-0 fw-medium small">
-                  {{ t().admin.teachers.form.hints.noAllocations }}
-                </p>
-              </div>
-            } @else {
-              <div class="table-responsive rounded-4 border bg-white shadow-xs">
-                <table class="table table-hover align-middle mb-0">
-                  <thead class="bg-light bg-opacity-50">
-                    <tr class="small text-uppercase fw-bold text-muted">
-                      <th class="ps-4 border-0 py-3">Turma</th>
-                      <th class="border-0 py-3">Disciplina</th>
-                      <th class="text-center border-0 py-3">Dia / Horário</th>
-                      <th class="text-center border-0 py-3">Carga</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (alloc of currentAllocations(); track $index) {
-                      <tr class="border-bottom-light">
-                        <td class="ps-4 py-3 fw-bold turma-cell">{{ alloc.turmaNome }}</td>
-                        <td class="py-3 fw-medium">{{ alloc.disciplinaNome }}</td>
-                        <td class="text-center py-3">
-                          <span class="badge bg-light text-dark border fw-normal">
-                            {{ getDayName(alloc.diaDaSemana) }} - {{ alloc.ordemAula }}ª Aula
-                          </span>
-                        </td>
-                        <td class="text-center py-3">
-                          <span
-                            class="badge rounded-pill bg-primary-subtle text-primary border-0 px-3 py-1"
-                          >
-                            {{ alloc.cargaHoraria }}h
-                          </span>
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
+                {{ subject.name }}
+                @if (isSubjectSelected(subject.id)) {
+                  <i class="bi bi-check-lg ms-1"></i>
+                }
+              </button>
             }
           </div>
         </div>
       }
 
-      <!-- TAB 3: AVAILABILITY GRID -->
       @if (activeTab() === 'availability') {
         <div class="animate-in">
-          <div class="d-flex align-items-center gap-3 mb-4">
-            <div
-              class="icon-container bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center availability-icon-box"
-              style="width: 40px; height: 40px"
-            >
-              <i class="bi bi-grid-3x3 fs-5"></i>
-            </div>
-            <div>
-              <h6 class="text-uppercase text-dark fw-bold small mb-0 tracking-widest">
-                {{ t().admin.teachers.form.sections.availability }}
-              </h6>
-              <p class="extra-small text-muted mb-0 opacity-75">
-                {{ t().admin.teachers.form.hints.availability }}
-              </p>
-            </div>
-          </div>
-
-          <div
-            class="availability-grid overflow-hidden rounded-4 border shadow-xs bg-white"
-            tourAnchor="teacherAvailabilityGrid"
-          >
-            <!-- Header Row -->
-            <div class="d-flex bg-light border-bottom">
-              <div class="grid-label-width"></div>
-              @for (day of ['Seg', 'Ter', 'Qua', 'Qui', 'Sex']; track day) {
-                <div
-                  class="flex-fill text-center py-3 small fw-bold text-muted text-uppercase tracking-wider border-start"
-                >
-                  {{ day }}
+          <div class="table-responsive rounded-4 border shadow-sm">
+            <div class="availability-grid bg-white">
+              <div class="d-flex bg-light border-bottom fw-bold text-muted small">
+                <div class="p-3 border-end" style="width: 80px">Turno</div>
+                @for (day of ['Seg', 'Ter', 'Qua', 'Qui', 'Sex']; track day) {
+                  <div class="flex-fill text-center py-3 border-end">{{ day }}</div>
+                }
+              </div>
+              @for (shiftKey of shiftKeys; track shiftKey; let shiftIdx = $index) {
+                <div class="d-flex border-bottom last-child-border-0 align-items-stretch">
+                  <div
+                    class="bg-light p-2 d-flex align-items-center justify-content-center text-center fw-bold small border-end"
+                    style="width: 80px"
+                  >
+                    {{ t().common.shifts[shiftKey] }}
+                  </div>
+                  @for (day of [0, 1, 2, 3, 4]; track day) {
+                    <div
+                      class="flex-fill border-end d-flex align-items-center justify-content-center cursor-pointer transition-hover"
+                      style="min-height: 60px"
+                      [class.bg-primary-subtle]="availabilityGrid()[day][shiftIdx]"
+                      (click)="toggleAvailability(day, shiftIdx)"
+                    >
+                      @if (availabilityGrid()[day][shiftIdx]) {
+                        <i class="bi bi-check-circle-fill text-primary fs-4"></i>
+                      } @else {
+                        <i class="bi bi-plus text-muted opacity-25 fs-4"></i>
+                      }
+                    </div>
+                  }
                 </div>
               }
             </div>
-
-            <!-- Rows for Shifts -->
-            @for (shiftKey of shiftKeys; track shiftKey; let shiftIdx = $index) {
-              <div class="d-flex align-items-stretch border-bottom last-child-border-0">
-                <!-- Shift Label -->
-                <div
-                  class="grid-label-width d-flex align-items-center justify-content-center bg-light small fw-bold text-muted text-center px-2"
-                >
-                  {{ t().common.shifts[shiftKey] }}
-                </div>
-
-                <!-- Columns for Days -->
-                @for (day of [0, 1, 2, 3, 4]; track day) {
-                  <div
-                    class="flex-fill grid-cell-height border-start transition-hover cursor-pointer d-flex align-items-center justify-content-center"
-                    [class.bg-primary-subtle]="availabilityGrid()[day][shiftIdx]"
-                    [class.text-primary]="availabilityGrid()[day][shiftIdx]"
-                    (click)="toggleAvailability(day, shiftIdx)"
-                  >
-                    @if (availabilityGrid()[day][shiftIdx]) {
-                      <i class="bi bi-check-circle-fill fs-4 animate-in"></i>
-                    } @else {
-                      <i class="bi bi-plus-lg opacity-10 fs-5 transition-hover-show"></i>
-                    }
-                  </div>
-                }
-              </div>
-            }
           </div>
-
-          @if (isAvailabilityInvalid) {
-            <div
-              class="mt-3 p-3 rounded-4 bg-danger-subtle border-0 d-flex align-items-center gap-2 animate-in"
-            >
-              <i class="bi bi-exclamation-triangle-fill text-danger"></i>
-              <span class="small fw-bold text-danger"
-                >Selecione pelo menos um horário disponível.</span
-              >
-            </div>
-          }
         </div>
       }
     </form>
-  </div>
+  </main>
 </div>
 
-<!-- ════════════════════════════════════════════
-     Modal: Gerenciar Disciplinas
-     ════════════════════════════════════════════ -->
 <app-modal-manage-list
   #subjectModal
   [isOpen]="showSubjectManager()"
   title="Gerenciar Disciplinas"
-  subtitle="Configure as disciplinas disponíveis para os professores"
-  labelNew="Nova Disciplina"
-  labelEdit="Editar Disciplina"
-  inputPlaceholder="Ex: Matemática"
   [items]="schoolData.subjects()"
-  emptyMessage="Nenhuma disciplina cadastrada."
-  emptyIcon="bi-journal-check"
   (close)="closeSubjectManager()"
   (onSave)="saveSubject($event)"
   (onDelete)="deleteSubject($event)"

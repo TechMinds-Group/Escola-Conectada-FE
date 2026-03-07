@@ -5,19 +5,25 @@ import { CommonModule } from '@angular/common';
   selector: 'app-button-save',
   standalone: true,
   imports: [CommonModule],
+  host: { class: 'w-100 d-block d-lg-inline-block' },
   template: `
     <button
       [type]="type"
-      class="btn btn-success px-4 fw-bold shadow-sm transition-hover d-flex align-items-center gap-2 text-white"
+      class="btn btn-success w-100 d-flex align-items-center justify-content-center py-2 rounded-3 shadow-sm fw-bold transition-hover gap-2 text-white"
       [disabled]="disabled || isSubmitting"
       (click)="onClick.emit($event)"
     >
-      <ng-container *ngIf="isSubmitting; else iconTemplate">
-        <span class="spinner-border spinner-border-sm"></span>
-      </ng-container>
-      <ng-template #iconTemplate>
-        <i class="bi bi-check2-circle fs-5"></i>
-      </ng-template>
+      <div
+        style="width: 20px; height: 20px;"
+        class="d-flex align-items-center justify-content-center"
+      >
+        <ng-container *ngIf="isSubmitting; else iconTemplate">
+          <span class="spinner-border spinner-border-sm" style="width: 1rem; height: 1rem;"></span>
+        </ng-container>
+        <ng-template #iconTemplate>
+          <i class="bi bi-check2-circle fs-5"></i>
+        </ng-template>
+      </div>
       {{ label }}
     </button>
   `,

@@ -21,8 +21,11 @@ export class UserProfile {
 
   // Forms
   personalForm = this.fb.group({
-    name: [this.user?.nome || '', Validators.required],
-    email: [this.user?.email || '', [Validators.required, Validators.email]],
+    name: [this.user?.nome || '', [Validators.required, Validators.maxLength(50)]],
+    email: [
+      this.user?.email || '',
+      [Validators.required, Validators.email, Validators.maxLength(200)],
+    ],
     phone: [''],
     role: [{ value: this.user?.roles?.[0] || 'Usuário', disabled: true }],
   });
