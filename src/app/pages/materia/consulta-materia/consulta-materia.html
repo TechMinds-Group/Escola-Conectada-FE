@@ -1,181 +1,220 @@
 <div class="container-fluid py-4 pb-5">
   <!-- Header -->
-  <div
-    class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
-  >
-    <div>
-      <h2 class="fw-bold mb-0 text-primary">{{ t().admin.subjects.title }}</h2>
-      <p class="text-muted mb-0 small">{{ t().admin.subjects.subtitle }}</p>
-    </div>
-
-    <!-- Actions -->
-    <div class="d-flex align-items-center gap-3">
-      <button
-        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold transition-hover"
-        (click)="addSubject()"
-        id="subjects-new-btn"
-        tourAnchor="subjectsNewBtnDesktop"
-      >
-        <i class="bi bi-plus-lg fs-5"></i>
-        {{ t().admin.subjects.buttons.new }}
-      </button>
-    </div>
-
-    <!-- Mobile FAB -->
-    <div
-      class="d-md-none position-fixed bottom-0 end-0 m-4 z-3"
-      style="margin-bottom: 5rem !important"
-    >
-      <button
-        class="btn btn-primary rounded-circle shadow-lg p-0 d-flex align-items-center justify-content-center transition-hover"
-        style="width: 56px; height: 56px"
-        (click)="addSubject()"
-        tourAnchor="subjectsNewBtnMobile"
-      >
-        <i class="bi bi-plus-lg fs-3 text-white"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- Filters & Search -->
-  <div class="row g-3 mb-4">
-    <div class="col-12 col-md-4">
-      <div class="input-group shadow-sm rounded-3 overflow-hidden border">
-        <span class="input-group-text">
-          <i class="bi bi-search text-muted"></i>
-        </span>
-        <input
-          type="text"
-          class="form-control border-0 py-2 ps-2"
-          [placeholder]="'Filtrar por nome...'"
-          [ngModel]="searchQuery()"
-          (ngModelChange)="searchQuery.set($event)"
-        />
+  <header class="mb-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-auto">
+        <h2 class="fw-bold mb-0 text-primary fs-3">Matérias</h2>
+        <p class="text-muted mb-0 small opacity-75">Gestão da base curricular</p>
       </div>
-    </div>
-    <div class="col-12 col-md-3">
-      <div class="input-group shadow-sm rounded-3 overflow-hidden border">
-        <span class="input-group-text bg-white border-0">
-          <i class="bi bi-filter text-muted"></i>
-        </span>
-        <select
-          class="form-select border-0 py-2"
-          [ngModel]="filterCategory()"
-          (ngModelChange)="filterCategory.set($event)"
+
+      <div class="col-12 col-md-auto ms-auto">
+        <button
+          class="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-4 py-2 shadow-sm fw-bold transition-hover rounded-3 w-100"
+          (click)="navigateToNew()"
         >
-          <option value="Todas">Todas as Categorias</option>
-          <option value="Base Comum">Base Comum</option>
-          <option value="Técnica">Técnica</option>
-          <option value="Eletiva">Eletiva</option>
-        </select>
+          <i class="bi bi-plus-lg fs-5"></i>
+          Nova Matéria
+        </button>
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- WEB VIEW: PREMIUM FRAMELESS TABLE -->
-  <div class="card border-0 shadow-sm rounded-4 overflow-hidden d-none d-md-block bg-white">
-    <div class="table-responsive">
-      <table class="table align-middle mb-0 table-hover">
-        <thead class="bg-light">
-          <tr>
-            <th
-              class="border-0 ps-4 py-3 text-muted small fw-bold text-uppercase"
-              style="width: 45%"
-              tourAnchor="subjectsTableColName"
-            >
-              {{ t().admin.subjects.table.name }}
-            </th>
-            <th
-              class="border-0 py-3 text-muted small fw-bold text-uppercase"
-              style="width: 35%"
-              tourAnchor="subjectsTableColAxis"
-            >
-              {{ t().admin.subjects.table.axis }}
-            </th>
-            <th
-              class="border-0 py-3 text-muted small fw-bold text-uppercase text-center"
-              style="width: 20%"
-            >
-              Categoria
-            </th>
-          </tr>
-        </thead>
-        <tbody class="border-top-0">
-          @for (subject of subjects(); track subject.id) {
-            <tr
-              class="cursor-pointer transition-hover border-bottom-light"
-              (click)="editSubject(subject.id)"
-            >
-              <td class="ps-4 py-3">
-                <div class="d-flex align-items-center gap-3">
-                  <div
-                    class="d-flex align-items-center justify-content-center rounded-3 p-2"
-                    [style.background-color]="subject.color + '20'"
-                    [style.color]="subject.color"
-                    style="width: 40px; height: 40px"
-                  >
-                    <i class="bi bi-book fs-5"></i>
-                  </div>
-                  <div>
-                    <div class="fw-bold text-dark">{{ subject.name }}</div>
-                  </div>
-                </div>
-              </td>
-              <td class="py-3 text-muted small">{{ subject.axis }}</td>
-              <td class="py-3 text-center">
-                <span class="badge rounded-pill bg-light text-secondary border-0 px-3 py-2">
-                  {{ subject.category }}
-                </span>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="3" class="text-center py-5 text-muted">
-                <i class="bi bi-inbox fs-2 d-block mb-2 opacity-50"></i>
-                {{ t().admin.subjects.table.empty }}
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+  <!-- Filters Button Row -->
+  <div class="row mb-3 animate-in">
+    <div class="col-12 col-md-auto ms-auto">
+      <button
+        class="btn d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 transition-hover border shadow-xs w-100"
+        [class.btn-primary]="showFilters()"
+        [class.btn-light]="!showFilters()"
+        (click)="toggleFilters()"
+      >
+        <i
+          class="bi text-dark"
+          [class.bi-funnel]="!showFilters()"
+          [class.bi-chevron-up]="showFilters()"
+        ></i>
+        <span class="fw-bold">Filtros</span>
+        @if (appliedFilters().length > 0) {
+          <span
+            class="badge rounded-circle bg-primary p-1 ms-1"
+            style="width: 8px; height: 8px"
+          ></span>
+        }
+      </button>
     </div>
   </div>
 
-  <!-- MOBILE VIEW: PREMIUM CARDS -->
+  <!-- Retractable Filter Panel -->
+  @if (showFilters()) {
+    <section class="filters-panel mb-4 animate-in">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <tm-text
+                [formControl]="filterName"
+                placeholder="Ex: Matemática, Física..."
+                icon="bi-search"
+                label="Nome/Número"
+              ></tm-text>
+            </div>
+            <div class="col-12 col-md-4">
+              <tm-select
+                [formControl]="filterArea"
+                [options]="areaOptions()"
+                placeholder="Área"
+                icon="bi-layers"
+                label="Área do Conhecimento"
+              ></tm-select>
+            </div>
+            <div class="col-12 col-md-4">
+              <tm-select
+                [formControl]="filterStatus"
+                [options]="statusOptions"
+                placeholder="Status"
+                icon="bi-check-circle"
+                label="Status"
+              ></tm-select>
+            </div>
+          </div>
+
+          <div class="pt-3 mt-4 border-top d-flex justify-content-end gap-2">
+            <button
+              class="btn btn-light rounded-3 px-4 py-2 fw-bold text-muted transition-hover border"
+              (click)="clearFilters()"
+            >
+              Limpar
+            </button>
+            <button
+              class="btn btn-primary rounded-3 px-4 py-2 fw-bold transition-hover shadow-sm"
+              (click)="toggleFilters()"
+            >
+              Aplicar Filtros
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Active Filters Badges -->
+  @if (appliedFilters().length > 0) {
+    <div class="d-flex flex-wrap gap-2 mb-4 animate-in">
+      @for (filter of appliedFilters(); track filter.key) {
+        <span
+          class="badge bg-primary-subtle text-primary border-0 px-3 py-2 rounded-pill d-flex align-items-center gap-2"
+        >
+          {{ filter.label }}
+          <i class="bi bi-x-lg cursor-pointer" (click)="removeFilter(filter.key)"></i>
+        </span>
+      }
+    </div>
+  }
+
+  <!-- Desktop Table (tm-table) -->
+  <main class="animate-in d-none d-md-block">
+    <tm-table
+      [cols]="[
+        {
+          header: 'Cor',
+          template: colorTpl,
+          width: '80px',
+          class: 'text-center',
+          headerClass: 'text-center',
+        },
+        { header: 'Nome da Matéria', template: nameTpl, width: '45%' },
+        { header: 'Área', key: 'axis', width: '35%' },
+        { header: 'Status', template: statusTpl, width: '15%' },
+      ]"
+      [data]="subjects()"
+      (rowClick)="navigateToEdit($event.id)"
+    ></tm-table>
+
+    <!-- Templates for Table Columns -->
+    <ng-template #colorTpl let-subject>
+      <div class="d-flex justify-content-center">
+        <div
+          class="rounded-circle shadow-sm"
+          [style.background-color]="subject.color"
+          style="width: 12px; height: 12px; border: 2px solid white"
+          [title]="subject.color"
+        ></div>
+      </div>
+    </ng-template>
+
+    <ng-template #nameTpl let-subject>
+      <div class="d-flex align-items-center gap-3 ps-3 text-start">
+        <div
+          class="rounded-3 d-flex align-items-center justify-content-center subject-icon"
+          style="width: 40px; height: 40px"
+        >
+          <i class="bi bi-book fs-5"></i>
+        </div>
+        <div>
+          <div class="fw-bold text-dark lh-1 mb-1">{{ subject.name }}</div>
+          <div class="text-muted extra-small text-uppercase tracking-wider opacity-75">
+            {{ subject.category }}
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #statusTpl let-subject>
+      <div class="text-start">
+        <span class="badge bg-success-subtle text-success border-0 px-3 py-1 rounded-pill">
+          Ativo
+        </span>
+      </div>
+    </ng-template>
+  </main>
+
+  <!-- Mobile View: Cards -->
   <div class="d-md-none d-flex flex-column gap-3">
     @for (subject of subjects(); track subject.id) {
       <div
-        class="card border-0 shadow-sm rounded-4 p-3 bg-white transition-hover position-relative"
-        (click)="editSubject(subject.id)"
+        class="card border-0 shadow-sm rounded-4 p-3 animate-in"
+        (click)="navigateToEdit(subject.id)"
       >
-        <div class="d-flex align-items-start gap-3 mb-3">
-          <div
-            class="d-flex align-items-center justify-content-center rounded-3 p-2 flex-shrink-0"
-            [style.background-color]="subject.color + '20'"
-            [style.color]="subject.color"
-            style="width: 48px; height: 48px"
-          >
-            <i class="bi bi-book fs-4"></i>
-          </div>
-          <div class="flex-grow-1 min-w-0">
-            <h6 class="fw-bold text-dark mb-0 text-truncate">{{ subject.name }}</h6>
-            <div class="xx-small text-muted text-uppercase fw-semibold mt-1">
-              {{ subject.axis }}
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex align-items-center gap-3">
+            <div
+              class="subject-icon rounded-3 d-flex align-items-center justify-content-center flex-shrink-0 position-relative"
+              style="width: 48px; height: 48px"
+            >
+              <i class="bi bi-book fs-4"></i>
+              <div
+                class="position-absolute bottom-0 end-0 rounded-circle border border-white"
+                [style.background-color]="subject.color"
+                style="width: 14px; height: 14px; margin: -2px"
+              ></div>
+            </div>
+            <div>
+              <h6 class="fw-bold text-dark mb-0 text-truncate" style="max-width: 150px">
+                {{ subject.name }}
+              </h6>
+              <div class="extra-small text-muted text-uppercase fw-bold">{{ subject.axis }}</div>
             </div>
           </div>
+          <span
+            class="badge bg-success-subtle text-success border-0 px-2 py-1 rounded-pill smaller"
+          >
+            Ativo
+          </span>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center pt-3 border-top border-light">
-          <div class="small text-muted">Categoria</div>
-          <span class="badge rounded-pill bg-light text-secondary border-0 px-3 py-2 small">
-            {{ subject.category }}
-          </span>
+        <div
+          class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-light"
+        >
+          <div class="d-flex align-items-center gap-2 text-muted small">
+            <i class="bi bi-tag"></i>
+            <span class="fw-bold">{{ subject.category }}</span>
+          </div>
         </div>
       </div>
     } @empty {
-      <div class="text-center py-5 text-muted">
-        <i class="bi bi-inbox fs-2 d-block mb-2 opacity-50"></i>
-        <p>{{ t().admin.subjects.table.empty }}</p>
+      <div class="text-center py-5 text-muted bg-white rounded-4 shadow-sm border">
+        <i class="bi bi-book fs-1 d-block mb-3 opacity-25"></i>
+        <p class="mb-0">Nenhuma matéria encontrada</p>
       </div>
     }
   </div>

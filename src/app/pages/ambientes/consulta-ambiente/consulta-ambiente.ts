@@ -8,7 +8,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SchoolDataService, SchoolRoom } from '../../../core/services/school-data';
 import { AmbienteService } from '../../../core/services/ambiente.service';
@@ -18,11 +18,24 @@ import { MatIconModule } from '@angular/material/icon';
 import { LanguageService } from '../../../core/services/language.service';
 import { TranslationService } from '../../../core/services/translation.service';
 import { ConfirmationService } from '../../../core/services/confirmation.service';
+import { TableComponent } from '../../../core/components/table/table.component';
+import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
+import { SelectComponent } from '../../../core/components/select/select.component';
 
 @Component({
   selector: 'app-consulta-ambiente',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatMenuModule, MatButtonModule, MatIconModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatMenuModule,
+    MatButtonModule,
+    MatIconModule,
+    TableComponent,
+    TextInputComponent,
+    SelectComponent,
+  ],
   templateUrl: './consulta-ambiente.html',
   styleUrl: './consulta-ambiente.scss',
 })
@@ -36,16 +49,26 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
   private confirmationService = inject(ConfirmationService);
   t = this.translation.dictionary;
 
-  // Filters
-  filterType = signal<string>('Todos');
+  // Filters State
+  showFilters = signal(false);
+  filterName = new FormControl('');
+  filterType = new FormControl('Todos');
+  filterStatus = new FormControl('Todos');
+
+  appliedFilters = signal<any[]>([]);
 
   // Data
   roomsList = signal<SchoolRoom[]>([]);
+
   rooms = computed(() => {
     let list = this.roomsList();
-    const type = this.filterType();
+    const name = this.filterName.value?.toLowerCase();
+    const type = this.filterType.value;
 
-    if (type !== 'Todos') {
+    if (name) {
+      list = list.filter((r) => r.name.toLowerCase().includes(name));
+    }
+    if (type && type !== 'Todos') {
       list = list.filter((r) => r.type === type);
     }
     return list;
@@ -69,6 +92,37 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
       },
       error: (err) => console.error('Erro ao carregar ambientes:', err),
     });
+  }
+
+  toggleFilters() {
+    this.showFilters.set(!this.showFilters());
+  }
+
+  applyFilters() {
+    const filters = [];
+    if (this.filterName.value)
+      filters.push({ key: 'name', label: `Nome: ${this.filterName.value}` });
+    if (this.filterType.value !== 'Todos')
+      filters.push({ key: 'type', label: `Tipo: ${this.filterType.value}` });
+    if (this.filterStatus.value !== 'Todos')
+      filters.push({ key: 'status', label: `Status: ${this.filterStatus.value}` });
+
+    this.appliedFilters.set(filters);
+    this.showFilters.set(false);
+  }
+
+  clearFilters() {
+    this.filterName.setValue('');
+    this.filterType.setValue('Todos');
+    this.filterStatus.setValue('Todos');
+    this.appliedFilters.set([]);
+  }
+
+  removeFilter(key: string) {
+    if (key === 'name') this.filterName.setValue('');
+    if (key === 'type') this.filterType.setValue('Todos');
+    if (key === 'status') this.filterStatus.setValue('Todos');
+    this.applyFilters();
   }
 
   getResourceLabel(res: string): string {
@@ -98,6 +152,20 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
       });
     }
   }
+
+  // Options for selects
+  typeOptions = computed(() => {
+    return [
+      { value: 'Todos', label: 'Todos os Tipos' },
+      ...this.schoolData.roomTypes().map((t) => ({ value: t.name, label: t.name })),
+    ];
+  });
+
+  statusOptions = [
+    { value: 'Todos', label: 'Todos os Status' },
+    { value: 'Ativo', label: 'Ativo' },
+    { value: 'Inativo', label: 'Inativo' },
+  ];
 
   completeTutorial() {
     this.ambienteService.completeTutorial();

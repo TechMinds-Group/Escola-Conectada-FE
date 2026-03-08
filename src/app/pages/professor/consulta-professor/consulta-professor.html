@@ -236,23 +236,36 @@
             ></span>
           </div>
           <div class="flex-grow-1">
-            <h6 class="fw-bold text-dark mb-0">{{ teacher.name }}</h6>
+            <h6 class="fw-bold text-dark mb-0 text-truncate" style="max-width: 150px">
+              {{ teacher.name }}
+            </h6>
             <div class="extra-small text-muted text-uppercase fw-bold">
-              {{ teacher.mainSubject?.name }}
+              {{ teacher.mainSubject?.name || 'Sem disciplina' }}
             </div>
           </div>
+          <span
+            class="badge rounded-pill px-3 py-1 border-0 extra-small fw-bold bg-primary-subtle text-primary"
+          >
+            {{ teacher.contractualWorkload }}h
+          </span>
         </div>
 
         <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
-          <div class="small fw-bold" [class.text-danger]="teacher.isOverloaded">
+          <div
+            class="small fw-bold"
+            [class.text-danger]="teacher.isOverloaded"
+            [class.text-muted]="!teacher.isOverloaded"
+          >
             <i class="bi bi-clock-history me-1"></i> {{ teacher.usagePercentage }}% Uso
           </div>
           <span
-            class="badge rounded-pill px-3 py-1 border-0 extra-small fw-bold d-inline-flex align-items-center justify-content-center"
+            class="badge rounded-pill px-3 py-1 border extra-small fw-bold d-inline-flex align-items-center justify-content-center"
             [class.bg-danger-subtle]="teacher.isOverloaded"
             [class.text-danger]="teacher.isOverloaded"
+            [class.border-danger-subtle]="teacher.isOverloaded"
             [class.bg-success-subtle]="!teacher.isOverloaded"
             [class.text-success]="!teacher.isOverloaded"
+            [class.border-success-subtle]="!teacher.isOverloaded"
           >
             {{ teacher.isOverloaded ? 'Sobrecarga' : 'Disponível' }}
           </span>

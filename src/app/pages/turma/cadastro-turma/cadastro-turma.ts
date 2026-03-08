@@ -470,7 +470,6 @@ export class CadastroTurma implements OnInit {
         next: (turma) => {
           this.classForm.patchValue({
             nome: turma.nome,
-            ano: turma.ano,
             turno: turma.turno,
             matrizId: turma.matrizId,
             salaId: turma.salaId || null,
@@ -489,7 +488,6 @@ export class CadastroTurma implements OnInit {
           this.classForm.patchValue({
             capacidadeMaxima: turma.capacidadeMaxima || 30,
             professorRegenteId: turma.professorRegenteId || null,
-            unidadeId: turma.unidadeId || null,
           });
         },
       });
@@ -499,10 +497,6 @@ export class CadastroTurma implements OnInit {
   onEditClick() {
     this.isViewMode.set(false);
     this.classForm.enable({ emitEvent: false });
-    if (this.editingId()) {
-      // Bloquear apenas os campos que realmente não podem mudar (Vigência é auto-calculada)
-      this.classForm.get('ano')?.disable();
-    }
   }
 
   onSubmit() {
@@ -606,7 +600,6 @@ export class CadastroTurma implements OnInit {
           next: (turma) => {
             this.classForm.patchValue({
               nome: turma.nome,
-              ano: turma.ano,
               turno: turma.turno,
               matrizId: turma.matrizId,
               salaId: turma.salaId || null,

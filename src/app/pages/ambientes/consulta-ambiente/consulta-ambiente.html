@@ -1,173 +1,198 @@
 <div class="container-fluid py-4 pb-5">
   <!-- Header -->
-  <div
-    class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
-  >
-    <div>
-      <h2 class="fw-bold mb-0 text-primary">{{ t().admin.rooms.title }}</h2>
-      <p class="text-muted mb-0 small">{{ t().admin.rooms.subtitle }}</p>
+  <header class="mb-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-auto">
+        <h2 class="fw-bold mb-0 text-primary fs-3">Ambientes</h2>
+        <p class="text-muted mb-0 small opacity-75">Gerenciamento de salas e espaços</p>
+      </div>
+
+      <div class="col-12 col-md-auto ms-auto">
+        <button
+          class="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-4 py-2 shadow-sm fw-bold transition-hover rounded-3 w-100"
+          (click)="navigateToNew()"
+        >
+          <i class="bi bi-plus-lg fs-5"></i>
+          Novo Ambiente
+        </button>
+      </div>
     </div>
+  </header>
 
-    <!-- Actions -->
-    <button
-      class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold"
-      (click)="navigateToNew()"
-      id="rooms-new-btn"
-      tourAnchor="roomsNewBtnDesktop"
-    >
-      <i class="bi bi-plus-lg fs-5"></i>
-      {{ t().admin.rooms.buttons.new }}
-    </button>
-
-    <!-- Mobile FAB -->
-    <div
-      class="d-md-none position-fixed bottom-0 end-0 m-4 z-3"
-      style="margin-bottom: 5rem !important"
-    >
+  <!-- Filters Button Row -->
+  <div class="row mb-3 animate-in">
+    <div class="col-12 col-md-auto ms-auto">
       <button
-        class="btn btn-primary rounded-circle shadow-lg p-0 d-flex align-items-center justify-content-center"
-        style="width: 56px; height: 56px"
-        (click)="navigateToNew()"
-        tourAnchor="roomsNewBtnMobile"
+        class="btn d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 transition-hover border shadow-xs w-100"
+        [class.btn-primary]="showFilters()"
+        [class.btn-light]="!showFilters()"
+        (click)="toggleFilters()"
       >
-        <i class="bi bi-plus-lg fs-3 text-white"></i>
+        <i
+          class="bi text-dark"
+          [class.bi-funnel]="!showFilters()"
+          [class.bi-chevron-up]="showFilters()"
+        ></i>
+        <span class="fw-bold">Filtros</span>
+        @if (appliedFilters().length > 0) {
+          <span
+            class="badge rounded-circle bg-primary p-1 ms-1"
+            style="width: 8px; height: 8px"
+          ></span>
+        }
       </button>
     </div>
   </div>
 
-  <!-- Filters -->
-  <div class="d-flex flex-wrap gap-3 mb-4">
-    <div style="min-width: 200px">
-      <label class="form-label small fw-bold text-muted text-uppercase">{{
-        t().admin.rooms.filters.type
-      }}</label>
-      <select
-        class="form-select bg-white border-0 shadow-sm"
-        [ngModel]="filterType()"
-        (ngModelChange)="filterType.set($event)"
-      >
-        <option value="Todos">{{ t().admin.rooms.filters.options.all }}</option>
-        @for (type of schoolData.roomTypes(); track type.id) {
-          <option [value]="type.name">{{ type.name }}</option>
-        }
-      </select>
-    </div>
-  </div>
+  <!-- Retractable Filter Panel -->
+  @if (showFilters()) {
+    <section class="filters-panel mb-4 animate-in">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <tm-text
+                [formControl]="filterName"
+                placeholder="Ex: 101, Laboratório de Química"
+                icon="bi-search"
+                label="Nome/Número"
+              ></tm-text>
+            </div>
+            <div class="col-12 col-md-4">
+              <tm-select
+                [formControl]="filterType"
+                [options]="typeOptions()"
+                placeholder="Tipo"
+                icon="bi-building"
+                label="Tipo de Ambiente"
+              ></tm-select>
+            </div>
+            <div class="col-12 col-md-4">
+              <tm-select
+                [formControl]="filterStatus"
+                [options]="statusOptions"
+                placeholder="Status"
+                icon="bi-check-circle"
+                label="Status"
+              ></tm-select>
+            </div>
+          </div>
 
-  <!-- WEB VIEW: FRAMELESS TABLE -->
-  <div class="card border-0 shadow-sm rounded-4 overflow-hidden d-none d-md-block">
-    <div class="table-responsive">
-      <table class="table align-middle mb-0">
-        <thead>
-          <tr>
-            <th
-              class="border-0 ps-4 py-3 text-secondary small fw-bold text-uppercase letter-spacing-1"
-              style="width: 35%"
+          <div class="pt-3 mt-4 border-top d-flex justify-content-end gap-2">
+            <button
+              class="btn btn-light rounded-3 px-4 py-2 fw-bold text-muted transition-hover border"
+              (click)="clearFilters()"
             >
-              <span tourAnchor="roomTableColName" class="d-inline-block px-2 py-1 rounded">
-                {{ t().admin.rooms.table.spot }}
-              </span>
-            </th>
-            <th
-              class="border-0 py-3 text-secondary small fw-bold text-uppercase letter-spacing-1"
-              style="width: 25%"
+              Limpar
+            </button>
+            <button
+              class="btn btn-primary rounded-3 px-4 py-2 fw-bold transition-hover shadow-sm"
+              (click)="applyFilters()"
             >
-              <span tourAnchor="roomTableColLocation" class="d-inline-block px-2 py-1 rounded">
-                {{ t().admin.rooms.table.location }}
-              </span>
-            </th>
-            <th
-              class="border-0 py-3 text-secondary small fw-bold text-uppercase letter-spacing-1"
-              style="width: 15%"
-            >
-              <span tourAnchor="roomTableColCapacity" class="d-inline-block px-2 py-1 rounded">
-                {{ t().admin.rooms.table.capacity }}
-              </span>
-            </th>
-            <th
-              class="border-0 py-3 text-secondary small fw-bold text-uppercase letter-spacing-1"
-              style="width: 25%"
-            >
-              <span tourAnchor="roomTableColResources" class="d-inline-block px-2 py-1 rounded">
-                {{ t().admin.rooms.table.resources }}
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (room of rooms(); track room.id) {
-            <tr class="cursor-pointer" (click)="navigateToEdit(room.id)">
-              <td class="ps-4">
-                <div class="d-flex align-items-center gap-3">
-                  <div
-                    class="room-icon bg-primary-subtle text-primary rounded-3 p-2 d-flex align-items-center justify-content-center"
-                    style="width: 40px; height: 40px"
-                  >
-                    <i class="bi bi-building"></i>
-                  </div>
-                  <div>
-                    <div class="fw-bold text-primary">{{ room.name }}</div>
-                    <span
-                      class="badge rounded-pill border fw-normal py-1 px-2 small bg-light text-dark"
-                    >
-                      {{ room.type }}
-                    </span>
-                  </div>
-                </div>
-              </td>
-              <td class="text-muted fw-medium">{{ room.block }}</td>
-              <td>
-                <div class="d-flex align-items-center gap-2 text-muted">
-                  <i class="bi bi-people-fill"></i>
-                  <span class="fw-bold">{{ room.capacity }}</span>
-                </div>
-              </td>
-              <td>
-                <div class="d-flex gap-1 align-items-center flex-wrap">
-                  @for (res of room.resources.slice(0, 3); track res) {
-                    <span class="badge bg-light text-muted border fw-normal">{{
-                      getResourceLabel(res)
-                    }}</span>
-                  }
-                  @if (room.resources.length > 3) {
-                    <span class="small text-muted">+{{ room.resources.length - 3 }}</span>
-                  }
-                  @if (room.resources.length === 0) {
-                    <span class="text-muted small">-</span>
-                  }
-                </div>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="4" class="text-center py-5 text-muted">
-                <i class="bi bi-building-slash fs-1 d-block mb-3"></i>
-                {{ t().admin.rooms.table.empty }}
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </div>
+              Aplicar Filtros
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
 
-  <!-- MOBILE VIEW: CARDS -->
+  <!-- Active Filters Badges -->
+  @if (appliedFilters().length > 0) {
+    <div class="d-flex flex-wrap gap-2 mb-4 animate-in">
+      @for (filter of appliedFilters(); track filter.key) {
+        <span
+          class="badge bg-primary-subtle text-primary border-0 px-3 py-2 rounded-pill d-flex align-items-center gap-2"
+        >
+          {{ filter.label }}
+          <i class="bi bi-x-lg cursor-pointer" (click)="removeFilter(filter.key)"></i>
+        </span>
+      }
+    </div>
+  }
+
+  <!-- Desktop Table (tm-table) -->
+  <main class="animate-in d-none d-md-block">
+    <tm-table
+      [cols]="[
+        { header: 'Nome/Identificação', template: nameTpl, width: '30%' },
+        { header: 'Tipo', template: typeTpl, width: '20%' },
+        {
+          header: 'Capacidade',
+          template: capacityTpl,
+          width: '15%',
+          class: 'text-center',
+          headerClass: 'text-center',
+        },
+        { header: 'Bloco', key: 'block', width: '20%' },
+        { header: 'Status', template: statusTpl, width: '15%' },
+      ]"
+      [data]="rooms()"
+      (rowClick)="navigateToEdit($event.id)"
+    ></tm-table>
+
+    <!-- Templates for Table Columns -->
+    <ng-template #nameTpl let-room>
+      <div class="d-flex align-items-center gap-3 ps-3 text-start">
+        <div
+          class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
+          style="width: 40px; height: 40px"
+        >
+          <i class="bi bi-building fs-5"></i>
+        </div>
+        <div class="fw-bold text-dark">{{ room.name }}</div>
+      </div>
+    </ng-template>
+
+    <ng-template #typeTpl let-room>
+      <div class="text-start">
+        <span class="badge bg-light text-dark border px-3 py-1 rounded-pill fw-normal">
+          {{ room.type }}
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template #capacityTpl let-room>
+      <div class="d-flex align-items-center justify-content-center gap-2">
+        <i class="bi bi-people-fill text-muted small"></i>
+        <span class="fw-bold text-dark">{{ room.capacity }}</span>
+      </div>
+    </ng-template>
+
+    <ng-template #statusTpl let-room>
+      <div class="text-start">
+        <span class="badge bg-success-subtle text-success border-0 px-3 py-1 rounded-pill">
+          Ativo
+        </span>
+      </div>
+    </ng-template>
+  </main>
+
+  <!-- Mobile View: Cards -->
   <div class="d-md-none d-flex flex-column gap-3">
     @for (room of rooms(); track room.id) {
-      <div class="card border-0 shadow-sm p-3" (click)="navigateToEdit(room.id)">
+      <div
+        class="card border-0 shadow-sm rounded-4 p-3 animate-in"
+        (click)="navigateToEdit(room.id)"
+      >
         <div class="d-flex justify-content-between align-items-start mb-2">
           <div class="d-flex align-items-center gap-3">
             <div
-              class="room-icon bg-primary-subtle text-primary rounded-3 p-2 d-flex align-items-center justify-content-center flex-shrink-0"
+              class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
               style="width: 48px; height: 48px"
             >
-              <i class="bi bi-building fs-5"></i>
+              <i class="bi bi-building fs-4"></i>
             </div>
             <div>
-              <h6 class="fw-bold text-primary mb-0">{{ room.name }}</h6>
+              <h6 class="fw-bold text-dark mb-0">{{ room.name }}</h6>
               <div class="small text-muted">{{ room.block }}</div>
             </div>
           </div>
+          <span
+            class="badge bg-success-subtle text-success border-0 px-2 py-1 rounded-pill smaller"
+          >
+            Ativo
+          </span>
         </div>
 
         <div
@@ -175,18 +200,17 @@
         >
           <div class="d-flex align-items-center gap-2 text-muted small">
             <i class="bi bi-people-fill"></i>
-            <span class="fw-bold">{{ room.capacity }} {{ t().admin.rooms.table.places }}</span>
+            <span class="fw-bold">{{ room.capacity }} alunos</span>
           </div>
-
-          <span class="badge rounded-pill border fw-normal small bg-light text-dark">
+          <span class="badge bg-light text-dark border px-2 py-1 rounded-pill smaller fw-normal">
             {{ room.type }}
           </span>
         </div>
       </div>
     } @empty {
-      <div class="text-center py-5 text-muted">
-        <i class="bi bi-building-slash fs-1 d-block mb-3"></i>
-        <p>{{ t().admin.rooms.table.empty }}</p>
+      <div class="text-center py-5 text-muted bg-white rounded-4 shadow-sm border">
+        <i class="bi bi-building-slash fs-1 d-block mb-3 opacity-25"></i>
+        <p class="mb-0">Nenhum ambiente encontrado</p>
       </div>
     }
   </div>

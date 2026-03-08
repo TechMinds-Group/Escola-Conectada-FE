@@ -51,7 +51,7 @@ export class AmbienteService {
   }
 
   // Block (Bloco) Methods
-  private readonly blocoUrl = '/api/Blocos';
+  private readonly blocoUrl = `${environment.apiUrl}/Blocos`;
 
   listBlocks(): Observable<any> {
     return this.http.get<any>(this.blocoUrl);
@@ -70,7 +70,7 @@ export class AmbienteService {
   }
 
   // Resource Methods
-  private readonly resourceUrl = '/api/SalaRecursos';
+  private readonly resourceUrl = `${environment.apiUrl}/SalaRecursos`;
 
   listResources(): Observable<any> {
     return this.http.get<any>(this.resourceUrl);

@@ -36,16 +36,12 @@ export class ConsultaTurma implements OnInit {
   // Form Controls
   searchText = new FormControl('');
   filterTurno = new FormControl('Todos');
-  filterAno = new FormControl(new Date().getFullYear());
-  filterUnidade = new FormControl<string | null>(null);
   filterStatus = new FormControl('Todos');
 
   // Values currently applied to the list
   appliedFilters = signal({
     search: '',
     turno: 'Todos',
-    ano: new Date().getFullYear(),
-    unidade: null as string | null,
     status: 'Todos',
   });
 
@@ -57,16 +53,6 @@ export class ConsultaTurma implements OnInit {
     { value: 'Noite', label: 'Noite' },
     { value: 'Integral', label: 'Integral' },
   ];
-
-  anoOptions = computed(() => [
-    { value: new Date().getFullYear(), label: String(new Date().getFullYear()) },
-    { value: new Date().getFullYear() - 1, label: String(new Date().getFullYear() - 1) },
-  ]);
-
-  unidadeOptions = computed(() => [
-    { value: null, label: 'Todas as Unidades' },
-    ...this.schoolData.units().map((u: any) => ({ value: u.id, label: u.name })),
-  ]);
 
   statusOptions = [
     { value: 'Todos', label: 'Todos os Status' },
@@ -91,14 +77,8 @@ export class ConsultaTurma implements OnInit {
     if (filters.turno !== 'Todos') {
       list = list.filter((t) => t.turno === filters.turno);
     }
-    if (filters.ano) {
-      list = list.filter((t) => t.ano === Number(filters.ano));
-    }
     if (filters.status !== 'Todos') {
       list = list.filter((t) => t.statusCronograma === filters.status);
-    }
-    if (filters.unidade) {
-      // Logic for unit filter if available in TurmaDto
     }
     return list;
   });
@@ -107,7 +87,6 @@ export class ConsultaTurma implements OnInit {
     () =>
       !!this.appliedFilters().search ||
       this.appliedFilters().turno !== 'Todos' ||
-      this.appliedFilters().unidade !== null ||
       this.appliedFilters().status !== 'Todos',
   );
 
@@ -119,8 +98,6 @@ export class ConsultaTurma implements OnInit {
     this.appliedFilters.set({
       search: this.searchText.value || '',
       turno: this.filterTurno.value || 'Todos',
-      ano: this.filterAno.value || new Date().getFullYear(),
-      unidade: this.filterUnidade.value,
       status: this.filterStatus.value || 'Todos',
     });
   }
@@ -128,8 +105,6 @@ export class ConsultaTurma implements OnInit {
   clearFilters() {
     this.searchText.setValue('');
     this.filterTurno.setValue('Todos');
-    this.filterAno.setValue(new Date().getFullYear());
-    this.filterUnidade.setValue(null);
     this.filterStatus.setValue('Todos');
     this.applyFilters();
   }

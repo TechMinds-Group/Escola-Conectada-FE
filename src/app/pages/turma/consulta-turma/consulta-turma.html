@@ -54,13 +54,6 @@
               label="Buscar Turma"
             ></tm-text>
             <tm-select
-              [formControl]="filterAno"
-              [options]="anoOptions()"
-              placeholder="Ano"
-              icon="bi-calendar"
-              label="Série (Ano)"
-            ></tm-select>
-            <tm-select
               [formControl]="filterTurno"
               [options]="turnoOptions"
               placeholder="Turno"
@@ -105,8 +98,15 @@
     <tm-table
       [cols]="[
         { header: 'Turma', template: turmaTpl, width: '250px' },
+        { header: 'Matriz', key: 'matrizNome', width: '200px' },
         { header: 'Turno', template: turnoTpl, width: '150px' },
-        { header: 'Série/Ano', key: 'ano', width: '120px' },
+        {
+          header: 'Capacidade',
+          key: 'capacidadeMaxima',
+          width: '100px',
+          class: 'text-center',
+          headerClass: 'text-center',
+        },
         { header: 'Status', template: statusTpl, width: '150px' },
       ]"
       [data]="filteredTurmas()"
@@ -125,7 +125,6 @@
         </div>
         <div>
           <div class="fw-bold text-dark lh-1 mb-1">{{ turma.nome }}</div>
-          <div class="extra-small text-muted opacity-75">{{ turma.ano }}</div>
         </div>
       </div>
     </ng-template>

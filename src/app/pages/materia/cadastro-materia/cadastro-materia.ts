@@ -1,15 +1,13 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { LanguageService } from '../../../core/services/language.service';
-import { SchoolDataService, Subject } from '../../../core/services/school-data';
+import { SchoolDataService, Subject, ThematicAxis } from '../../../core/services/school-data';
 import { NotificationService } from '../../../core/services/notification.service';
 import { TranslationService } from '../../../core/services/translation.service';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { ConfirmationService } from '../../../core/services/confirmation.service';
+import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
+import { SelectComponent } from '../../../core/components/select/select.component';
 import { ButtonSaveComponent } from '../../../core/components/buttons/button-save';
 import { ButtonCancelComponent } from '../../../core/components/buttons/button-cancel';
 import { ButtonDeleteComponent } from '../../../core/components/buttons/button-delete';
@@ -22,9 +20,8 @@ import { ButtonEditComponent } from '../../../core/components/buttons/button-edi
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    MatMenuModule,
-    MatButtonModule,
-    MatIconModule,
+    TextInputComponent,
+    SelectComponent,
     ButtonSaveComponent,
     ButtonCancelComponent,
     ButtonDeleteComponent,
@@ -35,7 +32,6 @@ import { ButtonEditComponent } from '../../../core/components/buttons/button-edi
 })
 export class CadastroMateria implements OnInit {
   public schoolData = inject(SchoolDataService);
-  public lang = inject(LanguageService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -53,24 +49,40 @@ export class CadastroMateria implements OnInit {
 
   subjectForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
+    axis: ['Outros' as ThematicAxis, Validators.required],
+    color: ['#6366f1', Validators.required],
     category: ['Base Comum', Validators.required],
-    axis: ['', Validators.required],
-    color: ['#6366f1', Validators.required], // Modern Indigo as default
+    status: ['Ativo', Validators.required],
   });
 
+  areaOptions = computed(() => {
+    return this.schoolData.thematicAxes().map((axis) => ({ value: axis, label: axis }));
+  });
+
+  categoryOptions = [
+    { value: 'Base Comum', label: 'Obrigatória' },
+    { value: 'Eletiva', label: 'Eletiva' },
+    { value: 'Técnica', label: 'Técnica' },
+  ];
+
+  statusOptions = [
+    { value: 'Ativo', label: 'Ativo' },
+    { value: 'Inativo', label: 'Inativo' },
+  ];
+
   presetColors = [
-    '#6366f1', // Indigo
-    '#0ea5e9', // Sky
-    '#10b981', // Emerald
-    '#f59e0b', // Amber
-    '#ef4444', // Red
-    '#8b5cf6', // Violet
-    '#ec4899', // Pink
-    '#06b6d4', // Cyan
-    '#f97316', // Orange
-    '#84cc16', // Lime
-    '#64748b', // Slate
-    '#475569', // Slate darker
+    '#6366f1',
+    '#0ea5e9',
+    '#10b981',
+    '#f59e0b',
+    '#ef4444',
+    '#8b5cf6',
+    '#ec4899',
+    '#06b6d4',
+    '#f97316',
+    '#84cc16',
+    '#64748b',
+    '#475569',
   ];
 
   ngOnInit() {
@@ -91,9 +103,10 @@ export class CadastroMateria implements OnInit {
     if (subject) {
       this.subjectForm.patchValue({
         name: subject.name,
-        category: subject.category,
         axis: subject.axis,
         color: subject.color,
+        category: subject.category,
+        status: 'Ativo', // Default to active if not in model
       });
     } else {
       this.notification.error('Matéria não encontrada.');
@@ -154,13 +167,13 @@ export class CadastroMateria implements OnInit {
     }
 
     this.isSubmitting.set(true);
-    const data = this.subjectForm.getRawValue(); // getRawValue because it might be disabled
+    const data = this.subjectForm.getRawValue();
 
     const payload: Omit<Subject, 'id'> = {
       name: data.name!,
-      category: data.category as any,
       axis: data.axis as any,
       color: data.color!,
+      category: data.category as any,
     };
 
     try {
@@ -176,7 +189,6 @@ export class CadastroMateria implements OnInit {
       }
       this.router.navigate(['/subjects']);
     } catch (error) {
-      console.error('Error saving subject:', error);
       this.notification.error('Erro ao salvar a matéria. Tente novamente.');
     } finally {
       this.isSubmitting.set(false);

@@ -14,7 +14,6 @@ export interface TurmaDto {
   id: string;
   nome: string;
   codigo?: string;
-  ano: number;
   turno: string;
   matrizId: string;
   matrizNome?: string;
@@ -22,7 +21,6 @@ export interface TurmaDto {
   salaNome?: string;
   capacidadeMaxima: number;
   professorRegenteId?: string;
-  unidadeId: string;
   gradeHorariaId?: string;
   gradeHorariaNome?: string;
   statusCronograma: string;

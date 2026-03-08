@@ -1,146 +1,168 @@
 <div class="container-fluid py-4 pb-5">
-  <!-- Sticky Header & Action Bar -->
-  <div class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn transition-hover btn-back-header" (click)="onCancel()">
-          <i class="bi bi-arrow-left"></i>
-        </button>
-        <div>
-          <h2 class="fw-bold mb-0 text-dark fs-4">
-            {{
-              isEditMode() ? t().admin.subjects.form.title.edit : t().admin.subjects.form.title.new
-            }}
-          </h2>
-          <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
-            {{
-              isViewMode()
-                ? 'Visualizando matéria'
-                : subjectId()
-                  ? 'Editando detalhes'
-                  : 'Nova disciplina'
-            }}
-          </p>
+  <!-- Sticky Header SaaS Style -->
+  <header
+    class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header border-bottom border-light"
+  >
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-lg-auto">
+        <div class="d-flex align-items-center gap-3">
+          <button
+            class="btn transition-hover border-0 shadow-sm bg-white btn-back-responsive"
+            (click)="onCancel()"
+            title="Voltar"
+          >
+            <i class="bi bi-arrow-left fs-5 text-primary"></i>
+          </button>
+          <div>
+            <h2 class="fw-bold mb-0 text-dark fs-4 text-truncate" style="max-width: 300px">
+              {{
+                subjectId()
+                  ? isViewMode()
+                    ? 'Detalhes da Matéria'
+                    : 'Editar Matéria'
+                  : 'Nova Matéria'
+              }}
+            </h2>
+            <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+              {{
+                subjectId()
+                  ? 'Gerenciamento de disciplina'
+                  : 'Cadastre uma nova disciplina na base curricular'
+              }}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div
-        class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 action-bar-buttons"
-      >
-        @if (subjectId()) {
-          <app-button-delete (onClick)="deleteSubject()"></app-button-delete>
-          <div class="vr mx-2 opacity-25 d-none d-lg-block"></div>
-        }
+      <div class="col-12 col-lg-auto ms-auto">
+        <div class="row g-2 justify-content-end align-items-center">
+          @if (subjectId()) {
+            <div class="col-12 col-lg-auto order-3 order-lg-1">
+              <app-button-delete (onClick)="deleteSubject()" [isSolid]="true"></app-button-delete>
+            </div>
+            <div class="col-auto d-none d-lg-block order-2">
+              <div class="vr opacity-25" style="height: 30px"></div>
+            </div>
+          }
 
-        @if (isViewMode()) {
-          <app-button-edit (onClick)="enableEdit()"></app-button-edit>
-        } @else {
-          <app-button-cancel (onClick)="cancelEdit()"></app-button-cancel>
-          <app-button-save (onClick)="onSubmit()" [isSubmitting]="isSubmitting()"></app-button-save>
-        }
+          @if (isViewMode()) {
+            <div class="col-12 col-lg-auto order-1 order-lg-3">
+              <app-button-edit (onClick)="enableEdit()"></app-button-edit>
+            </div>
+          } @else {
+            <div class="col-12 col-lg-auto order-2 order-lg-2">
+              <app-button-cancel
+                (onClick)="isEditMode() ? cancelEdit() : onCancel()"
+              ></app-button-cancel>
+            </div>
+            <div class="col-12 col-lg-auto order-1 order-lg-3">
+              <app-button-save
+                (onClick)="onSubmit()"
+                [isSubmitting]="isSubmitting()"
+              ></app-button-save>
+            </div>
+          }
+        </div>
       </div>
     </div>
-  </div>
+  </header>
 
-  <div class="row justify-content-center">
-    <div class="col-12 col-xl-8">
-      <form [formGroup]="subjectForm">
-        <!-- Section: Basic Info -->
-        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
-          <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">
-            {{ t().admin.subjects.form.sections.info }}
-          </h6>
-
-          <div class="row g-4">
-            <!-- Name -->
-            <div class="col-12">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                {{ t().admin.subjects.form.fields.name }} <span class="text-danger">*</span>
-              </label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-type text-primary"></i></span>
-                <input
-                  type="text"
-                  class="form-control fw-bold py-2"
-                  formControlName="name"
-                  [placeholder]="t().admin.subjects.form.hints.name"
-                  [readonly]="isViewMode()"
-                  [class.is-invalid]="subjectForm.get('name')?.invalid && saveAttempted()"
-                />
-              </div>
-            </div>
-
-            <!-- Category -->
-            <div class="col-12 col-md-6">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                {{ t().admin.subjects.form.fields.category }}
-              </label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-tag text-primary"></i></span>
-                <select
-                  class="form-select fw-bold py-2"
-                  formControlName="category"
-                  [attr.disabled]="isViewMode() ? true : null"
-                >
-                  <option value="Base Comum">Base Comum</option>
-                  <option value="Técnica">Técnica</option>
-                  <option value="Eletiva">Eletiva</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Thematic Axis -->
-            <div class="col-12 col-md-6">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                {{ t().admin.subjects.form.fields.axis }}
-              </label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-compass text-primary"></i></span>
-                <select
-                  class="form-select fw-bold py-2"
-                  formControlName="axis"
-                  [attr.disabled]="isViewMode() ? true : null"
-                  [class.is-invalid]="subjectForm.get('axis')?.invalid && saveAttempted()"
-                >
-                  <option value="" disabled selected>Selecione...</option>
-                  @for (axis of schoolData.thematicAxes(); track axis) {
-                    <option [value]="axis">{{ axis }}</option>
-                  }
-                </select>
-              </div>
-            </div>
+  <form [formGroup]="subjectForm" (ngSubmit)="onSubmit()">
+    <!-- Main Card Container -->
+    <main class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white animate-in">
+      <div class="card-body p-0">
+        <!-- ROW 1: Name -->
+        <div class="row g-4 mb-4">
+          <div class="col-12">
+            <tm-text
+              formControlName="name"
+              label="Nome da Matéria"
+              placeholder="Ex: Matemática, Física, Química..."
+              icon="bi-book"
+              [control]="subjectForm.get('name')"
+            ></tm-text>
           </div>
         </div>
 
-        <!-- Section: Visual Identity -->
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-          <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-widest">
-            {{ t().admin.subjects.form.fields.color }}
-          </h6>
+        <!-- ROW 2: Area -->
+        <div class="row g-4 mb-4">
+          <div class="col-12">
+            <tm-select
+              formControlName="axis"
+              label="Área do Conhecimento"
+              placeholder="Selecione a área"
+              icon="bi-layers"
+              [options]="areaOptions()"
+              [required]="true"
+            ></tm-select>
+          </div>
+        </div>
 
-          <div class="d-flex flex-wrap gap-2">
-            @for (color of presetColors; track color) {
-              <button
-                type="button"
-                class="btn rounded-4 p-0 shadow-sm transition-transform hover-scale"
-                [style.background-color]="color"
-                [style.width.px]="45"
-                [style.height.px]="45"
-                [class.ring-active]="subjectForm.get('color')?.value === color"
-                (click)="selectPresetColor(color)"
-                [disabled]="isViewMode()"
+        <!-- ROW 3: Color and Category/Type -->
+        <div class="row g-4 mb-4">
+          <div class="col-12 col-lg-6">
+            <div class="form-group">
+              <label
+                class="form-label small fw-bold text-muted text-uppercase tracking-wider mb-2 d-flex align-items-center gap-2"
               >
-                @if (subjectForm.get('color')?.value === color) {
-                  <i
-                    class="bi bi-check-lg text-white"
-                    style="font-size: 1.5rem; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3)"
-                  ></i>
-                }
-              </button>
-            }
+                <i class="bi bi-palette text-primary"></i>
+                Cor da Legenda
+              </label>
+
+              <!-- Color Display and Picker -->
+              <div
+                class="d-flex align-items-center gap-3 p-3 rounded-4 border bg-light shadow-xs border-light-subtle"
+              >
+                <div
+                  class="rounded-circle shadow-sm border border-2 border-white ring-offset-2 ring-2 ring-primary flex-shrink-0"
+                  [style.background-color]="subjectForm.get('color')?.value"
+                  style="width: 44px; height: 44px; min-width: 44px; min-height: 44px"
+                ></div>
+                <div class="flex-grow-1">
+                  <div class="fw-bold text-dark mb-1 small">Preset de Cores</div>
+                  <div class="d-flex flex-wrap gap-2">
+                    @for (color of presetColors; track color) {
+                      <button
+                        type="button"
+                        (click)="selectPresetColor(color)"
+                        class="rounded-circle border-0 p-0 transition-hover shadow-xs flex-shrink-0"
+                        [style.background-color]="color"
+                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px"
+                        [class.active-color]="subjectForm.get('color')?.value === color"
+                        [title]="color"
+                      ></button>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-6">
+            <tm-select
+              formControlName="category"
+              label="Tipo / Categoria"
+              placeholder="Selecione o tipo"
+              icon="bi-tag"
+              [options]="categoryOptions"
+              [required]="true"
+            ></tm-select>
           </div>
         </div>
-      </form>
-    </div>
-  </div>
+
+        <!-- ROW 4: Status (Professor/Ambiente Pattern) -->
+        <div class="row g-4 pt-2">
+          <div class="col-12 col-lg-6">
+            <tm-select
+              formControlName="status"
+              label="Status da Matéria"
+              placeholder="Status"
+              icon="bi-check-circle"
+              [options]="statusOptions"
+              [required]="true"
+            ></tm-select>
+          </div>
+        </div>
+      </div>
+    </main>
+  </form>
 </div>

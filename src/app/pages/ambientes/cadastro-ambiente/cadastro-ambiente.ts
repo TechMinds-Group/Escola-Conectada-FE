@@ -26,6 +26,8 @@ import { ButtonEditComponent } from '../../../core/components/buttons/button-edi
 import { ButtonSaveComponent } from '../../../core/components/buttons/button-save';
 import { ButtonCancelComponent } from '../../../core/components/buttons/button-cancel';
 import { ModalManageListComponent } from '../../../core/components/modals/modal-manage-list/modal-manage-list.component';
+import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
+import { SelectComponent } from '../../../core/components/select/select.component';
 
 @Component({
   selector: 'app-cadastro-ambiente',
@@ -42,6 +44,8 @@ import { ModalManageListComponent } from '../../../core/components/modals/modal-
     ButtonSaveComponent,
     ButtonCancelComponent,
     ModalManageListComponent,
+    TextInputComponent,
+    SelectComponent,
   ],
   templateUrl: './cadastro-ambiente.html',
   styleUrl: './cadastro-ambiente.scss',
@@ -71,6 +75,7 @@ export class CadastroAmbiente {
   isViewMode = signal(false);
   classId = signal<string | null>(null);
   saveAttempted = signal(false);
+  isSubmitting = signal(false);
 
   // Available Resources for Selection
   availableResources = [
@@ -159,8 +164,6 @@ export class CadastroAmbiente {
   loadTypes() {
     this.ambienteService.listTypes().subscribe({
       next: (res: any) => {
-        // The API returns a direct list or a Result object depending on implementation
-        // Based on TipoSalasController.GetAll, it returns Ok(results) where results is IEnumerable<TipoSalaDTO>
         const types = res && res.data ? res.data : res;
         this.schoolData.roomTypes.set(types);
       },
@@ -213,6 +216,7 @@ export class CadastroAmbiente {
   onSubmit() {
     this.saveAttempted.set(true);
     if (this.roomForm.valid) {
+      this.isSubmitting.set(true);
       const formValue = this.roomForm.value;
       const payload = {
         id: this.classId() || '00000000-0000-0000-0000-000000000000',
@@ -223,19 +227,27 @@ export class CadastroAmbiente {
         resources: formValue.resources,
       };
 
-      this.loadResources();
-
       if (this.isEditMode() && this.classId()) {
         this.ambienteService.update(this.classId()!, payload).subscribe({
-          next: () => this.router.navigate(['/ambientes']),
-          error: (err) => console.error('Erro ao atualizar ambiente:', err),
+          next: () => {
+            this.notificationService.success('Ambiente atualizado com sucesso!');
+            this.router.navigate(['/ambientes']);
+          },
+          error: (err) => {
+            console.error('Erro ao atualizar ambiente:', err);
+            this.isSubmitting.set(false);
+          },
         });
       } else {
         this.ambienteService.save(payload).subscribe({
           next: () => {
+            this.notificationService.success('Ambiente cadastrado com sucesso!');
             this.router.navigate(['/ambientes']);
           },
-          error: (err) => console.error('Erro ao cadastrar ambiente:', err),
+          error: (err) => {
+            console.error('Erro ao cadastrar ambiente:', err);
+            this.isSubmitting.set(false);
+          },
         });
       }
     } else {
@@ -253,33 +265,14 @@ export class CadastroAmbiente {
 
       if (confirmed) {
         this.ambienteService.delete(this.classId()!).subscribe({
-          next: () => this.router.navigate(['/ambientes']),
+          next: () => {
+            this.notificationService.success('Ambiente excluído com sucesso!');
+            this.router.navigate(['/ambientes']);
+          },
           error: (err) => console.error('Erro ao excluir ambiente:', err),
         });
       }
     }
-  }
-
-  openRoomTypeModal(typeId?: string) {
-    const type = typeId
-      ? this.schoolData.roomTypes().find((t) => String(t.id) === String(typeId))
-      : null;
-    const initialValue = type ? type.name : '';
-    const name = prompt('Nome do Tipo de Sala:', initialValue);
-
-    if (name && name.trim()) {
-      if (typeId) {
-        this.schoolData.updateRoomType(typeId, name.trim());
-        this.roomForm.patchValue({ type: name.trim() });
-      } else {
-        const newId = this.schoolData.addRoomType(name.trim());
-        this.roomForm.patchValue({ type: name.trim() });
-      }
-    }
-  }
-
-  editCurrentRoomType() {
-    // Replaced by premium modal logic
   }
 
   // Premium Modal Methods
@@ -301,7 +294,7 @@ export class CadastroAmbiente {
       .roomTypes()
       .some((t) => t.name.trim().toLowerCase() === name.toLowerCase() && t.id !== event.id);
     if (exists) {
-      alert('Já existe um tipo de sala com este nome.');
+      this.notificationService.error('Já existe um tipo de sala com este nome.');
       return;
     }
 
@@ -310,10 +303,10 @@ export class CadastroAmbiente {
         next: () => {
           this.loadTypes();
           this.typeModal?.reset();
+          this.notificationService.success('Tipo de ambiente atualizado!');
         },
         error: (err) => {
           console.error('Erro ao atualizar tipo:', err);
-          alert(err.error || 'Erro ao atualizar tipo.');
         },
       });
     } else {
@@ -321,10 +314,10 @@ export class CadastroAmbiente {
         next: () => {
           this.loadTypes();
           this.typeModal?.reset();
+          this.notificationService.success('Tipo de ambiente criado!');
         },
         error: (err) => {
           console.error('Erro ao salvar tipo:', err);
-          alert(err.error || 'Erro ao salvar tipo.');
         },
       });
     }
@@ -339,7 +332,10 @@ export class CadastroAmbiente {
 
     if (confirmed) {
       this.ambienteService.deleteType(String(id)).subscribe({
-        next: () => this.loadTypes(),
+        next: () => {
+          this.loadTypes();
+          this.notificationService.success('Tipo removido.');
+        },
         error: (err) => {
           console.error('Erro ao excluir tipo:', err);
           this.notificationService.error(this.extractErrorMessage(err, 'Erro ao excluir tipo.'));
@@ -367,7 +363,7 @@ export class CadastroAmbiente {
       .schoolBlocks()
       .some((b) => b.name.trim().toLowerCase() === name.toLowerCase() && b.id !== event.id);
     if (exists) {
-      alert('Já existe um bloco com este nome.');
+      this.notificationService.error('Já existe um bloco com este nome.');
       return;
     }
 
@@ -376,10 +372,10 @@ export class CadastroAmbiente {
         next: () => {
           this.loadBlocks();
           this.blockModal?.reset();
+          this.notificationService.success('Bloco atualizado!');
         },
         error: (err) => {
           console.error('Erro ao atualizar bloco:', err);
-          alert(err.error || 'Erro ao atualizar bloco.');
         },
       });
     } else {
@@ -387,10 +383,10 @@ export class CadastroAmbiente {
         next: () => {
           this.loadBlocks();
           this.blockModal?.reset();
+          this.notificationService.success('Bloco criado!');
         },
         error: (err) => {
           console.error('Erro ao salvar bloco:', err);
-          alert(err.error || 'Erro ao salvar bloco.');
         },
       });
     }
@@ -405,7 +401,10 @@ export class CadastroAmbiente {
 
     if (confirmed) {
       this.ambienteService.deleteBlock(String(id)).subscribe({
-        next: () => this.loadBlocks(),
+        next: () => {
+          this.loadBlocks();
+          this.notificationService.success('Bloco removido.');
+        },
         error: (err) => {
           console.error('Erro ao excluir bloco:', err);
           this.notificationService.error(this.extractErrorMessage(err, 'Erro ao excluir bloco.'));
@@ -434,19 +433,19 @@ export class CadastroAmbiente {
       .schoolResources()
       .some((r) => r.name.trim().toLowerCase() === name.toLowerCase() && r.id !== event.id);
     if (exists) {
-      alert('Já existe um recurso com este nome.');
+      this.notificationService.error('Já existe um recurso com este nome.');
       return;
     }
 
     if (isEditing) {
-      this.ambienteService.updateResource(event.id, { name: name }).subscribe({
+      this.ambienteService.updateResource(event.id, { id: event.id, name: name }).subscribe({
         next: () => {
           this.loadResources();
           this.resourceModal?.reset();
+          this.notificationService.success('Recurso atualizado!');
         },
         error: (err) => {
           console.error('Erro ao atualizar recurso:', err);
-          alert(err.error || 'Erro ao atualizar recurso.');
         },
       });
     } else {
@@ -454,10 +453,10 @@ export class CadastroAmbiente {
         next: () => {
           this.loadResources();
           this.resourceModal?.reset();
+          this.notificationService.success('Recurso criado!');
         },
         error: (err) => {
           console.error('Erro ao salvar recurso:', err);
-          alert(err.error || 'Erro ao salvar recurso.');
         },
       });
     }
@@ -473,7 +472,8 @@ export class CadastroAmbiente {
     if (confirmed) {
       this.ambienteService.deleteResource(id).subscribe({
         next: () => {
-          this.schoolData.deleteResource(id);
+          this.loadResources();
+          this.notificationService.success('Recurso removido.');
         },
         error: (err) => {
           console.error('Erro ao excluir recurso:', err);
@@ -485,52 +485,39 @@ export class CadastroAmbiente {
 
   private loadResources() {
     this.ambienteService.listResources().subscribe((res: any) => {
-      // Update schoolData signal
-      // Assuming schoolData has a way to set all or I loop update.
-      // schoolData doesn't have setAllResources. I should probably add one or simple iterate.
-      // Let's iterate clear and add for now or just trust the signal if I modify SchoolDataService to have setResources
-      // For now, I'll direct set the signal if I can access it.
       const resources = res && res.data ? res.data : res;
       this.schoolData.schoolResources.set(resources.map((r: any) => ({ id: r.id, name: r.name })));
     });
   }
 
   getResourceLabel(res: string): string {
-    // Fallback to the resource name itself since now they are dynamic strings
-    // But we might still want to support translation keys if they exist in existing data.
-    // For dynamic resources, the 'res' is the name (or ID if we changed storage).
-    // The storage is List<string> Resources (names).
-    // So if it's a legacy key, try translation. If not, return valid name.
-
-    // Check if it's a dynamic resource
     const dynamic = this.schoolData.schoolResources().find((r) => r.name === res);
     if (dynamic) return dynamic.name;
 
     const resources = this.t().admin.rooms.form.resources as Record<string, string>;
     return resources[res] || res;
   }
+
   private extractErrorMessage(err: any, fallback: string): string {
-    console.dir('Extraction Error Object:', err);
     if (!err) return fallback;
-
-    // Se err.error for a string direta (ex: BadRequest("mensagem"))
     if (typeof err.error === 'string') return err.error;
-
-    // Se vier envelopado no CustomResponse do BaseController (ASP.NET)
     if (err.error?.errors && Array.isArray(err.error.errors) && err.error.errors.length > 0) {
       return err.error.errors[0];
     }
-
-    // Se vier do padrão ASP.NET ProblemDetails
     if (err.error?.title) return err.error.title;
-
-    // Outros formatos em objetos
     if (err.error?.message) return err.error.message;
     if (err.error?.error) return err.error.error;
-
-    // Se for o exception raiz de Error do JS
     if (err.message) return err.message;
 
     return fallback;
   }
+
+  // Dropdown options
+  typeOptions = computed(() => {
+    return this.schoolData.roomTypes().map((t) => ({ value: t.id, label: t.name }));
+  });
+
+  blockOptions = computed(() => {
+    return this.schoolData.schoolBlocks().map((b) => ({ value: b.name, label: b.name }));
+  });
 }

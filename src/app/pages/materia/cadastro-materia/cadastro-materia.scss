@@ -1,0 +1,77 @@
+// ============================================================
+// Sticky Header
+// ============================================================
+.sticky-header {
+  top: 0;
+  background-color: transparent !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+// ============================================================
+// Back button - Standardized SaaS Style
+// ============================================================
+.btn-back-responsive {
+  border-radius: 12px !important;
+  padding: 0.75rem 1.5rem !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  @media (min-width: 768px) {
+    padding: 0 !important;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 8px !important;
+  }
+}
+
+// ============================================================
+// Hover transition
+// ============================================================
+.transition-hover {
+  transition: all 0.2s ease-in-out !important;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  }
+}
+
+// ============================================================
+// Active Color Border - Standard CSS Replacement for ring
+// ============================================================
+.active-color {
+  box-shadow:
+    0 0 0 2px var(--surface-color, white),
+    0 0 0 4px var(--bs-primary) !important;
+  transform: scale(1.1);
+  z-index: 10;
+}
+
+// ============================================================
+// Action bar — mobile full-width buttons
+// ============================================================
+@media (max-width: 991.98px) {
+  .action-bar-buttons {
+    width: 100%;
+
+    app-button-edit,
+    app-button-delete,
+    app-button-cancel,
+    app-button-save {
+      width: 100%;
+
+      ::ng-deep button {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+    }
+  }
+}
+
+:host-context([data-theme='dark']) {
+  .sticky-header {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+}

@@ -51,6 +51,16 @@ export interface SelectOption<T = any> {
           </span>
         </div>
 
+        @if (clearable && internalValue() !== null && !disabled) {
+          <div
+            class="clear-section pe-2 py-2 transition-all opacity-50 hover-opacity-100"
+            (click)="clearSelection($event)"
+            title="Limpar seleção"
+          >
+            <i class="bi bi-x-circle-fill text-muted small"></i>
+          </div>
+        }
+
         <div class="arrow-section pe-3 py-2 transition-transform" [class.rotated]="isOpen()">
           <i class="bi bi-chevron-down text-muted small"></i>
         </div>
@@ -150,6 +160,16 @@ export interface SelectOption<T = any> {
         transition: transform 0.2s ease;
         &.rotated {
           transform: rotate(180deg);
+        }
+      }
+
+      .clear-section {
+        cursor: pointer;
+        z-index: 2;
+        &:hover {
+          i {
+            color: var(--bs-danger) !important;
+          }
         }
       }
 
@@ -303,6 +323,7 @@ export class SelectComponent implements ControlValueAccessor {
   @Input() placeholder = 'Selecione...';
   @Input() icon = '';
   @Input() control: any;
+  @Input() clearable = false;
 
   private elementRef = inject(ElementRef);
 
@@ -348,6 +369,13 @@ export class SelectComponent implements ControlValueAccessor {
     this.internalValue.set(option.value);
     this.onChange(option.value);
     this.closeDropdown();
+  }
+
+  clearSelection(event: Event) {
+    event.stopPropagation();
+    this.internalValue.set(null);
+    this.onChange(null);
+    this.onTouched();
   }
 
   writeValue(value: any): void {
