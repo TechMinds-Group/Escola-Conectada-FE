@@ -18,9 +18,9 @@
               {{
                 subjectId()
                   ? isViewMode()
-                    ? 'Detalhes da Matéria'
-                    : 'Editar Matéria'
-                  : 'Nova Matéria'
+                    ? 'Detalhes da Disciplina'
+                    : 'Editar Disciplina'
+                  : 'Nova Disciplina'
               }}
             </h2>
             <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
@@ -76,7 +76,7 @@
           <div class="col-12">
             <tm-text
               formControlName="name"
-              label="Nome da Matéria"
+              label="Nome da Disciplina"
               placeholder="Ex: Matemática, Física, Química..."
               icon="bi-book"
               [control]="subjectForm.get('name')"
@@ -150,13 +150,13 @@
         </div>
 
         <!-- ROW 4: Status (Professor/Ambiente Pattern) -->
-        <div class="row g-4 pt-2">
+        <div class="row g-4 mb-2">
           <div class="col-12 col-lg-6">
             <tm-select
               formControlName="status"
-              label="Status da Matéria"
-              placeholder="Status"
-              icon="bi-check-circle"
+              label="Status da Disciplina"
+              placeholder="Selecione o status"
+              icon="bi-toggle-on"
               [options]="statusOptions"
               [required]="true"
             ></tm-select>

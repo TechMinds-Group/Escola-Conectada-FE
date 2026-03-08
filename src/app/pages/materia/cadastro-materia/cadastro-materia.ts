@@ -109,7 +109,7 @@ export class CadastroMateria implements OnInit {
         status: 'Ativo', // Default to active if not in model
       });
     } else {
-      this.notification.error('Matéria não encontrada.');
+      this.notification.error('Disciplina não encontrada.');
       this.router.navigate(['/subjects']);
     }
   }
@@ -147,10 +147,10 @@ export class CadastroMateria implements OnInit {
     if (confirmed) {
       try {
         await this.schoolData.deleteSubject(this.subjectId()!);
-        this.notification.success('Matéria removida com sucesso!');
+        this.notification.success('Disciplina removida com sucesso!');
         this.router.navigate(['/subjects']);
       } catch (error) {
-        this.notification.error('Erro ao remover a matéria.');
+        this.notification.error('Erro ao remover a disciplina.');
       }
     }
   }
@@ -182,14 +182,14 @@ export class CadastroMateria implements OnInit {
           ...payload,
           id: this.subjectId()!,
         } as Subject);
-        this.notification.success('Matéria atualizada com sucesso!');
+        this.notification.success('Disciplina atualizada com sucesso!');
       } else {
         await this.schoolData.addSubject(payload);
-        this.notification.success('Matéria criada com sucesso!');
+        this.notification.success('Disciplina criada com sucesso!');
       }
       this.router.navigate(['/subjects']);
     } catch (error) {
-      this.notification.error('Erro ao salvar a matéria. Tente novamente.');
+      this.notification.error('Erro ao salvar a disciplina. Tente novamente.');
     } finally {
       this.isSubmitting.set(false);
     }

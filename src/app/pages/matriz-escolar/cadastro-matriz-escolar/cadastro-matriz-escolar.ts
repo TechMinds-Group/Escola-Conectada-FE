@@ -28,6 +28,8 @@ import { ButtonCancelComponent } from '../../../core/components/buttons/button-c
 import { ButtonDeleteComponent } from '../../../core/components/buttons/button-delete';
 import { ButtonEditComponent } from '../../../core/components/buttons/button-edit';
 import { ModalManageListComponent } from '../../../core/components/modals/modal-manage-list/modal-manage-list.component';
+import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
+import { SelectComponent } from '../../../core/components/select/select.component';
 
 @Component({
   selector: 'app-cadastro-matriz-escolar',
@@ -43,6 +45,8 @@ import { ModalManageListComponent } from '../../../core/components/modals/modal-
     ButtonDeleteComponent,
     ButtonEditComponent,
     ModalManageListComponent,
+    TextInputComponent,
+    SelectComponent,
   ],
   templateUrl: './cadastro-matriz-escolar.html',
   styleUrl: './cadastro-matriz-escolar.scss',

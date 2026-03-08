@@ -259,7 +259,7 @@ export const TRANSLATIONS: Translation = {
         classes: 'Turmas',
         rooms: 'Ambientes',
         matrix: 'Matriz Escolar',
-        subjects: 'Matérias',
+        subjects: 'Disciplinas',
         calendar: 'Calendário',
         settings: 'Configurações',
         timeGrids: 'Grade de Horários',
@@ -307,7 +307,7 @@ export const TRANSLATIONS: Translation = {
           overloaded: 'Acima do limite (Sobrecarga)',
           full: 'Carga horária completa (100%)',
           available: 'Com horas disponíveis',
-          noSubject: 'Sem Matéria',
+          noSubject: 'Sem Disciplina',
           none: 'Nenhuma',
         },
         workload: {
@@ -325,11 +325,11 @@ export const TRANSLATIONS: Translation = {
           color: 'Cor de Identificação',
           contractType: 'Tipo de Contrato',
           workload: 'Carga Horária Semanal',
-          mainSubject: 'Matéria Principal',
-          secondarySubjects: 'Matérias Secundárias',
+          mainSubject: 'Disciplina Principal',
+          secondarySubjects: 'Disciplinas Secundárias',
           tabs: {
             info: 'Dados e Contrato',
-            subjects: 'Matérias',
+            subjects: 'Disciplinas',
             availability: 'Disponibilidade',
           },
           sections: {
@@ -341,7 +341,7 @@ export const TRANSLATIONS: Translation = {
           },
           hints: {
             fillData: 'Preencha os dados curriculares e contratuais.',
-            extraSubjects: 'Selecione outras matérias que este professor está apto a lecionar.',
+            extraSubjects: 'Selecione outras disciplinas que este professor está apto a lecionar.',
             noAllocations: 'Nenhuma turma atribuída ainda.',
             availability: 'Clique nos blocos para marcar onde o professor pode dar aula.',
             workloadHelp:
@@ -410,9 +410,9 @@ export const TRANSLATIONS: Translation = {
             students: 'Quantidade de Alumnos',
           },
           hints: {
-            matrix: 'Define a grade de matérias e a carga horária que esta turma seguirá.',
+            matrix: 'Define a grade de disciplinas e a carga horária que esta turma seguirá.',
             summary:
-              'Indica as matérias e cargas horárias definidas pela Matriz Curricular selecionada.',
+              'Indica as disciplinas e cargas horárias definidas pela Matriz Curricular selecionada.',
             noMatrix:
               'Selecione uma matriz curricular na aba "Informações Básicas" para visualizar a grade.',
           },
@@ -583,19 +583,19 @@ export const TRANSLATIONS: Translation = {
             name: 'Nome de Referência',
             year: 'Ano Letivo',
             category: 'Categoria',
-            subject: 'Matéria',
+            subject: 'Disciplina',
             lessons: 'aulas/sem',
             limit: 'Limite Diário',
             resource: 'Recurso Específico',
           },
           placeholders: {
             name: 'Ex: 1º Ano Ensino Médio',
-            selectSubject: 'Selecione a Matéria...',
+            selectSubject: 'Selecione a Disciplina...',
             standardRoom: 'Ambiente Padrão',
           },
           hints: {
             basic: 'Defina as diretrizes pedagógicas e curriculares.',
-            curriculum: 'Adicione as matérias e suas cargas horárias.',
+            curriculum: 'Adicione as disciplinas e suas cargas horárias.',
             target: 'Meta mínima: 800 horas anuais',
             empty: 'Nenhuma disciplina adicionada',
             consecutive: 'Permitir Aulas Geminadas',
@@ -608,31 +608,31 @@ export const TRANSLATIONS: Translation = {
             court: 'Quadra',
           },
           buttons: {
-            addSubject: 'Adicionar Matéria',
+            addSubject: 'Adicionar Disciplina',
           },
         },
       },
       subjects: {
-        title: 'Gestão de Matérias',
-        subtitle: 'Organize a grade curricular e a identidade visual das matérias.',
+        title: 'Gestão de Disciplinas',
+        subtitle: 'Organize a grade curricular e a identidade visual das disciplinas.',
         buttons: {
-          new: 'Nova Matéria',
+          new: 'Nova Disciplina',
           save: 'Salvar Alterações',
-          create: 'Criar Matéria',
-          delete: 'Excluir Matéria',
+          create: 'Criar Disciplina',
+          delete: 'Excluir Disciplina',
           cancel: 'Cancelar',
         },
         table: {
           color: 'Cor',
-          name: 'Matéria',
+          name: 'Disciplina',
           axis: 'Eixo Temático',
           actions: 'Ações',
-          empty: 'Nenhuma matéria encontrada.',
+          empty: 'Nenhuma disciplina encontrada.',
         },
         form: {
           title: {
-            new: 'Nova Matéria',
-            edit: 'Editar Matéria',
+            new: 'Nova Disciplina',
+            edit: 'Editar Disciplina',
           },
           subtitle: 'Defina os detalhes pedagógicos e visuais da disciplina.',
           sections: {
@@ -640,7 +640,7 @@ export const TRANSLATIONS: Translation = {
             visual: 'Identidade Visual',
           },
           fields: {
-            name: 'Nome da Matéria',
+            name: 'Nome da Disciplina',
             axis: 'Eixo Temático',
             color: 'Identidade Visual',
             category: 'Categoria',
@@ -651,7 +651,7 @@ export const TRANSLATIONS: Translation = {
           },
         },
         tutorial: {},
-        deleteConfirm: 'Deseja excluir esta matéria?',
+        deleteConfirm: 'Deseja excluir esta disciplina?',
       },
       calendar: {
         title: 'Calendário Acadêmico',

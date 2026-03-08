@@ -61,8 +61,8 @@ export interface SelectOption<T = any> {
           </div>
         }
 
-        <div class="arrow-section pe-3 py-2 transition-transform" [class.rotated]="isOpen()">
-          <i class="bi bi-chevron-down text-muted small"></i>
+        <div class="arrow-section pe-4 py-2" [class.rotated]="isOpen()">
+          <i class="bi bi-chevron-down text-muted small d-inline-block"></i>
         </div>
       </div>
 
@@ -157,8 +157,10 @@ export interface SelectOption<T = any> {
       }
 
       .arrow-section {
-        transition: transform 0.2s ease;
-        &.rotated {
+        i {
+          transition: transform 0.2s ease;
+        }
+        &.rotated i {
           transform: rotate(180deg);
         }
       }

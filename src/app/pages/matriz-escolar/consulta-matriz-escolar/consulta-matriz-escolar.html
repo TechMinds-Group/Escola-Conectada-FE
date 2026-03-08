@@ -1,148 +1,191 @@
 <div class="container-fluid py-4 pb-5">
   <!-- Header -->
-  <div
-    class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
-  >
-    <div>
-      <h2 class="fw-bold mb-0 text-primary">{{ t().admin.matrices.title }}</h2>
-      <p class="text-muted mb-0 small">{{ t().admin.matrices.subtitle }}</p>
-    </div>
+  <header class="mb-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-auto">
+        <h2 class="fw-bold mb-0 text-primary fs-3">{{ t().admin.matrices.title }}</h2>
+        <p class="text-muted mb-0 small opacity-75">{{ t().admin.matrices.subtitle }}</p>
+      </div>
 
-    <!-- Actions -->
-    <div class="d-flex align-items-center gap-3">
-      <button
-        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold transition-hover"
-        [routerLink]="['/school-matrices/new']"
-      >
-        <i class="bi bi-plus-lg fs-5"></i>
-        {{ t().admin.matrices.buttons.new }}
-      </button>
+      <div class="col-12 col-md-auto ms-auto">
+        <button
+          class="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-4 py-2 shadow-sm fw-bold transition-hover rounded-3 w-100"
+          [routerLink]="['/school-matrices/new']"
+        >
+          <i class="bi bi-plus-lg fs-5"></i>
+          {{ t().admin.matrices.buttons.new }}
+        </button>
+      </div>
     </div>
+  </header>
 
-    <!-- Mobile FAB -->
-    <div
-      class="d-md-none position-fixed bottom-0 end-0 m-4 z-3"
-      style="margin-bottom: 5rem !important"
-    >
+  <!-- Filters Button Row -->
+  <div class="row mb-3 animate-in">
+    <div class="col-12 col-md-auto ms-auto">
       <button
-        class="btn btn-primary rounded-circle shadow-lg p-0 d-flex align-items-center justify-content-center transition-hover"
-        style="width: 56px; height: 56px"
-        [routerLink]="['/school-matrices/new']"
+        class="btn d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 transition-hover border shadow-xs w-100"
+        [class.btn-primary]="showFilters()"
+        [class.btn-light]="!showFilters()"
+        (click)="toggleFilters()"
       >
-        <i class="bi bi-plus-lg fs-3 text-white"></i>
+        <i
+          class="bi text-dark"
+          [class.bi-funnel]="!showFilters()"
+          [class.bi-chevron-up]="showFilters()"
+        ></i>
+        <span class="fw-bold">Filtros</span>
+        @if (appliedFilters().length > 0) {
+          <span
+            class="badge rounded-circle bg-primary p-1 ms-1"
+            style="width: 8px; height: 8px"
+          ></span>
+        }
       </button>
     </div>
   </div>
 
-  <!-- WEB VIEW: PREMIUM FRAMELESS TABLE -->
-  <div class="card border-0 shadow-sm rounded-4 overflow-hidden d-none d-md-block bg-white">
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="bg-light">
-          <tr>
-            <th
-              class="border-0 ps-4 py-3 text-muted small fw-bold text-uppercase"
-              style="width: 25%"
+  <!-- Retractable Filter Panel -->
+  @if (showFilters()) {
+    <section class="filters-panel mb-4 animate-in">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <tm-text
+                [control]="filterName"
+                label="Nome da Matriz"
+                placeholder="Buscar por nome..."
+                icon="bi-search"
+              ></tm-text>
+            </div>
+            <div class="col-12 col-md-6">
+              <tm-select
+                [control]="filterStatus"
+                [options]="statusOptions"
+                label="Status"
+                icon="bi-check-circle"
+              ></tm-select>
+            </div>
+          </div>
+
+          <div class="pt-3 mt-4 border-top d-flex justify-content-end gap-2">
+            <button
+              class="btn btn-light rounded-3 px-4 py-2 fw-bold text-muted transition-hover border"
+              (click)="clearFilters()"
             >
-              {{ t().admin.matrices.table.name }}
-            </th>
-            <th class="border-0 py-3 text-muted small fw-bold text-uppercase" style="width: 15%">
-              {{ t().admin.matrices.table.validity }}
-            </th>
-            <th class="border-0 py-3 text-muted small fw-bold text-uppercase" style="width: 25%">
-              {{ t().admin.matrices.table.level }}
-            </th>
-            <th class="border-0 py-3 text-muted small fw-bold text-uppercase" style="width: 20%">
-              {{ t().admin.matrices.table.workload }}
-            </th>
-            <th
-              class="border-0 py-3 text-muted small fw-bold text-uppercase text-center"
-              style="width: 20%"
+              Limpar
+            </button>
+            <button
+              class="btn btn-primary rounded-3 px-4 py-2 fw-bold transition-hover shadow-sm"
+              (click)="applyFilters()"
             >
-              {{ t().admin.matrices.table.status }}
-            </th>
-          </tr>
-        </thead>
-        <tbody class="border-top-0">
-          @for (matrix of matrices(); track matrix.id) {
-            <tr
-              class="transition-hover cursor-pointer border-bottom-light"
-              [routerLink]="['/school-matrices/edit', matrix.id]"
-            >
-              <td class="ps-4 py-3">
-                <div class="d-flex align-items-center gap-3">
-                  <div
-                    class="matrix-icon d-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-3 p-2"
-                    style="width: 40px; height: 40px"
-                  >
-                    <i class="bi bi-grid-3x3 fs-5"></i>
-                  </div>
-                  <div>
-                    <div class="fw-bold text-dark">{{ matrix.name }}</div>
-                  </div>
-                </div>
-              </td>
-              <td class="py-3">
-                <span class="small fw-bold text-muted">{{ matrix.year }}</span>
-              </td>
-              <td class="py-3">
-                <div class="d-flex flex-wrap gap-1">
-                  <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
-                    {{ getMatrixLevelsSummary(matrix) }}
-                  </span>
-                </div>
-              </td>
-              <td class="py-3">
-                @let total = getMatrixTotalHours(matrix);
-                <div class="d-flex align-items-center gap-2">
-                  <div
-                    class="progress flex-grow-1"
-                    style="height: 6px; max-width: 80px"
-                    [title]="total + 'h / ' + matrix.mecAnnualHours + 'h'"
-                  >
-                    <div
-                      class="progress-bar rounded-pill"
-                      [class.bg-success]="total >= matrix.mecAnnualHours"
-                      [class.bg-warning]="total < matrix.mecAnnualHours"
-                      [style.width.%]="(total / matrix.mecAnnualHours) * 100"
-                    ></div>
-                  </div>
-                  <span
-                    class="small fw-bold"
-                    [class.text-success]="total >= matrix.mecAnnualHours"
-                    [class.text-warning]="total < matrix.mecAnnualHours"
-                  >
-                    {{ total }}h
-                  </span>
-                </div>
-              </td>
-              <td class="text-center py-3">
-                <span
-                  class="badge rounded-pill px-3 py-2 border-0"
-                  [class.bg-success-subtle]="matrix.status === 'Ativa'"
-                  [class.text-success]="matrix.status === 'Ativa'"
-                  [class.bg-light]="matrix.status !== 'Ativa'"
-                  [class.text-muted]="matrix.status !== 'Ativa'"
-                >
-                  <i class="bi bi-check-circle-fill me-1" *ngIf="matrix.status === 'Ativa'"></i>
-                  {{ matrix.status === 'Ativa' ? t().admin.matrices.badges.active : matrix.status }}
-                </span>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="4" class="text-center py-5 text-muted">
-                <i class="bi bi-inbox fs-2 d-block mb-2 opacity-50"></i>
-                Nenhuma matriz encontrada.
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+              Aplicar Filtros
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Applied Filters Chips -->
+  @if (appliedFilters().length > 0) {
+    <div class="d-flex flex-wrap gap-2 mb-4 animate-in">
+      @for (filter of appliedFilters(); track filter.key) {
+        <span
+          class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill d-flex align-items-center gap-2"
+        >
+          {{ filter.label }}
+          <i
+            class="bi bi-x-circle-fill cursor-pointer hover-opacity-100"
+            (click)="removeFilter(filter.key)"
+          ></i>
+        </span>
+      }
     </div>
+  }
+
+  <!-- WEB VIEW: PREMIUM TABLE -->
+  <div class="d-none d-md-block">
+    <tm-table
+      [cols]="[
+        { header: t().admin.matrices.table.name, template: nameTpl, width: '35%' },
+        { header: t().admin.matrices.table.validity, template: yearTpl, width: '10%' },
+        { header: t().admin.matrices.table.level, template: levelsTpl, width: '25%' },
+        { header: t().admin.matrices.table.workload, template: workloadTpl, width: '15%' },
+        { header: t().admin.matrices.table.status, template: statusTpl, width: '15%' },
+      ]"
+      [data]="matrices()"
+      [isLoading]="false"
+      (rowClick)="onRowClick($event)"
+    ></tm-table>
+
+    <!-- Templates for Table Columns -->
+    <ng-template #nameTpl let-matrix>
+      <div class="d-flex align-items-center gap-3 ps-3">
+        <div
+          class="matrix-icon d-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-3 flex-shrink-0"
+          style="width: 40px; height: 40px"
+        >
+          <i class="bi bi-grid-3x3 fs-5"></i>
+        </div>
+        <div class="min-w-0">
+          <div class="fw-bold text-dark text-truncate">{{ matrix.name }}</div>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #yearTpl let-matrix>
+      <span class="small fw-bold text-muted">{{ matrix.year }}</span>
+    </ng-template>
+
+    <ng-template #levelsTpl let-matrix>
+      <div class="d-flex flex-wrap gap-1">
+        <span class="badge rounded-pill bg-light text-dark border px-3 py-2 small fw-semibold">
+          {{ getMatrixLevelsSummary(matrix) }}
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template #workloadTpl let-matrix>
+      @let total = getMatrixTotalHours(matrix);
+      <div class="d-flex align-items-center gap-2" style="min-width: 140px">
+        <div
+          class="progress flex-grow-1"
+          style="height: 6px"
+          [title]="total + 'h / ' + (matrix.mecAnnualHours || 0) + 'h'"
+        >
+          <div
+            class="progress-bar rounded-pill"
+            [class.bg-success]="total >= (matrix.mecAnnualHours || 0)"
+            [class.bg-warning]="total < (matrix.mecAnnualHours || 0)"
+            [style.width.%]="matrix.mecAnnualHours ? (total / matrix.mecAnnualHours) * 100 : 0"
+          ></div>
+        </div>
+        <span
+          class="small fw-bold text-nowrap"
+          [class.text-success]="total >= (matrix.mecAnnualHours || 0)"
+          [class.text-warning]="total < (matrix.mecAnnualHours || 0)"
+        >
+          {{ total }}h
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template #statusTpl let-matrix>
+      <span
+        class="badge rounded-pill px-3 py-2 border-0"
+        [class.bg-success-subtle]="matrix.status === 'Ativa'"
+        [class.text-success]="matrix.status === 'Ativa'"
+        [class.bg-light]="matrix.status !== 'Ativa'"
+        [class.text-muted]="matrix.status !== 'Ativa'"
+      >
+        <i class="bi bi-check-circle-fill me-1" *ngIf="matrix.status === 'Ativa'"></i>
+        {{ matrix.status === 'Ativa' ? t().admin.matrices.badges.active : matrix.status }}
+      </span>
+    </ng-template>
   </div>
 
-  <!-- MOBILE VIEW: CARDS -->
+  <!-- MOBILE VIEW: PREMIUM CARDS -->
   <div class="d-md-none d-flex flex-column gap-3">
     @for (matrix of matrices(); track matrix.id) {
       <div
@@ -151,7 +194,7 @@
       >
         <div class="d-flex align-items-start gap-3 mb-3">
           <div
-            class="matrix-icon flex-shrink-0 d-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-3 p-2"
+            class="matrix-icon flex-shrink-0 d-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-3 p-2 shadow-xs"
             style="width: 48px; height: 48px"
           >
             <i class="bi bi-grid-3x3 fs-4"></i>
@@ -189,9 +232,10 @@
         </div>
       </div>
     } @empty {
-      <div class="text-center py-5 text-muted">
-        <i class="bi bi-inbox fs-2 d-block mb-2 opacity-50"></i>
-        Nenhuma matriz encontrada.
+      <div class="text-center py-5 text-muted bg-white rounded-4 shadow-sm">
+        <i class="bi bi-grid-3x3 fs-1 d-block mb-3 opacity-25"></i>
+        <h6 class="fw-bold mb-1">Nenhuma matriz encontrada</h6>
+        <p class="small mb-0 px-4">Tente ajustar seus filtros para encontrar o que procura.</p>
       </div>
     }
   </div>

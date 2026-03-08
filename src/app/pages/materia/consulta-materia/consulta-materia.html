@@ -3,7 +3,7 @@
   <header class="mb-3">
     <div class="row g-3 align-items-center">
       <div class="col-12 col-md-auto">
-        <h2 class="fw-bold mb-0 text-primary fs-3">Matérias</h2>
+        <h2 class="fw-bold mb-0 text-primary fs-3">Disciplinas</h2>
         <p class="text-muted mb-0 small opacity-75">Gestão da base curricular</p>
       </div>
 
@@ -13,7 +13,7 @@
           (click)="navigateToNew()"
         >
           <i class="bi bi-plus-lg fs-5"></i>
-          Nova Matéria
+          Nova Disciplina
         </button>
       </div>
     </div>
@@ -122,7 +122,7 @@
           class: 'text-center',
           headerClass: 'text-center',
         },
-        { header: 'Nome da Matéria', template: nameTpl, width: '45%' },
+        { header: 'Nome da Disciplina', template: nameTpl, width: '45%' },
         { header: 'Área', key: 'axis', width: '35%' },
         { header: 'Status', template: statusTpl, width: '15%' },
       ]"
@@ -213,8 +213,9 @@
       </div>
     } @empty {
       <div class="text-center py-5 text-muted bg-white rounded-4 shadow-sm border">
-        <i class="bi bi-book fs-1 d-block mb-3 opacity-25"></i>
-        <p class="mb-0">Nenhuma matéria encontrada</p>
+        <i class="bi bi-journal-x fs-1 text-muted opacity-50 mb-3 d-block"></i>
+        <h5 class="fw-bold text-dark mb-1">Nenhum resultado</h5>
+        <p class="mb-0">Nenhuma disciplina encontrada</p>
       </div>
     }
   </div>
