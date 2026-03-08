@@ -59,6 +59,7 @@ import { MaskDirective } from '../../directives/mask.directive';
     `
       .tm-text-container {
         position: relative;
+        min-width: 200px;
 
         &.disabled {
           .input-wrapper {
@@ -89,7 +90,7 @@ import { MaskDirective } from '../../directives/mask.directive';
       }
 
       .custom-input {
-        padding: 0.6rem 1rem;
+        padding: 0.6rem 1.25rem 0.6rem 1rem;
         outline: none;
         color: var(--text-primary);
         font-size: 0.95rem;

@@ -15,7 +15,7 @@ export interface TableColumn<T = any> {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="tm-table-wrapper shadow-sm border overflow-hidden">
+    <div class="tm-table-wrapper shadow-sm border overflow-hidden" [class.is-loading]="isLoading">
       <div class="table-responsive custom-scrollbar">
         <table class="table mb-0">
           <thead>
@@ -34,33 +34,50 @@ export interface TableColumn<T = any> {
             </tr>
           </thead>
           <tbody>
-            @for (row of data; track $index) {
-              <tr
-                class="row-item transition-all"
-                [class.cursor-pointer]="rowClick.observed"
-                (click)="onRowClick(row)"
-              >
-                @for (col of cols; track col.header) {
-                  <td [class]="'cell-item py-3 ' + (col.class || '')">
-                    @if (col.template) {
-                      <ng-container
-                        *ngTemplateOutlet="col.template; context: { $implicit: row }"
-                      ></ng-container>
-                    } @else if (col.key) {
-                      {{ getCellValue(row, col.key) }}
-                    }
+            @if (isLoading) {
+              @for (i of [1, 2, 3, 4, 5]; track i) {
+                <tr>
+                  @for (col of cols; track col.header) {
+                    <td class="cell-item py-3">
+                      <div class="skeleton-line"></div>
+                    </td>
+                  }
+                </tr>
+              }
+            } @else {
+              @for (row of data; track $index) {
+                <tr
+                  class="row-item transition-all"
+                  [class.cursor-pointer]="rowClick.observed"
+                  (click)="onRowClick(row)"
+                >
+                  @for (col of cols; track col.header) {
+                    <td [class]="'cell-item py-3 ' + (col.class || '')">
+                      @if (col.template) {
+                        <ng-container
+                          *ngTemplateOutlet="col.template; context: { $implicit: row }"
+                        ></ng-container>
+                      } @else if (col.key) {
+                        {{ getCellValue(row, col.key) }}
+                      }
+                    </td>
+                  }
+                </tr>
+              } @empty {
+                <tr>
+                  <td [attr.colspan]="cols.length" class="text-center py-5 border-0">
+                    <div class="empty-state animate-in py-5">
+                      <div class="empty-icon-container mb-3">
+                        <i class="bi bi-search fs-1 opacity-25"></i>
+                      </div>
+                      <h5 class="fw-bold text-dark opacity-75 mb-2">Nenhum registro encontrado</h5>
+                      <p class="text-muted small mb-0 mx-auto" style="max-width: 300px;">
+                        Não encontramos nenhum resultado para os filtros aplicados no momento.
+                      </p>
+                    </div>
                   </td>
-                }
-              </tr>
-            } @empty {
-              <tr>
-                <td [attr.colspan]="cols.length" class="text-center py-5 text-muted opacity-50">
-                  <div class="empty-state animate-in">
-                    <i class="bi bi-inbox fs-1 mb-2 d-block"></i>
-                    <p class="mb-0 fw-medium">Nenhum dado encontrado para exibir.</p>
-                  </div>
-                </td>
-              </tr>
+                </tr>
+              }
             }
           </tbody>
         </table>
@@ -110,7 +127,51 @@ export interface TableColumn<T = any> {
         cursor: pointer;
       }
 
-      /* Dark Mode Specific Fine-tuning if needed, but variables should handle most */
+      /* Skeleton styles */
+      .skeleton-line {
+        height: 12px;
+        background: linear-gradient(
+          90deg,
+          rgba(0, 0, 0, 0.05) 25%,
+          rgba(0, 0, 0, 0.1) 50%,
+          rgba(0, 0, 0, 0.05) 75%
+        );
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 4px;
+        width: 80%;
+      }
+
+      :host-context([data-theme='dark']) .skeleton-line {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.05) 25%,
+          rgba(255, 255, 255, 0.1) 50%,
+          rgba(255, 255, 255, 0.05) 75%
+        );
+        background-size: 200% 100%;
+      }
+
+      @keyframes loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      .empty-icon-container {
+        width: 80px;
+        height: 80px;
+        background: var(--input-bg);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+      }
+
       :host-context([data-theme='dark']) {
         .tm-table-wrapper {
           border-color: var(--border-color);
@@ -120,6 +181,9 @@ export interface TableColumn<T = any> {
         }
         .row-item:hover {
           background-color: var(--hover-bg);
+        }
+        .empty-state h5 {
+          color: #f8fafc !important;
         }
       }
 
@@ -160,6 +224,7 @@ export interface TableColumn<T = any> {
 export class TableComponent<T> {
   @Input() cols: TableColumn<T>[] = [];
   @Input() data: T[] = [];
+  @Input() isLoading = false;
   @Output() rowClick = new EventEmitter<T>();
 
   onRowClick(row: T) {

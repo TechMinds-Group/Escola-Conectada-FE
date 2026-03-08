@@ -1,41 +1,93 @@
-.turma-icon {
-  font-size: 0.85rem;
-  transition: all 0.2s;
-  background-color: rgba(var(--primary-rgb), 0.15) !important;
-  color: #0d6efd !important;
-  border: 1px solid rgba(var(--primary-rgb), 0.15) !important;
+/* 1. Animações e Transições */
+.transition-hover {
+  transition: all 0.2s ease-in-out !important;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  }
 }
 
-.actions-container {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: nowrap;
-  opacity: 0.6;
-  transition: opacity 0.2s;
+/* 2. Suporte a Dark Mode */
+:host-context([data-theme='dark']) {
+  .text-dark {
+    color: #f8fafc !important;
+  }
+
+  .bg-primary-subtle {
+    background-color: rgba(var(--bs-primary-rgb), 0.15) !important;
+  }
+
+  .border-light {
+    border-color: rgba(255, 255, 255, 0.05) !important;
+  }
 }
 
-tr:hover .actions-container {
-  opacity: 1;
+/* 3. Utilitários de Texto */
+.extra-small {
+  font-size: 0.7rem;
+}
+
+.xx-small {
+  font-size: 0.6rem;
+}
+
+/* 4. Estilização de Botões Customizados */
+.btn-light-primary {
+  background-color: rgba(var(--bs-primary-rgb), 0.08);
+  color: var(--bs-primary);
+  &:hover {
+    background-color: rgba(var(--bs-primary-rgb), 0.15);
+  }
+}
+
+.btn-light-danger {
+  background-color: rgba(var(--bs-danger-rgb), 0.08);
+  color: var(--bs-danger);
+  &:hover {
+    background-color: rgba(var(--bs-danger-rgb), 0.15);
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.filters-panel {
+  .card {
+    border: 1px solid var(--border-color) !important;
+    background-color: var(--surface-color) !important;
+  }
+}
+
+.shadow-lg {
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.125) !important;
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
 }
 
 :host-context([data-theme='dark']) {
-  .turma-icon {
-    background-color: rgba(var(--primary-rgb), 0.2) !important;
-    border-color: rgba(var(--primary-rgb), 0.25) !important;
+  .filters-panel .card {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.4) !important;
   }
-
-  .schedule-badge {
-    background-color: rgba(var(--primary-rgb), 0.2) !important;
-    color: #79c0ff !important;
-    border-color: rgba(var(--primary-rgb), 0.3) !important;
-  }
-}
-
-.schedule-badge {
-  background-color: rgba(var(--primary-rgb), 0.15) !important; // Match dark mode opacity
-  color: #0d6efd !important; // Keep primary blue for light background text
-  border: 1px solid rgba(var(--primary-rgb), 0.2) !important; // Distinct border like dark mode
-  font-weight: 700;
 }

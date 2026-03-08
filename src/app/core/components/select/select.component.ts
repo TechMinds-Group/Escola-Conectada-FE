@@ -95,6 +95,7 @@ export interface SelectOption<T = any> {
 
       .tm-select-container {
         position: relative;
+        min-width: 200px;
 
         &.disabled {
           .input-wrapper {
@@ -128,10 +129,20 @@ export interface SelectOption<T = any> {
 
       .selected-value-container {
         font-size: 0.95rem;
+        display: block;
+        min-width: 0;
 
         .placeholder-state {
           color: rgba(0, 0, 0, 0.4);
           font-weight: 500;
+        }
+
+        span {
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          width: 100%;
         }
       }
 

@@ -13,6 +13,7 @@ export interface AlocacaoDto {
 export interface TurmaDto {
   id: string;
   nome: string;
+  codigo?: string;
   ano: number;
   turno: string;
   matrizId: string;
@@ -20,6 +21,8 @@ export interface TurmaDto {
   salaId?: string;
   salaNome?: string;
   capacidadeMaxima: number;
+  professorRegenteId?: string;
+  unidadeId: string;
   gradeHorariaId?: string;
   gradeHorariaNome?: string;
   statusCronograma: string;

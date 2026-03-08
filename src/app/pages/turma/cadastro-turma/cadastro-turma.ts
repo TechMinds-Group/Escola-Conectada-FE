@@ -20,16 +20,18 @@ import {
 } from '../../../core/services/school-data';
 import { TranslationService } from '../../../core/services/translation.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { ButtonSaveComponent } from '../../../core/components/buttons/button-save';
-import { ButtonCancelComponent } from '../../../core/components/buttons/button-cancel';
-import { ButtonDeleteComponent } from '../../../core/components/buttons/button-delete';
-import { ButtonEditComponent } from '../../../core/components/buttons/button-edit';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ProfessorService, Professor } from '../../../core/services/professor.service';
 import { ConfirmationService } from '../../../core/services/confirmation.service';
 import { ModalManageTimeGridComponent } from '../../../core/components/modals/modal-manage-time-grid/modal-manage-time-grid.component';
 import { ModalManageRoomComponent } from '../../../core/components/modals/modal-manage-room/modal-manage-room.component';
+import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
+import { SelectComponent } from '../../../core/components/select/select.component';
+import { ButtonSaveComponent } from '../../../core/components/buttons/button-save';
+import { ButtonCancelComponent } from '../../../core/components/buttons/button-cancel';
+import { ButtonDeleteComponent } from '../../../core/components/buttons/button-delete';
+import { ButtonEditComponent } from '../../../core/components/buttons/button-edit';
 
 @Component({
   selector: 'app-cadastro-turma',
@@ -40,12 +42,14 @@ import { ModalManageRoomComponent } from '../../../core/components/modals/modal-
     FormsModule,
     MatSelectModule,
     MatProgressBarModule,
+    ModalManageTimeGridComponent,
+    ModalManageRoomComponent,
+    TextInputComponent,
+    SelectComponent,
     ButtonSaveComponent,
     ButtonCancelComponent,
     ButtonDeleteComponent,
     ButtonEditComponent,
-    ModalManageTimeGridComponent,
-    ModalManageRoomComponent,
   ],
   templateUrl: './cadastro-turma.html',
   styleUrl: './cadastro-turma.scss',
@@ -178,13 +182,14 @@ export class CadastroTurma implements OnInit {
 
   constructor() {
     this.classForm = this.fb.group({
-      nome: ['', [Validators.required, Validators.maxLength(25)]],
+      nome: ['', [Validators.required, Validators.maxLength(30)]],
 
-      ano: [new Date().getFullYear(), Validators.required],
       turno: ['Manhã', Validators.required],
       matrizId: [null, Validators.required],
       salaId: [null],
       gradeHorariaId: [null, Validators.required],
+      capacidadeMaxima: [30, [Validators.required, Validators.min(1)]],
+      professorRegenteId: [null],
     });
 
     this.classForm.get('matrizId')?.valueChanges.subscribe((val) => {
@@ -192,11 +197,8 @@ export class CadastroTurma implements OnInit {
         this.selectedMatrixId.set(val);
         this.allocations.set([]); // Limpar alocações ao trocar matriz REALMENTE
 
-        // Sincronizar Ano Letivo com a Matriz
+        // Sincronizar Ano Letivo com a Matriz (Removido patch de ano)
         const matrix = this.matrices().find((m) => m.id === val);
-        if (matrix) {
-          this.classForm.patchValue({ ano: matrix.year });
-        }
       }
     });
 
@@ -213,6 +215,47 @@ export class CadastroTurma implements OnInit {
       this.classForm.patchValue({ turno: grid.shift }, { emitEvent: false });
     }
   }
+
+  turnoOptions = [
+    { value: 'Manhã', label: 'Manhã' },
+    { value: 'Tarde', label: 'Tarde' },
+    { value: 'Noite', label: 'Noite' },
+  ];
+
+  matrixOptions = computed(() =>
+    this.matrices().map((m) => ({
+      value: m.id,
+      label: this.getMatrixLabel(m),
+    })),
+  );
+
+  teacherOptions = computed(() =>
+    this.teachers().map((t) => ({
+      value: t.id,
+      label: t.name,
+    })),
+  );
+
+  unidadeOptions = computed(() =>
+    this.schoolData.units().map((u: any) => ({
+      value: u.id,
+      label: u.name,
+    })),
+  );
+
+  roomOptions = computed(() =>
+    this.rooms().map((r) => ({
+      value: r.id,
+      label: `${r.name} — ${r.block} (Cap: ${r.capacity})`,
+    })),
+  );
+
+  timeGridOptions = computed(() =>
+    this.schoolData.schoolTimeGrids().map((g) => ({
+      value: g.id,
+      label: `${g.name} (${g.shift})`,
+    })),
+  );
 
   setActiveTab(tab: string) {
     this.activeTab.set(tab);
@@ -441,6 +484,13 @@ export class CadastroTurma implements OnInit {
             console.log('[ALLOCATION-DEBUG] Loading allocations from API:', turma.alocacoes);
             this.allocations.set([...turma.alocacoes]);
           }
+
+          // Ensure extra fields are patched if available in response
+          this.classForm.patchValue({
+            capacidadeMaxima: turma.capacidadeMaxima || 30,
+            professorRegenteId: turma.professorRegenteId || null,
+            unidadeId: turma.unidadeId || null,
+          });
         },
       });
     }
@@ -476,7 +526,6 @@ export class CadastroTurma implements OnInit {
 
     const payload: Partial<TurmaDto> = {
       ...this.classForm.getRawValue(),
-      capacidadeMaxima: 30,
       alocacoes: validAllocations,
     };
 
@@ -574,11 +623,26 @@ export class CadastroTurma implements OnInit {
     }
   }
 
-  deleteTurma() {
-    if (this.turmaId && confirm('Tem certeza que deseja excluir esta turma?')) {
-      this.turmaService.delete(this.turmaId).subscribe({
-        next: () => this.router.navigate(['/classes']),
+  async deleteTurma() {
+    if (this.turmaId) {
+      const confirmed = await this.confirmation.confirm({
+        title: 'Confirmar Exclusão',
+        message: `Tem certeza que deseja excluir esta turma? Esta ação não pode ser desfeita.`,
+        confirmClass: 'btn-danger',
+        confirmLabel: 'Excluir',
       });
+
+      if (confirmed) {
+        this.turmaService.delete(this.turmaId).subscribe({
+          next: () => {
+            this.notification.success('Turma excluída com sucesso');
+            this.router.navigate(['/classes']);
+          },
+          error: () => {
+            this.notification.error('Erro ao excluir turma');
+          },
+        });
+      }
     }
   }
 

@@ -1,17 +1,18 @@
 import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslationService } from '../../../core/services/translation.service';
 import { SchoolDataService } from '../../../core/services/school-data';
 import { ProfessorService, Professor } from '../../../core/services/professor.service';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { ConfirmationService } from '../../../core/services/confirmation.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { SelectComponent } from '../../../core/components/select/select.component';
-import { TableComponent, TableColumn } from '../../../core/components/table/table.component';
+import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
+import { TableComponent } from '../../../core/components/table/table.component';
 
 @Component({
   selector: 'app-consulta-professor',
@@ -22,6 +23,7 @@ import { TableComponent, TableColumn } from '../../../core/components/table/tabl
     MatButtonModule,
     ReactiveFormsModule,
     SelectComponent,
+    TextInputComponent,
     TableComponent,
   ],
   templateUrl: './consulta-professor.html',
@@ -34,49 +36,68 @@ export class ConsultaProfessor implements OnInit {
   t = this.translation.dictionary;
   private router = inject(Router);
   private confirmationService = inject(ConfirmationService);
+  private notificationService = inject(NotificationService);
 
-  // Filters
+  // State
+  rawTeachers = signal<Professor[]>([]);
+  isFilterPanelOpen = signal(false);
+  isLoading = signal(true);
+
+  // Form Controls
+  nameFilter = new FormControl('');
   subjectFilter = new FormControl<string | null>(null);
-  statusFilter = new FormControl<string | null>(null);
+  unidadeFilter = new FormControl<string | null>(null);
 
-  // Signal-based filter values for computed reactivity
-  subjectFilterValue = toSignal(this.subjectFilter.valueChanges, { initialValue: null });
-  statusFilterValue = toSignal(this.statusFilter.valueChanges, { initialValue: null });
+  // Values currently applied to the list
+  appliedFilters = signal({
+    name: '',
+    subject: null as string | null,
+    unidade: null as string | null,
+  });
 
-  // Determines if the "Clear Filters" button should be visible
-  isFilterActive = computed(() => !!this.subjectFilterValue() || !!this.statusFilterValue());
+  // Determines if any filter is applied
+  isFilterActive = computed(
+    () =>
+      !!this.appliedFilters().name ||
+      !!this.appliedFilters().subject ||
+      !!this.appliedFilters().unidade,
+  );
 
   subjectOptions = computed(() => [
     { value: null, label: 'Todas as Disciplinas' },
     ...this.schoolData.subjects().map((s) => ({ value: s.id, label: s.name })),
   ]);
 
-  statusOptions = computed(() => [
-    { value: null, label: 'Todos os Status' },
-    { value: 'available', label: 'Disponível' },
-    { value: 'full', label: 'Ocupado' },
-    { value: 'overloaded', label: 'Sobrecarga' },
+  unidadeOptions = computed(() => [
+    { value: null, label: 'Todas as Unidades' },
+    ...this.schoolData.units().map((u: any) => ({ value: u.id, label: u.name })),
   ]);
-
-  rawTeachers = signal<Professor[]>([]);
 
   ngOnInit() {
     this.loadTeachers();
+    this.schoolData.loadUnidades();
   }
 
   loadTeachers() {
-    this.professorService.getAll().subscribe((res: any) => {
-      setTimeout(() => {
+    this.isLoading.set(true);
+    this.professorService.getAll().subscribe({
+      next: (res: any) => {
         const data = res && res.data ? res.data : res;
         this.rawTeachers.set(data);
-      });
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading teachers:', err);
+        this.isLoading.set(false);
+        this.notificationService.error('Erro ao carregar lista de professores');
+      },
     });
   }
 
   teachers = computed(() => {
     const subjects = this.schoolData.subjects();
-    const subFilter = this.subjectFilterValue();
-    const statFilter = this.statusFilterValue();
+    const filters = this.appliedFilters();
+    const nameSearch = (filters.name || '').toLowerCase();
 
     return this.rawTeachers()
       .map((t) => {
@@ -110,14 +131,33 @@ export class ConsultaProfessor implements OnInit {
         };
       })
       .filter((t) => {
+        const matchesName = !nameSearch || t.name.toLowerCase().includes(nameSearch);
         const matchesSubject =
-          !subFilter ||
-          t.mainSubjectId === subFilter ||
-          (t.secondarySubjectIds || []).includes(subFilter);
-        const matchesStatus = !statFilter || t.status === statFilter;
-        return matchesSubject && matchesStatus;
+          !filters.subject ||
+          t.mainSubjectId === filters.subject ||
+          (t.secondarySubjectIds || []).includes(filters.subject);
+        return matchesName && matchesSubject;
       });
   });
+
+  toggleFilterPanel() {
+    this.isFilterPanelOpen.update((v) => !v);
+  }
+
+  applyFilters() {
+    this.appliedFilters.set({
+      name: this.nameFilter.value || '',
+      subject: this.subjectFilter.value,
+      unidade: this.unidadeFilter.value,
+    });
+  }
+
+  clearFilters() {
+    this.nameFilter.setValue('');
+    this.subjectFilter.setValue(null);
+    this.unidadeFilter.setValue(null);
+    this.applyFilters();
+  }
 
   navigateToNew() {
     this.router.navigate(['/professores/novo']);
@@ -128,21 +168,29 @@ export class ConsultaProfessor implements OnInit {
   }
 
   async deleteTeacher(id: string) {
+    const teacher = this.rawTeachers().find((t) => t.id === id);
     const confirmed = await this.confirmationService.confirm({
-      message: this.t().admin.teachers.deleteConfirm,
+      title: 'Confirmar Exclusão',
+      message: `Tem certeza que deseja excluir o professor ${teacher?.name || ''}? Esta ação não pode ser desfeita.`,
       confirmClass: 'btn-danger',
       confirmLabel: 'Excluir',
     });
 
     if (confirmed) {
-      this.professorService.delete(id).subscribe(() => {
-        this.loadTeachers();
+      this.professorService.delete(id).subscribe({
+        next: () => {
+          this.notificationService.success('Professor excluído com sucesso');
+          this.loadTeachers();
+        },
+        error: () => {
+          this.notificationService.error('Erro ao excluir professor');
+        },
       });
     }
   }
 
   getRemainingSubjectsTooltip(teacher: any): string {
-    const remaining = teacher.subjects.slice(2);
+    const remaining = teacher.subjects?.slice(2) || [];
     return remaining.map((s: any) => `${s.name} (${s.workload}h)`).join(', ');
   }
 }
