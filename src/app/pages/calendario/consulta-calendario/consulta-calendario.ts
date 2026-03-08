@@ -5,13 +5,25 @@ import { EventoService, Evento } from '../../../core/services/evento.service';
 import { addMonths, subMonths, startOfToday, format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CalendarModule, CalendarView, CalendarEvent } from 'angular-calendar';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ModalManageEventComponent } from '../../../core/components/modals/modal-manage-event/modal-manage-event.component';
 import { ModalManageListComponent } from '../../../core/components/modals/modal-manage-list/modal-manage-list.component';
+import { SelectComponent } from '../../../core/components/select/select.component';
+import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
 
 @Component({
   selector: 'app-consulta-calendario',
   standalone: true,
-  imports: [CommonModule, CalendarModule, ModalManageEventComponent, ModalManageListComponent],
+  imports: [
+    CommonModule,
+    CalendarModule,
+    ModalManageEventComponent,
+    ModalManageListComponent,
+    FormsModule,
+    ReactiveFormsModule,
+    SelectComponent,
+    TextInputComponent,
+  ],
   templateUrl: './consulta-calendario.html',
   styleUrl: './consulta-calendario.scss',
 })
@@ -36,16 +48,44 @@ export class ConsultaCalendario implements OnInit {
   // State
   isModalOpen = signal(false);
   activeFilters = signal<string[]>([]);
+  showFilters = signal(false);
+
+  filterName = new FormControl('');
+  filterCategory = new FormControl<string>('Todas');
 
   // Sincronizar filtros ativos com as categorias disponíveis
   private syncFilters = effect(
     () => {
       const cats = this.eventCategories();
-      // Na primeira carga ou se categorias mudarem, selecionamos tudo por padrão
-      this.activeFilters.set(cats);
+      // Na primeira carga ou se categorias mudarem, selecionamos tudo por padrão se estiver em 'Todas'
+      if (this.filterCategory.value === 'Todas' || !this.filterCategory.value) {
+        this.activeFilters.set(cats);
+        this.filterCategory.setValue('Todas', { emitEvent: false });
+      }
     },
     { allowSignalWrites: true },
   );
+
+  constructor() {
+    effect(() => {
+      const updated = this.eventoService.eventosUpdated();
+      this.loadEvents();
+    });
+
+    this.filterCategory.valueChanges.subscribe((val) => {
+      if (val === 'Todas' || !val) {
+        this.activeFilters.set(this.eventCategories());
+      } else {
+        this.activeFilters.set([val]);
+      }
+    });
+
+    // Sub to clear event by name
+    this.filterName.valueChanges.subscribe((val) => {
+      // Re-trigger computed when name changes
+      this.activeFilters.set([...this.activeFilters()]);
+    });
+  }
 
   // Events Data
   rawEvents = signal<Evento[]>([]);
@@ -53,8 +93,11 @@ export class ConsultaCalendario implements OnInit {
   // Computed for Calendar Events
   events = computed<CalendarEvent[]>(() => {
     const filters = this.activeFilters();
+    const nameFilter = this.filterName.value?.toLowerCase() || '';
+
     return this.rawEvents()
       .filter((e) => filters.includes(e.categoria))
+      .filter((e) => !nameFilter || e.titulo.toLowerCase().includes(nameFilter))
       .map((e) => ({
         id: e.id,
         start: e.dataInicio ? parseISO(e.dataInicio) : new Date(),
@@ -77,12 +120,12 @@ export class ConsultaCalendario implements OnInit {
     return format(this.viewDate(), 'MMMM yyyy', { locale: ptBR });
   });
 
-  constructor() {
-    effect(() => {
-      const updated = this.eventoService.eventosUpdated();
-      this.loadEvents();
-    });
-  }
+  categoryOptions = computed(() => {
+    return [
+      { value: 'Todas', label: 'Todas as Categorias' },
+      ...this.eventCategories().map((cat) => ({ value: cat, label: cat })),
+    ];
+  });
 
   ngOnInit() {
     this.loadEvents();
@@ -138,6 +181,16 @@ export class ConsultaCalendario implements OnInit {
   handleEventClick(event: CalendarEvent) {
     this.isModalOpen.set(true);
     this.eventModal.startEdit(event.meta);
+  }
+
+  toggleFilters() {
+    this.showFilters.update((s) => !s);
+  }
+
+  clearFilters() {
+    this.filterName.setValue('');
+    this.filterCategory.setValue('Todas');
+    this.activeFilters.set(this.eventCategories());
   }
 
   // Filters

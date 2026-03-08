@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -12,11 +12,20 @@ import { TranslationService } from '../../../services/translation.service';
 import { MatIconModule } from '@angular/material/icon';
 import { NotificationService } from '../../../services/notification.service';
 import { format, setHours, setMinutes, parseISO } from 'date-fns';
+import { TextInputComponent } from '../../text-input/text-input.component';
+import { SelectComponent } from '../../select/select.component';
 
 @Component({
   selector: 'app-modal-manage-event',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, MatIconModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    MatIconModule,
+    TextInputComponent,
+    SelectComponent,
+  ],
   templateUrl: './modal-manage-event.component.html',
   styleUrls: ['./modal-manage-event.component.scss'],
 })
@@ -37,6 +46,10 @@ export class ModalManageEventComponent {
   isSubmitting = signal(false);
 
   categories = this.eventoService.eventCategories;
+  categoryOptions = computed(() => {
+    return this.categories().map((c) => ({ value: c, label: c }));
+  });
+
   @Output() onCategoryManage = new EventEmitter<void>();
 
   constructor() {

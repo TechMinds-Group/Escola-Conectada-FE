@@ -1,161 +1,214 @@
 <div class="container-fluid py-4 pb-5">
   <!-- Header -->
-  <div
-    class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mb-4 text-center text-md-start"
-  >
-    <div class="w-100 w-md-auto">
-      <h2 class="fw-bold mb-0 text-primary fs-4 fs-md-2">{{ t().admin.calendar.title }}</h2>
-      <p class="text-muted mb-0 small">{{ t().admin.calendar.subtitle }}</p>
-    </div>
+  <header class="mb-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-auto">
+        <h2 class="fw-bold mb-0 text-primary fs-3">{{ t().admin.calendar.title }}</h2>
+        <p class="text-muted mb-0 small opacity-75">{{ t().admin.calendar.subtitle }}</p>
+      </div>
 
-    <!-- Navigation (Central) -->
-    <div
-      class="d-flex align-items-center justify-content-center justify-content-md-start flex-wrap gap-2 gap-md-3 w-100 w-md-auto"
-    >
-      <div class="btn-group shadow-sm">
+      <div class="col-12 col-lg-auto ms-lg-auto">
         <button
-          class="btn btn-light border bg-white rounded-start-4 px-3"
-          (click)="decrementDate()"
+          class="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-4 py-2 shadow-sm fw-bold transition-hover rounded-3 w-100"
+          (click)="navigateToNew()"
         >
-          <i class="bi bi-chevron-left"></i>
+          <i class="bi bi-plus-lg fs-5"></i>
+          {{ t().admin.calendar.buttons.new }}
         </button>
-        <button class="btn btn-light border bg-white px-3 fw-bold" (click)="today()">Hoje</button>
-        <button class="btn btn-light border bg-white rounded-end-4 px-3" (click)="incrementDate()">
-          <i class="bi bi-chevron-right"></i>
-        </button>
-      </div>
-
-      <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
-        <span
-          class="badge nav-month-badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill text-capitalize fw-bold fs-6 shadow-sm"
-        >
-          {{ viewMonth() }}
-        </span>
-        <span
-          class="badge nav-year-badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-2 rounded-pill fw-bold fs-6 shadow-sm"
-        >
-          {{ viewYear() }}
-        </span>
       </div>
     </div>
+  </header>
 
-    <!-- Mobile FAB -->
-    <div
-      class="d-md-none position-fixed bottom-0 end-0 m-4 z-3"
-      style="margin-bottom: 5rem !important"
-    >
-      <button
-        class="btn btn-primary rounded-circle shadow-lg p-0 d-flex align-items-center justify-content-center"
-        style="width: 56px; height: 56px"
-        (click)="navigateToNew()"
+  <!-- Controls and Filters Row -->
+  <div class="row mb-3 animate-in align-items-center justify-content-between g-3">
+    <!-- Calendar Navigation & Date -->
+    <div class="col-12 col-lg-auto order-2 order-lg-1">
+      <div
+        class="d-flex flex-column flex-lg-row align-items-lg-center gap-3 gap-lg-2 justify-content-lg-start w-100"
       >
-        <i class="bi bi-plus-lg fs-3 text-white"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- Filters Card & Actions -->
-  <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-      <div class="d-flex align-items-center gap-3">
-        <span class="text-muted small fw-bold text-uppercase tracking-wider">Filtros:</span>
-
-        <div class="dropdown" tourAnchor="calendarFilterDropdown">
+        <div class="btn-group shadow-sm w-100 w-lg-auto d-flex">
           <button
-            class="btn btn-white border bg-white rounded-3 px-3 py-2 d-flex align-items-center gap-2 shadow-sm dropdown-toggle fw-semibold"
-            type="button"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
+            class="btn btn-white border rounded-start-4 px-3 py-2 transition-hover flex-fill"
+            (click)="decrementDate()"
           >
-            <i class="bi bi-funnel text-primary"></i>
-            Categorias
-            <span
-              class="badge bg-primary rounded-pill small ms-1"
-              *ngIf="activeFilters().length < eventCategories().length"
-            >
-              {{ activeFilters().length }}
-            </span>
+            <i class="bi bi-chevron-left"></i>
           </button>
-          <ul class="dropdown-menu shadow border-0 rounded-4 p-2" style="min-width: 220px">
-            <li *ngFor="let cat of eventCategories()">
-              <label
-                class="dropdown-item d-flex align-items-center gap-2 rounded-3 py-2 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  class="form-check-input mt-0"
-                  [checked]="isFilterActive(cat)"
-                  (change)="toggleFilter(cat)"
-                />
-                <span class="fw-medium">{{ cat }}</span>
-              </label>
-            </li>
-            <li class="dropdown-divider opacity-50"></li>
-            <li>
-              <button
-                class="dropdown-item text-center small text-primary fw-bold rounded-3"
-                (click)="activeFilters.set(eventCategories())"
-              >
-                Selecionar Todas
-              </button>
-            </li>
-          </ul>
+          <button
+            class="btn btn-white border px-3 py-2 fw-bold transition-hover flex-fill"
+            (click)="today()"
+          >
+            Hoje
+          </button>
+          <button
+            class="btn btn-white border rounded-end-4 px-3 py-2 transition-hover flex-fill"
+            (click)="incrementDate()"
+          >
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-center gap-2 w-100 w-lg-auto">
+          <span
+            class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill text-capitalize fw-bold fs-6 shadow-xs flex-fill text-center"
+          >
+            {{ viewMonth() }}
+          </span>
+          <span
+            class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 rounded-pill fw-bold fs-6 shadow-xs flex-fill text-center"
+          >
+            {{ viewYear() }}
+          </span>
         </div>
       </div>
+    </div>
 
-      <!-- New Event Button (Visible in Desktop row) -->
+    <!-- Filter Toggle Button -->
+    <div class="col-12 col-lg-auto ms-lg-auto order-1 order-lg-2">
       <button
-        class="btn btn-primary d-none d-md-flex align-items-center gap-2 px-4 py-2 shadow-sm fw-bold rounded-4"
-        (click)="navigateToNew()"
+        class="btn d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 transition-hover border shadow-xs w-100"
+        [class.btn-primary]="showFilters()"
+        [class.btn-light]="!showFilters()"
+        (click)="toggleFilters()"
       >
-        <i class="bi bi-plus-lg fs-5"></i>
-        {{ t().admin.calendar.buttons.new }}
+        <i
+          class="bi text-dark"
+          [class.bi-funnel]="!showFilters()"
+          [class.bi-chevron-up]="showFilters()"
+        ></i>
+        <span class="fw-bold">Filtros</span>
+        @if (activeFilters().length < eventCategories().length) {
+          <span
+            class="badge rounded-circle bg-primary p-1 ms-1"
+            style="width: 8px; height: 8px"
+          ></span>
+        }
       </button>
     </div>
   </div>
 
-  <!-- Calendar Rendering -->
-  <div class="card border-0 shadow-sm rounded-4 overflow-hidden" [ngSwitch]="calendarView">
-    <mwl-calendar-month-view
-      *ngSwitchCase="CalendarView.Month"
-      [viewDate]="viewDate()"
-      [events]="events()"
-      [locale]="'pt-BR'"
-      [weekStartsOn]="0"
-      [cellTemplate]="monthCellTemplate"
-      (dayClicked)="handleDayClick($event.day.date)"
-      (eventClicked)="handleEventClick($event.event)"
-    >
-    </mwl-calendar-month-view>
+  <!-- Retractable Filter Panel -->
+  @if (showFilters()) {
+    <section class="filters-panel mb-4 animate-in">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-12 col-md-6">
+              <tm-text
+                [formControl]="filterName"
+                placeholder="Ex: Reunião Pedagógica"
+                icon="bi-search"
+                label="Nome do Evento"
+              ></tm-text>
+            </div>
+            <div class="col-12 col-md-6">
+              <tm-select
+                [formControl]="filterCategory"
+                [options]="categoryOptions()"
+                placeholder="Selecione..."
+                icon="bi-tags"
+                label="Categoria"
+              ></tm-select>
+            </div>
+          </div>
 
-    <!-- Template Customizado para Célula do Mês -->
-    <ng-template #monthCellTemplate let-day="day" let-openDay="openDay" let-locale="locale">
-      <div class="cal-cell-top">
-        <span class="cal-day-number">{{
-          day.date | calendarDate: 'monthViewDayNumber' : locale
-        }}</span>
-      </div>
-      <div class="cal-events">
-        <div
-          *ngFor="let event of day.events"
-          class="cal-event"
-          [style.backgroundColor]="event.color?.primary"
-          [title]="event.title"
-          (click)="$event.stopPropagation(); handleEventClick(event)"
-        >
-          {{ event.title }}
+          <div class="pt-3 mt-4 border-top d-flex justify-content-end gap-2">
+            <button
+              class="btn btn-light rounded-3 px-4 py-2 fw-bold text-muted transition-hover border bg-surface"
+              (click)="clearFilters()"
+            >
+              Limpar
+            </button>
+            <button
+              class="btn btn-primary rounded-3 px-4 py-2 fw-bold transition-hover shadow-sm"
+              (click)="toggleFilters()"
+            >
+              Aplicar Filtros
+            </button>
+          </div>
         </div>
       </div>
-    </ng-template>
+    </section>
+  }
 
-    <mwl-calendar-day-view
-      *ngSwitchCase="CalendarView.Day"
-      [viewDate]="viewDate()"
-      [events]="events()"
-      [locale]="'pt-BR'"
-      (eventClicked)="handleEventClick($event.event)"
+  <!-- Active Filters Badges -->
+  @if (activeFilters().length < eventCategories().length && activeFilters().length > 0) {
+    <div class="d-flex flex-wrap gap-2 mb-4 animate-in">
+      <span
+        class="badge bg-primary-subtle text-primary border-0 px-3 py-2 rounded-pill d-flex align-items-center gap-2"
+      >
+        {{ activeFilters()[0] }}
+        <i class="bi bi-x-lg cursor-pointer" (click)="clearFilters()"></i>
+      </span>
+    </div>
+  }
+
+  <div class="w-100 pb-4">
+    <!-- Calendar Rendering -->
+    <main
+      class="card border-0 shadow-sm rounded-4 overflow-hidden bg-surface w-100"
+      [ngSwitch]="calendarView"
     >
-    </mwl-calendar-day-view>
+      <mwl-calendar-month-view
+        *ngSwitchCase="CalendarView.Month"
+        [viewDate]="viewDate()"
+        [events]="events()"
+        [locale]="'pt-BR'"
+        [weekStartsOn]="0"
+        [headerTemplate]="customHeaderTemplate"
+        [cellTemplate]="monthCellTemplate"
+        (dayClicked)="handleDayClick($event.day.date)"
+        (eventClicked)="handleEventClick($event.event)"
+      >
+      </mwl-calendar-month-view>
+
+      <!-- Template Customizado para o Cabeçalho Responsivo -->
+      <ng-template #customHeaderTemplate let-days="days" let-locale="locale">
+        <div class="cal-cell-row cal-header d-flex text-center border-bottom">
+          <div
+            class="cal-cell flex-fill fw-bold text-uppercase py-2 text-secondary"
+            *ngFor="let day of days"
+          >
+            <!-- Tela Grande: Nome original (ex: segunda-feira) -->
+            <span class="d-none d-lg-block">{{
+              day.date | calendarDate: 'monthViewColumnHeader' : locale
+            }}</span>
+            <!-- Tela Pequena/Média: Apenas 3 letras (ex: seg) -->
+            <span class="d-block d-lg-none">{{
+              day.date | calendarDate: 'monthViewColumnHeader' : locale | slice: 0 : 3
+            }}</span>
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- Template Customizado para Célula do Mês -->
+      <ng-template #monthCellTemplate let-day="day" let-openDay="openDay" let-locale="locale">
+        <div class="cal-cell-top">
+          <span class="cal-day-number">{{
+            day.date | calendarDate: 'monthViewDayNumber' : locale
+          }}</span>
+        </div>
+        <div class="cal-events">
+          <div
+            *ngFor="let event of day.events"
+            class="cal-event"
+            [style.backgroundColor]="event.color?.primary"
+            [title]="event.title"
+            (click)="$event.stopPropagation(); handleEventClick(event)"
+          >
+            {{ event.title }}
+          </div>
+        </div>
+      </ng-template>
+
+      <mwl-calendar-day-view
+        *ngSwitchCase="CalendarView.Day"
+        [viewDate]="viewDate()"
+        [events]="events()"
+        [locale]="'pt-BR'"
+        (eventClicked)="handleEventClick($event.event)"
+      >
+      </mwl-calendar-day-view>
+    </main>
   </div>
 
   <!-- Event Modal -->

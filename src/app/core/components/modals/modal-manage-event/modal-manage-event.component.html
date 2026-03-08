@@ -9,7 +9,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
         <!-- Header -->
-        <div class="modal-header bg-primary text-white border-0 py-3">
+        <div class="modal-header bg-primary text-white border-0 py-3 px-4">
           <h5 class="modal-title fw-bold">
             <i class="bi bi-calendar-event me-2"></i>
             {{ editingEventId() ? 'Editar Evento' : 'Novo Evento' }}
@@ -23,50 +23,52 @@
         </div>
 
         <!-- Body -->
-        <div class="modal-body p-4">
-          <form [formGroup]="eventForm">
-            <div class="mb-3">
-              <label class="form-label small fw-bold text-muted text-uppercase"
-                >Título do Evento</label
-              >
-              <input
-                type="text"
-                class="form-control bg-light border-0 rounded-3"
+        <div class="modal-body p-4 bg-surface">
+          <form [formGroup]="eventForm" class="row g-3">
+            <div class="col-12">
+              <tm-text
                 formControlName="titulo"
+                label="Título do Evento"
                 placeholder="Ex: Prova de Matemática"
-              />
+                icon="bi-pen"
+              ></tm-text>
             </div>
 
-            <div class="row g-3 mb-3">
-              <div class="col-6">
-                <label class="form-label small fw-bold text-muted text-uppercase">Início</label>
-                <input
-                  type="datetime-local"
-                  class="form-control bg-light border-0 rounded-3"
-                  formControlName="dataInicio"
-                />
-              </div>
-              <div class="col-6">
-                <label class="form-label small fw-bold text-muted text-uppercase">Término</label>
-                <input
-                  type="datetime-local"
-                  class="form-control bg-light border-0 rounded-3"
-                  formControlName="dataFim"
-                />
-              </div>
+            <div class="col-12">
+              <tm-text
+                type="datetime-local"
+                formControlName="dataInicio"
+                label="Início"
+                icon="bi-calendar-plus"
+              ></tm-text>
             </div>
 
-            <div class="mb-3">
-              <label class="form-label small fw-bold text-muted text-uppercase">Categoria</label>
-              <div class="d-flex gap-2">
-                <select class="form-select bg-light border-0 rounded-3" formControlName="categoria">
-                  <option value="">Selecione...</option>
-                  <option *ngFor="let cat of categories()" [value]="cat">{{ cat }}</option>
-                </select>
+            <div class="col-12">
+              <tm-text
+                type="datetime-local"
+                formControlName="dataFim"
+                label="Término"
+                icon="bi-calendar-check"
+              ></tm-text>
+            </div>
+
+            <div class="col-12">
+              <div class="d-flex align-items-end gap-2">
+                <div class="flex-grow-1">
+                  <tm-select
+                    formControlName="categoria"
+                    label="Categoria"
+                    placeholder="Selecione..."
+                    [options]="categoryOptions()"
+                    icon="bi-tags"
+                  ></tm-select>
+                </div>
+                <!-- Align the settings button vertically matching tm-select input height roughly (input is ~42px, margin-bottom depends on layout) -->
+                <!-- tm-select usually has a label with mb-2. The input itself is around 40px height. -->
                 <button
                   type="button"
-                  class="btn btn-outline-primary rounded-3 d-flex align-items-center justify-content-center border-0 bg-light"
-                  style="width: 44px"
+                  class="btn btn-outline-primary rounded-3 d-flex align-items-center justify-content-center border shadow-xs transition-hover"
+                  style="width: 44px; height: 42px; margin-top: 26px"
                   title="Gerenciar Categorias"
                   (click)="onCategoryManage.emit()"
                 >
@@ -75,43 +77,45 @@
               </div>
             </div>
 
-            <div class="mb-0">
-              <label class="form-label small fw-bold text-muted text-uppercase"
+            <div class="col-12">
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider mb-2"
                 >Descrição (Opcional)</label
               >
               <textarea
-                class="form-control bg-light border-0 rounded-3"
+                class="form-control bg-light border-0 rounded-3 shadow-sm custom-scrollbar transition-all"
                 formControlName="descricao"
                 rows="3"
-                placeholder="Detalhes adicionais..."
+                placeholder="Detalhes adicionais do evento..."
               ></textarea>
             </div>
           </form>
         </div>
 
         <!-- Footer -->
-        <div class="modal-footer border-0 p-4 pt-0 d-flex justify-content-between">
-          <div>
+        <div
+          class="modal-footer border-top-0 bg-surface p-4 pt-2 d-flex justify-content-between align-items-center flex-wrap gap-3"
+        >
+          <div class="order-2 order-md-1 w-100 w-md-auto text-center text-md-start">
             <button
               *ngIf="editingEventId()"
               type="button"
-              class="btn btn-outline-danger border-0 fw-bold"
+              class="btn btn-danger text-white border-0 fw-bold shadow-xs transition-hover rounded-3"
               (click)="deleteEvent()"
             >
               <i class="bi bi-trash me-1"></i> Excluir
             </button>
           </div>
-          <div class="d-flex gap-2">
+          <div class="d-flex gap-2 w-100 w-md-auto order-1 order-md-2 justify-content-end">
             <button
               type="button"
-              class="btn btn-light px-4 fw-bold text-muted border-0"
+              class="btn btn-light px-4 fw-bold text-muted border transition-hover rounded-3"
               (click)="closeModal()"
             >
               Cancelar
             </button>
             <button
               type="button"
-              class="btn btn-primary px-4 fw-bold shadow-sm"
+              class="btn btn-primary px-4 fw-bold shadow-sm transition-hover rounded-3"
               (click)="saveEvent()"
               [disabled]="isSubmitting()"
             >

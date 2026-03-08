@@ -9,17 +9,6 @@
 
 // Estilo de contraste para o cabeçalho (apenas tema claro)
 :host-context(:not([data-theme='dark'])) {
-  .nav-month-badge {
-    color: #004085 !important; // Azul marinho para contraste
-    background-color: #cce5ff !important;
-    border-color: #b8daff !important;
-  }
-  .nav-year-badge {
-    color: #383d41 !important; // Cinza escuro para contraste
-    background-color: #e2e3e5 !important;
-    border-color: #d6d8db !important;
-  }
-
   .dropdown-item {
     transition: all 0.2s ease;
     &:active {
@@ -47,17 +36,6 @@
 
 // Suporte ao Modo Escuro para elementos customizados
 :host-context([data-theme='dark']) {
-  .nav-month-badge {
-    color: #79c0ff !important;
-    background-color: rgba(13, 110, 253, 0.15) !important;
-    border-color: rgba(121, 192, 255, 0.2) !important;
-  }
-  .nav-year-badge {
-    color: #cbd5e0 !important;
-    background-color: rgba(255, 255, 255, 0.05) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-  }
-
   .btn-white {
     background-color: var(--input-bg) !important;
     border-color: var(--border-color) !important;
@@ -110,21 +88,35 @@
       display: flex !important;
       flex-direction: column !important;
       align-items: stretch !important;
-      border-right: 1px solid #e0e0e0;
-      border-bottom: 1px solid #e0e0e0;
+      border-right: 1px solid var(--border-color, #e0e0e0);
+      border-bottom: 1px solid var(--border-color, #e0e0e0);
       transition: background-color 0.2s;
       padding-bottom: 5px;
 
       &:hover {
-        background-color: #f8f9fa;
+        background-color: var(--bs-light, #f8f9fa);
       }
 
       &.cal-today {
-        background-color: #e7f1ff;
+        background-color: var(--bs-primary-bg-subtle, #e7f1ff);
       }
 
       .cal-cell-top {
         flex: 0 0 auto;
+
+        .cal-day-number {
+          font-size: 1.1rem;
+          font-weight: 500;
+          transition: font-size 0.2s;
+
+          @media (max-width: 991.98px) {
+            font-size: 0.95rem; /* Ajuste para tablets pequenos lg-down */
+          }
+
+          @media (max-width: 767.98px) {
+            font-size: 0.8rem; /* Ajuste para celulares md-down */
+          }
+        }
       }
     }
 
@@ -142,10 +134,10 @@
       font-weight: bold;
       text-transform: uppercase;
       font-size: 0.8rem;
-      color: #6c757d;
+      color: var(--text-secondary, #6c757d);
       padding: 12px 0;
-      background-color: #f8f9fa;
-      border-bottom: 1px solid #e0e0e0;
+      background-color: var(--surface-color, #f8f9fa);
+      border-bottom: 1px solid var(--border-color, #e0e0e0);
     }
   }
 
@@ -154,7 +146,7 @@
     height: auto !important;
     padding: 4px 8px !important;
     margin: 0 !important;
-    border-radius: 4px !important;
+    border-radius: 6px !important;
     font-size: 0.72rem !important;
     font-weight: 600 !important;
     display: block !important;
@@ -174,7 +166,7 @@
 
   .cal-day-view {
     .cal-hour-rows {
-      background-color: white;
+      background-color: var(--surface-color, white);
     }
     .cal-event {
       border-radius: 8px;
@@ -199,11 +191,11 @@
       border-bottom-color: var(--border-color) !important;
 
       &:hover {
-        background-color: rgba(0, 0, 0, 0.6) !important;
+        background-color: rgba(0, 0, 0, 0.85) !important;
       }
 
       &.cal-today {
-        background-color: rgba(13, 110, 253, 0.15) !important;
+        background-color: rgba(0, 0, 0, 0.85) !important;
       }
 
       &.cal-out-month {
@@ -237,7 +229,7 @@
     }
 
     .cal-hour-segment:hover {
-      background-color: rgba(0, 0, 0, 0.6) !important;
+      background-color: rgba(0, 0, 0, 0.85) !important;
     }
 
     .cal-time {

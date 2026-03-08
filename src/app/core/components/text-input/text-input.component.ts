@@ -20,11 +20,17 @@ import { MaskDirective } from '../../directives/mask.directive';
         [class.invalid]="isInvalid()"
       >
         @if (icon) {
-          <div class="icon-section ps-3 py-2 d-flex align-items-center justify-content-center">
+          <div
+            class="icon-section ps-3 py-2 d-flex align-items-center justify-content-center"
+            [class.cursor-pointer]="isDatePicker()"
+            (mousedown)="isDatePicker() ? $event.preventDefault() : null"
+            (click)="openPicker(inputEl)"
+          >
             <i [class]="icon" class="text-primary fs-5"></i>
           </div>
         }
         <input
+          #inputEl
           [type]="type"
           [placeholder]="placeholder"
           [disabled]="disabled"
@@ -36,6 +42,7 @@ import { MaskDirective } from '../../directives/mask.directive';
           [attr.maxlength]="maxlength || null"
           [attr.inputmode]="inputmode || (type === 'number' ? 'numeric' : null)"
           [attr.pattern]="type === 'number' ? '[0-9]*' : null"
+          lang="pt-BR"
           class="custom-input flex-grow-1 fw-bold border-0 bg-transparent"
         />
         @if (suffix) {
@@ -100,6 +107,17 @@ import { MaskDirective } from '../../directives/mask.directive';
           outline: none;
         }
 
+        /* Oculta o ícone nativo de calendário do navegador que fica duplicado com o nosso */
+        &::-webkit-calendar-picker-indicator {
+          display: none;
+          -webkit-appearance: none;
+        }
+
+        /* Força padrão 24h ocultando o campo AM/PM nativo em navegadores Webkit */
+        &::-webkit-datetime-edit-ampm-field {
+          display: none;
+        }
+
         &::placeholder {
           color: rgba(var(--text-secondary-rgb), 0.5);
           font-weight: 500;
@@ -143,6 +161,10 @@ import { MaskDirective } from '../../directives/mask.directive';
 
       /* Dark Mode Specific Overrides */
       :host-context([data-theme='dark']) {
+        .custom-input {
+          color-scheme: dark;
+        }
+
         .input-wrapper {
           background-color: var(--input-bg);
           border-color: rgba(255, 255, 255, 0.1);
@@ -187,6 +209,24 @@ export class TextInputComponent implements ControlValueAccessor {
     if (!this.control) return false;
     return this.control.invalid && (this.control.dirty || this.control.touched);
   });
+
+  isDatePicker(): boolean {
+    return this.type === 'date' || this.type === 'datetime-local' || this.type === 'time';
+  }
+
+  openPicker(inputEl: HTMLInputElement) {
+    if (this.isDatePicker()) {
+      try {
+        if (document.activeElement === inputEl) {
+          inputEl.blur(); // Fecha o picker nativo removendo o foco
+        } else {
+          inputEl.showPicker(); // Abre o picker nativo
+        }
+      } catch (e) {
+        inputEl.focus();
+      }
+    }
+  }
 
   writeValue(value: any): void {
     this.internalValue.set(value ?? '');
