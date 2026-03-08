@@ -81,21 +81,21 @@ export const routes: Routes = [
           {
             path: '',
             loadComponent: () =>
-              import('./pages/registros/avisos/consulta-avisos/consulta-avisos').then(
+              import('./pages/avisos/consulta-avisos/consulta-avisos').then(
                 (m) => m.ConsultaAvisos,
               ),
           },
           {
             path: 'new',
             loadComponent: () =>
-              import('./pages/registros/avisos/cadastro-avisos/cadastro-avisos').then(
+              import('./pages/avisos/cadastro-avisos/cadastro-avisos').then(
                 (m) => m.CadastroAvisos,
               ),
           },
           {
             path: 'edit/:id',
             loadComponent: () =>
-              import('./pages/registros/avisos/cadastro-avisos/cadastro-avisos').then(
+              import('./pages/avisos/cadastro-avisos/cadastro-avisos').then(
                 (m) => m.CadastroAvisos,
               ),
           },

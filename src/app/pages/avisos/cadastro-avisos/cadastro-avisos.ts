@@ -8,14 +8,17 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AvisoService, Aviso } from '../../../../core/services/aviso.service';
-import { TranslationService } from '../../../../core/services/translation.service';
-import { ConfirmationService } from '../../../../core/services/confirmation.service';
-import { NotificationService } from '../../../../core/services/notification.service';
-import { ButtonDeleteComponent } from '../../../../core/components/buttons/button-delete';
-import { ButtonEditComponent } from '../../../../core/components/buttons/button-edit';
-import { ButtonSaveComponent } from '../../../../core/components/buttons/button-save';
-import { ButtonCancelComponent } from '../../../../core/components/buttons/button-cancel';
+import { ButtonDeleteComponent } from '../../../core/components/buttons/button-delete';
+import { ButtonEditComponent } from '../../../core/components/buttons/button-edit';
+import { ButtonSaveComponent } from '../../../core/components/buttons/button-save';
+import { ButtonCancelComponent } from '../../../core/components/buttons/button-cancel';
+import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
+import { SelectComponent } from '../../../core/components/select/select.component';
+import { TmDateComponent } from '../../../core/components/tm-date/tm-date.component';
+import { Aviso, AvisoService } from '../../../core/services/aviso.service';
+import { TranslationService } from '../../../core/services/translation.service';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-cadastro-avisos',
@@ -28,6 +31,9 @@ import { ButtonCancelComponent } from '../../../../core/components/buttons/butto
     ButtonEditComponent,
     ButtonSaveComponent,
     ButtonCancelComponent,
+    TextInputComponent,
+    SelectComponent,
+    TmDateComponent,
   ],
   templateUrl: './cadastro-avisos.html',
   styleUrl: './cadastro-avisos.scss',
@@ -47,12 +53,15 @@ export class CadastroAvisos implements OnInit {
   isViewMode = signal(false);
   avisoId = signal<string | null>(null);
   saveAttempted = signal(false);
+  isSaving = signal(false);
 
   constructor() {
     this.avisoForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
       content: ['', [Validators.required, Validators.maxLength(150)]],
       type: ['Informativo', Validators.required],
+      startDate: [new Date().toISOString().split(':').slice(0, 2).join(':'), Validators.required],
+      expirationDate: [null],
     });
   }
 
@@ -75,6 +84,8 @@ export class CadastroAvisos implements OnInit {
           title: aviso.title,
           content: aviso.content,
           type: aviso.type,
+          startDate: aviso.startDate,
+          expirationDate: aviso.expirationDate || null,
         });
       },
       error: (err) => {
@@ -98,38 +109,45 @@ export class CadastroAvisos implements OnInit {
   }
 
   onCancel() {
-    this.router.navigate(['/avisos']);
+    if (this.isEditMode() && !this.isViewMode()) {
+      this.cancelEdit();
+    } else {
+      this.router.navigate(['/avisos']);
+    }
   }
 
   onSubmit() {
     this.saveAttempted.set(true);
     if (this.avisoForm.valid) {
-      const formValue = this.avisoForm.value;
+      this.isSaving.set(true);
+      const formValue = this.avisoForm.getRawValue();
       const id = this.avisoId();
 
-      if (this.isEditMode() && id) {
-        this.avisoService.update(id, formValue).subscribe({
-          next: () => {
-            this.notificationService.success('Aviso atualizado com sucesso!');
-            this.router.navigate(['/avisos']);
-          },
-          error: (err) => {
-            console.error('Erro ao atualizar aviso:', err);
-            this.notificationService.error('Erro ao atualizar aviso.');
-          },
-        });
-      } else {
-        this.avisoService.save(formValue).subscribe({
-          next: () => {
-            this.notificationService.success('Aviso criado com sucesso!');
-            this.router.navigate(['/avisos']);
-          },
-          error: (err) => {
-            console.error('Erro ao cadastrar aviso:', err);
-            this.notificationService.error('Erro ao cadastrar aviso.');
-          },
-        });
-      }
+      const payload: Aviso = {
+        ...formValue,
+        id: id || undefined,
+        active: true, // Default for new and current updates
+      };
+
+      const request$ =
+        this.isEditMode() && id
+          ? this.avisoService.update(id, payload)
+          : this.avisoService.save(payload);
+
+      request$.subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.notificationService.success(
+            this.isEditMode() ? 'Aviso atualizado com sucesso!' : 'Aviso criado com sucesso!',
+          );
+          this.router.navigate(['/avisos']);
+        },
+        error: (err) => {
+          this.isSaving.set(false);
+          console.error('Erro ao processar aviso:', err);
+          this.notificationService.error('Erro ao salvar aviso.');
+        },
+      });
     } else {
       this.avisoForm.markAllAsTouched();
     }
@@ -158,4 +176,10 @@ export class CadastroAvisos implements OnInit {
       }
     }
   }
+
+  typeOptions = computed(() => [
+    { value: 'Informativo', label: this.t().admin.notices.form.types.Informativo },
+    { value: 'Urgente', label: this.t().admin.notices.form.types.Urgente },
+    { value: 'Sucesso', label: this.t().admin.notices.form.types.Sucesso },
+  ]);
 }

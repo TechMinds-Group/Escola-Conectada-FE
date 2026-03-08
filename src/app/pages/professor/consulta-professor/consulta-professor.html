@@ -104,7 +104,7 @@
       ]"
       [data]="teachers()"
       [isLoading]="isLoading()"
-      (rowClick)="navigateToEdit($event.id)"
+      (rowClick)="navigateToEdit($event.id!)"
     ></tm-table>
     <!-- Teacher Column Template -->
     <ng-template #teacherTpl let-teacher>
@@ -218,7 +218,7 @@
     @for (teacher of teachers(); track teacher.id) {
       <div
         class="card border-0 shadow-sm rounded-4 p-3 bg-surface transition-hover"
-        (click)="navigateToEdit(teacher.id)"
+        (click)="navigateToEdit(teacher.id!)"
       >
         <div class="d-flex align-items-center gap-3 mb-3">
           <div class="position-relative">

@@ -1,0 +1,104 @@
+<div class="container-fluid py-4 pb-5">
+  <!-- Header SaaS Style -->
+  <header class="mb-4">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-lg-auto">
+        <div class="d-flex align-items-center gap-3">
+          <button
+            class="btn transition-hover border-0 shadow-sm bg-surface btn-back-responsive"
+            (click)="onCancel()"
+            title="Voltar"
+          >
+            <i class="bi bi-arrow-left fs-5 text-primary"></i>
+          </button>
+          <div>
+            <h2 class="fw-bold mb-0 text-primary fs-3 text-truncate" style="max-width: 300px">
+              {{ avisoId() ? (isViewMode() ? 'Detalhes do Aviso' : 'Editar Aviso') : 'Novo Aviso' }}
+            </h2>
+            <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+              {{ avisoId() ? 'Gerenciamento de aviso' : 'Cadastro de novo aviso' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-auto ms-auto">
+        <div class="row g-2 justify-content-end align-items-center">
+          @if (avisoId()) {
+            <div class="col-12 col-lg-auto order-3 order-lg-1">
+              <app-button-delete (onClick)="deleteAviso()" [isSolid]="true"></app-button-delete>
+            </div>
+            <div class="col-auto d-none d-lg-block order-2">
+              <div class="vr opacity-25" style="height: 30px"></div>
+            </div>
+          }
+
+          @if (isViewMode()) {
+            <div class="col-12 col-lg-auto order-1 order-lg-3">
+              <app-button-edit (onClick)="enableEdit()"></app-button-edit>
+            </div>
+          } @else {
+            <div class="col-12 col-lg-auto order-2 order-lg-2">
+              <app-button-cancel (onClick)="cancelEdit()"></app-button-cancel>
+            </div>
+            <div class="col-12 col-lg-auto order-1 order-lg-3">
+              <app-button-save (onClick)="onSubmit()" [isSubmitting]="isSaving()"></app-button-save>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Card Container -->
+  <main class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white overflow-hidden">
+    <form [formGroup]="avisoForm" (ngSubmit)="onSubmit()">
+      <div class="animate-in">
+        <div class="row g-4">
+          <div class="col-12 col-lg-8">
+            <tm-text
+              formControlName="title"
+              [label]="t().admin.notices.form.fields.title"
+              [placeholder]="t().admin.notices.form.placeholders.title"
+              icon="bi-type"
+              [control]="avisoForm.get('title')"
+              [maxlength]="50"
+            ></tm-text>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <tm-select
+              formControlName="type"
+              [label]="t().admin.notices.form.fields.type"
+              [options]="typeOptions()"
+              icon="bi-flag"
+              [control]="avisoForm.get('type')"
+            ></tm-select>
+          </div>
+
+          <!-- Linha 2: Data de Início e Expiração -->
+          <div class="col-12 col-md-6">
+            <tm-date formControlName="startDate" label="Data de Início"></tm-date>
+          </div>
+          <div class="col-12 col-md-6">
+            <tm-date formControlName="expirationDate" label="Expiração (Opcional)"></tm-date>
+          </div>
+
+          <!-- Linha 3: Conteúdo -->
+          <div class="col-12">
+            <tm-text
+              formControlName="content"
+              [label]="t().admin.notices.form.fields.content"
+              [placeholder]="t().admin.notices.form.placeholders.content"
+              icon="bi-chat-left-text"
+              [control]="avisoForm.get('content')"
+              [maxlength]="150"
+              [textarea]="true"
+              [rows]="4"
+            ></tm-text>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+</div>

@@ -128,7 +128,7 @@
         { header: 'Status', template: statusTpl, width: '15%' },
       ]"
       [data]="rooms()"
-      (rowClick)="navigateToEdit($event.id)"
+      (rowClick)="navigateToEdit($event.id!)"
     ></tm-table>
 
     <!-- Templates for Table Columns -->
@@ -173,7 +173,7 @@
     @for (room of rooms(); track room.id) {
       <div
         class="card border-0 shadow-sm rounded-4 p-3 animate-in"
-        (click)="navigateToEdit(room.id)"
+        (click)="navigateToEdit(room.id!)"
       >
         <div class="d-flex justify-content-between align-items-start mb-2">
           <div class="d-flex align-items-center gap-3">

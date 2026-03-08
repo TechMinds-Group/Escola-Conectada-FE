@@ -54,17 +54,14 @@ export class ConsultaCalendario implements OnInit {
   filterCategory = new FormControl<string>('Todas');
 
   // Sincronizar filtros ativos com as categorias disponíveis
-  private syncFilters = effect(
-    () => {
-      const cats = this.eventCategories();
-      // Na primeira carga ou se categorias mudarem, selecionamos tudo por padrão se estiver em 'Todas'
-      if (this.filterCategory.value === 'Todas' || !this.filterCategory.value) {
-        this.activeFilters.set(cats);
-        this.filterCategory.setValue('Todas', { emitEvent: false });
-      }
-    },
-    { allowSignalWrites: true },
-  );
+  private syncFilters = effect(() => {
+    const cats = this.eventCategories();
+    // Na primeira carga ou se categorias mudarem, selecionamos tudo por padrão se estiver em 'Todas'
+    if (this.filterCategory.value === 'Todas' || !this.filterCategory.value) {
+      this.activeFilters.set(cats);
+      this.filterCategory.setValue('Todas', { emitEvent: false });
+    }
+  });
 
   constructor() {
     effect(() => {

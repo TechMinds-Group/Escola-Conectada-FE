@@ -1,4 +1,12 @@
-import { Component, Input, forwardRef, signal, computed } from '@angular/core';
+import {
+  Component,
+  Input,
+  forwardRef,
+  signal,
+  computed,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
 import { MaskDirective } from '../../directives/mask.directive';
@@ -19,32 +27,56 @@ import { MaskDirective } from '../../directives/mask.directive';
         [class.focused]="isFocused()"
         [class.invalid]="isInvalid()"
       >
-        @if (icon) {
+        @if (icon || isDatePicker()) {
           <div
             class="icon-section ps-3 py-2 d-flex align-items-center justify-content-center"
             [class.cursor-pointer]="isDatePicker()"
             (mousedown)="isDatePicker() ? $event.preventDefault() : null"
-            (click)="openPicker(inputEl)"
+            (click)="isDatePicker() ? openPicker() : null"
+            [title]="isDatePicker() ? 'Abrir seletor de data' : ''"
           >
-            <i [class]="icon" class="text-primary fs-5"></i>
+            <i
+              [class]="
+                isDatePicker() ? (type === 'time' ? 'bi bi-clock' : 'bi bi-calendar3') : icon
+              "
+              class="text-primary fs-5"
+              [class.transition-hover]="isDatePicker()"
+            ></i>
           </div>
         }
-        <input
-          #inputEl
-          [type]="type"
-          [placeholder]="placeholder"
-          [disabled]="disabled"
-          [value]="internalValue()"
-          (input)="onInputChange($event)"
-          (blur)="onInputBlur()"
-          (focus)="onInputFocus()"
-          [appMask]="mask"
-          [attr.maxlength]="maxlength || null"
-          [attr.inputmode]="inputmode || (type === 'number' ? 'numeric' : null)"
-          [attr.pattern]="type === 'number' ? '[0-9]*' : null"
-          lang="pt-BR"
-          class="custom-input flex-grow-1 fw-bold border-0 bg-transparent"
-        />
+        @if (textarea) {
+          <textarea
+            #textareaEl
+            [placeholder]="placeholder"
+            [disabled]="disabled"
+            [value]="internalValue()"
+            (input)="onInputChange($event)"
+            (blur)="onInputBlur()"
+            (focus)="onInputFocus()"
+            [attr.maxlength]="maxlength || null"
+            [rows]="rows"
+            class="custom-input flex-grow-1 fw-bold border-0 bg-transparent"
+          ></textarea>
+        } @else {
+          <input
+            #inputEl
+            [type]="type"
+            [placeholder]="placeholder"
+            [disabled]="disabled"
+            [value]="internalValue()"
+            (input)="onInputChange($event)"
+            (blur)="onInputBlur()"
+            (focus)="onInputFocus()"
+            [appMask]="mask"
+            [attr.maxlength]="maxlength || null"
+            [attr.inputmode]="inputmode || (type === 'number' ? 'numeric' : null)"
+            [attr.pattern]="type === 'number' ? '[0-9]*' : null"
+            [attr.step]="type === 'time' || type === 'datetime-local' ? '60' : null"
+            lang="pt-BR"
+            class="custom-input flex-grow-1 fw-bold border-0 bg-transparent"
+          />
+        }
+
         @if (suffix) {
           <div class="suffix-section pe-3 py-2">
             <span
@@ -191,12 +223,18 @@ export class TextInputComponent implements ControlValueAccessor {
   @Input() label = '';
   @Input() placeholder = '';
   @Input() icon = '';
-  @Input() type = 'text';
+  @Input() type: 'text' | 'number' | 'password' | 'email' | 'date' | 'datetime-local' | 'time' =
+    'text';
   @Input() mask: 'cpf' | 'phone' | '' = '';
   @Input() suffix = '';
   @Input() maxlength: number | null = null;
   @Input() control: any;
   @Input() inputmode: string | null = null;
+  @Input() textarea = false;
+  @Input() rows = 3;
+
+  @ViewChild('inputEl') inputEl!: ElementRef;
+  @ViewChild('textareaEl') textareaEl!: ElementRef;
 
   internalValue = signal<any>('');
   disabled = false;
@@ -214,8 +252,10 @@ export class TextInputComponent implements ControlValueAccessor {
     return this.type === 'date' || this.type === 'datetime-local' || this.type === 'time';
   }
 
-  openPicker(inputEl: HTMLInputElement) {
-    if (this.isDatePicker()) {
+  openPicker() {
+    const el = this.inputEl || this.textareaEl;
+    if (this.isDatePicker() && el) {
+      const inputEl = el.nativeElement as HTMLInputElement;
       try {
         if (document.activeElement === inputEl) {
           inputEl.blur(); // Fecha o picker nativo removendo o foco
@@ -229,7 +269,37 @@ export class TextInputComponent implements ControlValueAccessor {
   }
 
   writeValue(value: any): void {
-    this.internalValue.set(value ?? '');
+    let formattedValue = value;
+
+    if (value && this.isDatePicker()) {
+      try {
+        const d = new Date(value);
+        if (!isNaN(d.getTime())) {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          const hours = String(d.getHours()).padStart(2, '0');
+          const minutes = String(d.getMinutes()).padStart(2, '0');
+
+          if (this.type === 'date') {
+            formattedValue = `${year}-${month}-${day}`;
+          } else if (this.type === 'datetime-local') {
+            formattedValue = `${year}-${month}-${day}T${hours}:${minutes}`;
+          } else if (this.type === 'time') {
+            formattedValue = `${hours}:${minutes}`;
+          }
+        }
+      } catch (e) {
+        // Fallback para o valor original se não for pareável
+      }
+
+      // Corta strings longas do backend "2026-03-08T00:00:00Z" se o tipo for apenas 'date'
+      if (typeof value === 'string' && this.type === 'date' && value.includes('T')) {
+        formattedValue = value.split('T')[0];
+      }
+    }
+
+    this.internalValue.set(formattedValue ?? '');
   }
 
   registerOnChange(fn: any): void {

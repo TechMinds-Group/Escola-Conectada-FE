@@ -1,0 +1,167 @@
+.tm-date-container {
+  display: block;
+
+  .input-wrapper {
+    background: var(--bg-surface, var(--surface-color, #fff));
+    border: 1px solid var(--border-main, var(--border-color, #dee2e6));
+    min-height: 48px;
+
+    &.focused {
+      border-color: var(--bs-primary);
+      box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb, 13, 110, 253), 0.25) !important;
+    }
+
+    &.disabled {
+      background-color: var(--input-bg, #e9ecef);
+      opacity: 0.8;
+      cursor: not-allowed;
+      .custom-input {
+        pointer-events: none;
+      }
+    }
+
+    .icon-section {
+      color: var(--bs-primary, #0d6efd);
+    }
+
+    .custom-input {
+      outline: none;
+      color: var(--text-main, var(--text-primary, #212529));
+      padding: 0.5rem 12px 0.5rem 16px;
+
+      &::placeholder {
+        color: var(--text-secondary, #6c757d);
+        opacity: 0.6;
+        font-weight: 400;
+      }
+    }
+  }
+}
+
+.tm-date-panel {
+  width: 300px;
+  max-height: calc(100vh - 20px); // 10px de margem em cada borda
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg-card, var(--surface-color, #fff));
+  border-color: var(--border-main, var(--border-color, rgba(0, 0, 0, 0.175)));
+
+  // Scroll interno estilizado
+  scrollbar-width: thin;
+  scrollbar-color: var(--bs-primary, #0d6efd) transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--bs-primary, #0d6efd);
+    border-radius: 4px;
+  }
+
+  .panel-header {
+    border-bottom: 1px solid var(--border-main, var(--border-color, rgba(0, 0, 0, 0.1)));
+  }
+
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+
+    div {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--text-main, var(--text-primary, #212529));
+      opacity: 0.8;
+    }
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+
+    .calendar-cell {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      color: var(--text-main, var(--text-primary, #212529));
+
+      &:hover:not(.bg-primary) {
+        background-color: var(--bg-hover, var(--hover-bg, #f8f9fa));
+      }
+
+      &.today-border {
+        box-shadow: inset 0 0 0 2px var(--bs-primary, #0d6efd);
+      }
+    }
+  }
+
+  .plugin-bg-surface {
+    background-color: var(--bg-card, var(--surface-color, #fff));
+  }
+
+  .colon-separator {
+    color: var(--text-main, var(--text-primary, #212529));
+  }
+
+  .time-section {
+    .time-select {
+      background-color: var(--input-bg, #f8f9fa);
+      color: var(--text-main, var(--text-primary, #212529));
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      background-size: 16px 12px;
+      padding-right: 1.5rem !important;
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 0.1rem rgba(var(--bs-primary-rgb, 13, 110, 253), 0.25);
+      }
+    }
+  }
+}
+
+// Dark Mode Overrides (Global for Overlay and inner components)
+// We use ::ng-deep combined with the global [data-theme='dark'] selector
+::ng-deep [data-theme='dark'] {
+  .tm-date-panel {
+    border-color: var(--border-color, rgba(255, 255, 255, 0.1)) !important;
+
+    .panel-header {
+      border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    }
+
+    .panel-footer {
+      border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.1)) !important;
+    }
+
+    .time-section .time-select {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+
+    .custom-input::placeholder {
+      color: #ffffff !important;
+      opacity: 0.8;
+    }
+  }
+}
+
+::ng-deep .cdk-overlay-transparent-backdrop {
+  background: transparent;
+}
+
+::ng-deep .cdk-overlay-container {
+  z-index: 1200 !important;
+}
+
+// Garante que o painel flutuante também herde o z-index correto
+::ng-deep .cdk-overlay-pane {
+  z-index: 1200 !important;
+}

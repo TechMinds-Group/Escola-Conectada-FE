@@ -14,6 +14,7 @@ import { NotificationService } from '../../../services/notification.service';
 import { format, setHours, setMinutes, parseISO } from 'date-fns';
 import { TextInputComponent } from '../../text-input/text-input.component';
 import { SelectComponent } from '../../select/select.component';
+import { TmDateComponent } from '../../tm-date/tm-date.component';
 
 @Component({
   selector: 'app-modal-manage-event',
@@ -25,6 +26,7 @@ import { SelectComponent } from '../../select/select.component';
     MatIconModule,
     TextInputComponent,
     SelectComponent,
+    TmDateComponent,
   ],
   templateUrl: './modal-manage-event.component.html',
   styleUrls: ['./modal-manage-event.component.scss'],

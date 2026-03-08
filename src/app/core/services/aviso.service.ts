@@ -11,8 +11,9 @@ export interface Aviso {
   content: string;
   type: AvisoType;
   active: boolean;
+  startDate?: string;
+  expirationDate?: string;
   createdAt?: string;
-  expiresAt?: string;
 }
 
 @Injectable({
@@ -38,10 +39,7 @@ export class AvisoService {
   }
 
   update(id: string, aviso: Aviso): Observable<any> {
-    const payload = { ...aviso, Id: id }; // Ensure standard PascalCase Id is included
-    return this.http
-      .put<any>(`${this.baseUrl}/${id}`, payload)
-      .pipe(tap(() => this.notifyUpdate()));
+    return this.http.put<any>(`${this.baseUrl}/${id}`, aviso).pipe(tap(() => this.notifyUpdate()));
   }
 
   delete(id: string): Observable<any> {

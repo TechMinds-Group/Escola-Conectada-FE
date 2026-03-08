@@ -1,0 +1,60 @@
+.animate-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bg-surface {
+  background-color: var(--surface-color, #ffffff) !important;
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.transition-hover {
+  transition: all 0.2s ease-in-out !important;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  }
+}
+
+:host-context([data-theme='dark']) {
+  .bg-surface {
+    background-color: #1e1e1e !important;
+  }
+
+  .border-light {
+    border-color: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  hr {
+    opacity: 0.05;
+    border-color: white;
+  }
+}
+
+.btn-back-responsive {
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 42px !important;
+  height: 42px !important;
+  transition: all 0.2s ease-in-out !important;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  }
+}
