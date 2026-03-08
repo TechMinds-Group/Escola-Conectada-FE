@@ -635,6 +635,21 @@ body {
   }
 }
 
+.animate-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Custom Scrollbar for sleek look */
 ::-webkit-scrollbar {
   width: 8px;
@@ -1101,5 +1116,26 @@ div.modern-help-popover.mat-mdc-menu-panel {
   /* Specific fix for the header which might be primary blue */
   .text-primary {
     color: #0d6efd !important; /* Keep primary blue for title if requested, but ensure it's the light-mode blue */
+  }
+}
+
+/* Theme-Aware Placeholder Overrides for Custom Components (tm-text / tm-select) */
+[data-theme='dark'] {
+  .custom-input::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important;
+  }
+  .custom-select.placeholder-state {
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-weight: 500;
+  }
+}
+
+:not([data-theme='dark']) {
+  .custom-input::placeholder {
+    color: rgba(0, 0, 0, 0.4) !important;
+  }
+  .custom-select.placeholder-state {
+    color: rgba(0, 0, 0, 0.4) !important;
+    font-weight: 500;
   }
 }

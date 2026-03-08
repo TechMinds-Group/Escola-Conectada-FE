@@ -30,16 +30,6 @@
   }
 }
 
-/* 3. Ajustes de Tamanho Específicos */
-.btn-gear-standard {
-  height: 42px; // Sincronizado com a altura do select py-2
-  width: 42px;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 8px !important;
-}
-
 /* 4. Suporte a Dark Mode (Overrides de Variáveis) */
 :host-context([data-theme='dark']) {
   .availability-grid {

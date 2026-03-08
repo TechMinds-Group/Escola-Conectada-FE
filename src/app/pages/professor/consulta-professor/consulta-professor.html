@@ -28,6 +28,42 @@
     </div>
   </header>
 
+  <section class="filters-section mb-4 animate-in">
+    <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-5 col-lg-4">
+          <tm-select
+            [formControl]="subjectFilter"
+            [options]="subjectOptions()"
+            placeholder="Filtrar por Disciplina..."
+            icon="bi-funnel"
+            label="Disciplina"
+          ></tm-select>
+        </div>
+        <div class="col-12 col-md-4 col-lg-3">
+          <tm-select
+            [formControl]="statusFilter"
+            [options]="statusOptions()"
+            placeholder="Filtrar por Status..."
+            icon="bi-activity"
+            label="Status"
+          ></tm-select>
+        </div>
+        @if (isFilterActive()) {
+          <div class="col-12 col-md-auto ms-auto d-flex gap-2 animate-in">
+            <button
+              class="btn btn-light rounded-3 px-3 py-2 fw-bold text-muted transition-hover shadow-xs border"
+              (click)="subjectFilter.setValue(null); statusFilter.setValue(null)"
+              title="Limpar Filtros"
+            >
+              <i class="bi bi-x-lg me-1"></i> Limpar
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
   <main class="card border-0 shadow-sm rounded-4 overflow-hidden d-none d-md-block bg-white">
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">

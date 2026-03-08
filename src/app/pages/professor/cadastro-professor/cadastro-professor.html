@@ -101,110 +101,64 @@
         <div class="animate-in">
           <div class="row g-3">
             <div class="col-12">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
-                >Nome Completo</label
-              >
-              <div class="input-group shadow-xs">
-                <span class="input-group-text">
-                  <i class="bi bi-person text-primary"></i>
-                </span>
-                <input
-                  type="text"
-                  class="form-control fw-bold py-2"
-                  formControlName="name"
-                  placeholder="Ex: Ricardo Oliveira"
-                  maxlength="50"
-                  [class.is-invalid]="teacherForm.get('name')?.invalid && saveAttempted()"
-                />
-              </div>
+              <tm-text
+                formControlName="name"
+                label="Nome Completo"
+                placeholder="Ex: Ricardo Oliveira"
+                icon="bi-person"
+                [control]="teacherForm.get('name')"
+                [maxlength]="50"
+              ></tm-text>
             </div>
 
             <div class="col-12 col-lg-6">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
-                >Celular</label
-              >
-              <div class="input-group shadow-xs">
-                <span class="input-group-text">
-                  <i class="bi bi-telephone text-primary"></i>
-                </span>
-                <input
-                  type="text"
-                  class="form-control fw-bold py-2"
-                  formControlName="celular"
-                  appMask="phone"
-                  placeholder="(11) 99999-9999"
-                  [class.is-invalid]="teacherForm.get('celular')?.invalid && saveAttempted()"
-                />
-              </div>
+              <tm-text
+                formControlName="celular"
+                label="Celular"
+                placeholder="(11) 99999-9999"
+                icon="bi-telephone"
+                type="text"
+                mask="phone"
+                [control]="teacherForm.get('celular')"
+              ></tm-text>
             </div>
 
             <div class="col-12 col-lg-6">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider"
-                >E-mail</label
-              >
-              <div class="input-group shadow-xs">
-                <span class="input-group-text">
-                  <i class="bi bi-envelope text-primary"></i>
-                </span>
-                <input
-                  type="email"
-                  class="form-control fw-bold py-2"
-                  formControlName="email"
-                  placeholder="email@escola.com"
-                  maxlength="200"
-                />
-              </div>
+              <tm-text
+                formControlName="email"
+                label="E-mail"
+                placeholder="email@escola.com"
+                icon="bi-envelope"
+                type="email"
+                [control]="teacherForm.get('email')"
+                [maxlength]="200"
+              ></tm-text>
             </div>
 
             <div class="col-12"><hr class="my-3 border-dashed opacity-25" /></div>
 
             <div class="col-12 col-lg-8">
-              <label
-                class="form-label small fw-bold text-muted text-uppercase tracking-wider text-nowrap"
-                >Disciplina Principal</label
+              <tm-select
+                [options]="subjectOptions()"
+                formControlName="mainSubjectId"
+                placeholder="Selecione a disciplina..."
+                icon="bi-journal-text"
+                label="Disciplina Principal"
+                [control]="teacherForm.get('mainSubjectId')"
               >
-              <div class="d-flex gap-2">
-                <select
-                  class="form-select fw-bold py-2 rounded-3 shadow-xs"
-                  formControlName="mainSubjectId"
-                >
-                  <option [ngValue]="null">Selecione...</option>
-                  @for (subject of availableSubjects(); track subject.id) {
-                    <option [value]="subject.id">{{ subject.name }}</option>
-                  }
-                </select>
-                <button
-                  type="button"
-                  class="btn btn-outline-primary rounded-3 shadow-sm btn-gear-standard flex-shrink-0 d-flex align-items-center justify-content-center p-0"
-                  (click)="openSubjectManager()"
-                  [disabled]="isViewMode()"
-                >
-                  <i class="bi bi-gear-fill"></i>
-                </button>
-              </div>
+              </tm-select>
             </div>
 
             <div class="col-12 col-lg-4">
-              <label
-                class="form-label small fw-bold text-muted text-uppercase tracking-wider text-nowrap d-flex align-items-center gap-1"
-              >
-                Carga Horária
-                <i
-                  class="bi bi-question-circle text-muted cursor-pointer xx-small"
-                  [matMenuTriggerFor]="workloadHelp"
-                ></i>
-              </label>
-              <div class="input-group shadow-xs">
-                <span class="input-group-text">
-                  <i class="bi bi-clock-history text-primary"></i>
-                </span>
-                <input
-                  type="number"
-                  class="form-control fw-bold py-2"
-                  formControlName="contractualWorkload"
-                />
-                <span class="input-group-text bg-light rounded-end-3 small fw-bold">horas</span>
-              </div>
+              <tm-text
+                formControlName="contractualWorkload"
+                label="Carga Horária"
+                placeholder="0"
+                icon="bi-clock-history"
+                type="number"
+                [control]="teacherForm.get('contractualWorkload')"
+                suffix="horas"
+              ></tm-text>
             </div>
 
             <div class="col-12 mt-3">

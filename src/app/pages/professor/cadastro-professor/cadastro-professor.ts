@@ -17,7 +17,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule, Location } from '@angular/common';
 import { MatMenuModule } from '@angular/material/menu';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MaskDirective } from '../../../core/directives/mask.directive';
 import { TranslationService } from '../../../core/services/translation.service';
 import { ConfirmationService } from '../../../core/services/confirmation.service';
 import { SchoolDataService, Subject, ThematicAxis } from '../../../core/services/school-data';
@@ -30,6 +29,8 @@ import { ButtonSaveComponent } from '../../../core/components/buttons/button-sav
 import { ButtonCancelComponent } from '../../../core/components/buttons/button-cancel';
 import { ButtonDeleteComponent } from '../../../core/components/buttons/button-delete';
 import { ButtonEditComponent } from '../../../core/components/buttons/button-edit';
+import { SelectComponent } from '../../../core/components/select/select.component';
+import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
 
 @Component({
   selector: 'app-cadastro-professor',
@@ -37,13 +38,14 @@ import { ButtonEditComponent } from '../../../core/components/buttons/button-edi
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MaskDirective,
     MatMenuModule,
     ButtonSaveComponent,
     ButtonCancelComponent,
     ButtonDeleteComponent,
     ButtonEditComponent,
     ModalManageListComponent,
+    SelectComponent,
+    TextInputComponent,
   ],
   templateUrl: './cadastro-professor.html',
   styleUrl: './cadastro-professor.scss',
@@ -67,6 +69,9 @@ export class CadastroProfessor implements OnInit {
   // State
   isSubmitting = signal(false);
   availableSubjects = this.schoolData.subjects;
+  subjectOptions = computed(() =>
+    this.availableSubjects().map((s: Subject) => ({ value: s.id, label: s.name })),
+  );
   teacherId: string | null = null;
   isViewMode = signal(false);
 

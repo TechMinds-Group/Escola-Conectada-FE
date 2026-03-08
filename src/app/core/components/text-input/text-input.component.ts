@@ -1,18 +1,14 @@
 import { Component, Input, forwardRef, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
-
-export interface SelectOption<T = any> {
-  value: T;
-  label: string;
-}
+import { MaskDirective } from '../../directives/mask.directive';
 
 @Component({
-  selector: 'tm-select',
+  selector: 'tm-text',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MaskDirective],
   template: `
-    <div class="tm-select-container w-100" [class.disabled]="disabled">
+    <div class="tm-text-container w-100" [class.disabled]="disabled">
       @if (label) {
         <label class="form-label small fw-bold text-muted text-uppercase tracking-wider mb-2">
           {{ label }}
@@ -28,26 +24,27 @@ export interface SelectOption<T = any> {
             <i [class]="icon" class="text-primary fs-5"></i>
           </div>
         }
-        <select
+        <input
+          [type]="type"
+          [placeholder]="placeholder"
           [disabled]="disabled"
-          (change)="onSelectChange($event)"
+          [value]="value"
+          (input)="onInputChange($event)"
           (blur)="onInputBlur()"
           (focus)="onInputFocus()"
-          class="custom-select w-100 fw-bold border-0 bg-transparent"
-          [class.placeholder-state]="value === null"
-        >
-          <option [ngValue]="null" [selected]="value === null" disabled hidden>
-            {{ placeholder }}
-          </option>
-          @for (option of options; track option.value) {
-            <option [value]="option.value" [selected]="value === option.value">
-              {{ option.label }}
-            </option>
-          }
-        </select>
-        <div class="arrow-section pe-3 py-2">
-          <i class="bi bi-chevron-down text-muted small"></i>
-        </div>
+          [appMask]="mask"
+          [attr.maxlength]="maxlength || null"
+          class="custom-input flex-grow-1 fw-bold border-0 bg-transparent"
+        />
+        @if (suffix) {
+          <div class="suffix-section pe-3 py-2">
+            <span
+              class="badge bg-light text-muted border py-2 px-3 rounded-3 small fw-bold shadow-xs"
+            >
+              {{ suffix }}
+            </span>
+          </div>
+        }
       </div>
       @if (isInvalid()) {
         <div class="invalid-feedback d-block extra-small mt-1 fw-medium animate-in">
@@ -58,7 +55,7 @@ export interface SelectOption<T = any> {
   `,
   styles: [
     `
-      .tm-select-container {
+      .tm-text-container {
         position: relative;
 
         &.disabled {
@@ -67,7 +64,7 @@ export interface SelectOption<T = any> {
             cursor: not-allowed;
             opacity: 0.7;
           }
-          .custom-select {
+          .custom-input {
             cursor: not-allowed;
           }
         }
@@ -89,9 +86,8 @@ export interface SelectOption<T = any> {
         }
       }
 
-      .custom-select {
+      .custom-input {
         padding: 0.6rem 1rem;
-        appearance: none;
         outline: none;
         color: var(--text-primary);
         font-size: 0.95rem;
@@ -100,8 +96,8 @@ export interface SelectOption<T = any> {
           outline: none;
         }
 
-        &.placeholder-state {
-          color: rgba(0, 0, 0, 0.4) !important;
+        &::placeholder {
+          color: rgba(var(--text-secondary-rgb), 0.5);
           font-weight: 500;
         }
       }
@@ -135,14 +131,10 @@ export interface SelectOption<T = any> {
           background-color: var(--input-bg);
           border-color: rgba(255, 255, 255, 0.1);
         }
-        .custom-select {
+        .custom-input {
           color: #ffffff;
-          option {
-            background-color: var(--surface-color);
-            color: #ffffff;
-          }
 
-          &.placeholder-state {
+          &::placeholder {
             color: rgba(255, 255, 255, 0.4) !important;
           }
         }
@@ -152,19 +144,22 @@ export interface SelectOption<T = any> {
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SelectComponent),
+      useExisting: forwardRef(() => TextInputComponent),
       multi: true,
     },
   ],
 })
-export class SelectComponent implements ControlValueAccessor {
+export class TextInputComponent implements ControlValueAccessor {
   @Input() label = '';
-  @Input() options: SelectOption[] = [];
-  @Input() placeholder = 'Selecione...';
+  @Input() placeholder = '';
   @Input() icon = '';
-  @Input() control: any; // Used to detect validation status
+  @Input() type: 'text' | 'email' | 'number' | 'tel' = 'text';
+  @Input() mask: 'cpf' | 'phone' | '' = '';
+  @Input() suffix = '';
+  @Input() maxlength: number | null = null;
+  @Input() control: any;
 
-  value: any = null;
+  value: any = '';
   disabled = false;
   isFocused = signal(false);
 
@@ -177,14 +172,14 @@ export class SelectComponent implements ControlValueAccessor {
   });
 
   writeValue(value: any): void {
-    this.value = value;
+    this.value = value || '';
   }
 
-  registerOnChange(fn: (value: any) => void): void {
+  registerOnChange(fn: any): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: () => void): void {
+  registerOnTouched(fn: any): void {
     this.onTouched = fn;
   }
 
@@ -192,17 +187,10 @@ export class SelectComponent implements ControlValueAccessor {
     this.disabled = isDisabled;
   }
 
-  onSelectChange(event: Event): void {
-    const selectElement = event.target as HTMLSelectElement;
-    const rawValue = selectElement.value;
-
-    // Direct comparison with Option values to support non-string types
-    // Since HTML select values are always strings, we find the first option where stringified value matches
-    const foundOption = this.options.find((opt) => String(opt.value) === rawValue);
-
-    this.value = foundOption ? foundOption.value : null;
+  onInputChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.value = input.value;
     this.onChange(this.value);
-    this.onTouched();
   }
 
   onInputFocus(): void {
