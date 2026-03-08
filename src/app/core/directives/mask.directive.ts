@@ -9,6 +9,8 @@ export class MaskDirective {
 
   @HostListener('input', ['$event'])
   onInput(event: Event) {
+    if (!this.maskType) return;
+
     const input = event.target as HTMLInputElement;
     let value = input.value.replace(/\D/g, '');
 

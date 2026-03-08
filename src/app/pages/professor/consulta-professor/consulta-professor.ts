@@ -11,11 +11,19 @@ import { ConfirmationService } from '../../../core/services/confirmation.service
 
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { SelectComponent } from '../../../core/components/select/select.component';
+import { TableComponent, TableColumn } from '../../../core/components/table/table.component';
 
 @Component({
   selector: 'app-consulta-professor',
   standalone: true,
-  imports: [CommonModule, MatMenuModule, MatButtonModule, ReactiveFormsModule, SelectComponent],
+  imports: [
+    CommonModule,
+    MatMenuModule,
+    MatButtonModule,
+    ReactiveFormsModule,
+    SelectComponent,
+    TableComponent,
+  ],
   templateUrl: './consulta-professor.html',
   styleUrl: './consulta-professor.scss',
 })

@@ -28,12 +28,14 @@ import { MaskDirective } from '../../directives/mask.directive';
           [type]="type"
           [placeholder]="placeholder"
           [disabled]="disabled"
-          [value]="value"
+          [value]="internalValue()"
           (input)="onInputChange($event)"
           (blur)="onInputBlur()"
           (focus)="onInputFocus()"
           [appMask]="mask"
           [attr.maxlength]="maxlength || null"
+          [attr.inputmode]="inputmode || (type === 'number' ? 'numeric' : null)"
+          [attr.pattern]="type === 'number' ? '[0-9]*' : null"
           class="custom-input flex-grow-1 fw-bold border-0 bg-transparent"
         />
         @if (suffix) {
@@ -91,6 +93,7 @@ import { MaskDirective } from '../../directives/mask.directive';
         outline: none;
         color: var(--text-primary);
         font-size: 0.95rem;
+        width: 100%;
 
         &:focus {
           outline: none;
@@ -99,6 +102,18 @@ import { MaskDirective } from '../../directives/mask.directive';
         &::placeholder {
           color: rgba(var(--text-secondary-rgb), 0.5);
           font-weight: 500;
+        }
+
+        /* Hide Number Spinners */
+        &[type='number'] {
+          -moz-appearance: textfield;
+          appearance: textfield;
+
+          &::-webkit-outer-spin-button,
+          &::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+          }
         }
       }
 
@@ -153,13 +168,14 @@ export class TextInputComponent implements ControlValueAccessor {
   @Input() label = '';
   @Input() placeholder = '';
   @Input() icon = '';
-  @Input() type: 'text' | 'email' | 'number' | 'tel' = 'text';
+  @Input() type = 'text';
   @Input() mask: 'cpf' | 'phone' | '' = '';
   @Input() suffix = '';
   @Input() maxlength: number | null = null;
   @Input() control: any;
+  @Input() inputmode: string | null = null;
 
-  value: any = '';
+  internalValue = signal<any>('');
   disabled = false;
   isFocused = signal(false);
 
@@ -172,7 +188,7 @@ export class TextInputComponent implements ControlValueAccessor {
   });
 
   writeValue(value: any): void {
-    this.value = value || '';
+    this.internalValue.set(value ?? '');
   }
 
   registerOnChange(fn: any): void {
@@ -189,8 +205,8 @@ export class TextInputComponent implements ControlValueAccessor {
 
   onInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.value = input.value;
-    this.onChange(this.value);
+    this.internalValue.set(input.value);
+    this.onChange(input.value);
   }
 
   onInputFocus(): void {

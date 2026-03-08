@@ -138,15 +138,30 @@
             <div class="col-12"><hr class="my-3 border-dashed opacity-25" /></div>
 
             <div class="col-12 col-lg-8">
-              <tm-select
-                [options]="subjectOptions()"
-                formControlName="mainSubjectId"
-                placeholder="Selecione a disciplina..."
-                icon="bi-journal-text"
-                label="Disciplina Principal"
-                [control]="teacherForm.get('mainSubjectId')"
-              >
-              </tm-select>
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider mb-2">
+                Disciplina Principal
+              </label>
+              <div class="d-flex align-items-start gap-2">
+                <tm-select
+                  [options]="subjectOptions()"
+                  formControlName="mainSubjectId"
+                  placeholder="Selecione a disciplina..."
+                  icon="bi-journal-text"
+                  [control]="teacherForm.get('mainSubjectId')"
+                  class="flex-fill"
+                >
+                </tm-select>
+                <button
+                  type="button"
+                  class="btn btn-light border shadow-sm transition-hover d-flex align-items-center justify-content-center"
+                  style="height: 48px; width: 48px; border-radius: 8px"
+                  (click)="openSubjectManager()"
+                  [disabled]="isViewMode()"
+                  title="Gerenciar Disciplinas"
+                >
+                  <i class="bi bi-gear-fill text-primary fs-5"></i>
+                </button>
+              </div>
             </div>
 
             <div class="col-12 col-lg-4">
@@ -257,6 +272,8 @@
   #subjectModal
   [isOpen]="showSubjectManager()"
   title="Gerenciar Disciplinas"
+  subtitle="Configure a lista de disciplinas disponíveis"
+  inputPlaceholder="Ex: Matemática"
   [items]="schoolData.subjects()"
   (close)="closeSubjectManager()"
   (onSave)="saveSubject($event)"

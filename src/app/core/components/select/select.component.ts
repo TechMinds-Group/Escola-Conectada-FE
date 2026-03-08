@@ -1,4 +1,13 @@
-import { Component, Input, forwardRef, signal, computed } from '@angular/core';
+import {
+  Component,
+  Input,
+  forwardRef,
+  signal,
+  computed,
+  HostListener,
+  ElementRef,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
 
@@ -19,36 +28,58 @@ export interface SelectOption<T = any> {
         </label>
       }
       <div
-        class="input-wrapper d-flex align-items-center rounded-3 shadow-sm transition-all"
-        [class.focused]="isFocused()"
+        class="input-wrapper d-flex align-items-center rounded-3 shadow-sm transition-all cursor-pointer"
+        [class.focused]="isOpen() || isFocused()"
         [class.invalid]="isInvalid()"
+        (click)="toggleDropdown()"
+        (blur)="onInputBlur()"
+        tabindex="0"
       >
         @if (icon) {
           <div class="icon-section ps-3 py-2 d-flex align-items-center justify-content-center">
             <i [class]="icon" class="text-primary fs-5"></i>
           </div>
         }
-        <select
-          [disabled]="disabled"
-          (change)="onSelectChange($event)"
-          (blur)="onInputBlur()"
-          (focus)="onInputFocus()"
-          class="custom-select w-100 fw-bold border-0 bg-transparent"
-          [class.placeholder-state]="value === null"
-        >
-          <option [ngValue]="null" [selected]="value === null" disabled hidden>
-            {{ placeholder }}
-          </option>
-          @for (option of options; track option.value) {
-            <option [value]="option.value" [selected]="value === option.value">
-              {{ option.label }}
-            </option>
-          }
-        </select>
-        <div class="arrow-section pe-3 py-2">
+
+        <div class="selected-value-container flex-fill px-3 py-2 overflow-hidden">
+          <span
+            class="fw-bold text-truncate d-block"
+            [class.placeholder-state]="internalValue() === null"
+            [class.text-dark]="internalValue() !== null"
+          >
+            {{ selectedLabel() || placeholder }}
+          </span>
+        </div>
+
+        <div class="arrow-section pe-3 py-2 transition-transform" [class.rotated]="isOpen()">
           <i class="bi bi-chevron-down text-muted small"></i>
         </div>
       </div>
+
+      <!-- Dropdown Panel -->
+      @if (isOpen()) {
+        <div class="dropdown-panel shadow-lg animate-slide-down">
+          <div class="options-list custom-scrollbar">
+            @if (options.length === 0) {
+              <div class="p-3 text-muted small text-center italic">Nenhuma opção disponível</div>
+            } @else {
+              @for (option of options; track option.value) {
+                <div
+                  class="option-item transition-all d-flex align-items-center justify-content-between"
+                  [class.selected]="internalValue() === option.value"
+                  (click)="selectOption(option)"
+                >
+                  <span class="option-label text-truncate">{{ option.label }}</span>
+                  @if (internalValue() === option.value) {
+                    <i class="bi bi-check-lg text-primary fw-bold"></i>
+                  }
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
+
       @if (isInvalid()) {
         <div class="invalid-feedback d-block extra-small mt-1 fw-medium animate-in">
           Este campo é obrigatório ou inválido.
@@ -58,6 +89,10 @@ export interface SelectOption<T = any> {
   `,
   styles: [
     `
+      :host {
+        display: block;
+      }
+
       .tm-select-container {
         position: relative;
 
@@ -67,9 +102,6 @@ export interface SelectOption<T = any> {
             cursor: not-allowed;
             opacity: 0.7;
           }
-          .custom-select {
-            cursor: not-allowed;
-          }
         }
       }
 
@@ -78,6 +110,7 @@ export interface SelectOption<T = any> {
         border: 1px solid var(--border-color);
         min-height: 48px;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        outline: none;
 
         &.focused {
           border-color: var(--bs-primary);
@@ -87,31 +120,106 @@ export interface SelectOption<T = any> {
         &.invalid {
           border-color: var(--bs-danger) !important;
         }
+
+        &:hover:not(.disabled) {
+          border-color: var(--bs-primary);
+        }
       }
 
-      .custom-select {
-        padding: 0.6rem 1rem;
-        appearance: none;
-        outline: none;
-        color: var(--text-primary);
+      .selected-value-container {
         font-size: 0.95rem;
 
-        &:focus {
-          outline: none;
-        }
-
-        &.placeholder-state {
-          color: rgba(0, 0, 0, 0.4) !important;
+        .placeholder-state {
+          color: rgba(0, 0, 0, 0.4);
           font-weight: 500;
         }
       }
 
-      .icon-section {
-        color: var(--bs-primary);
+      .arrow-section {
+        transition: transform 0.2s ease;
+        &.rotated {
+          transform: rotate(180deg);
+        }
       }
 
-      .extra-small {
-        font-size: 0.75rem;
+      /* Dropdown Panel Styling */
+      .dropdown-panel {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        margin-top: 5px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow:
+          0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+      }
+
+      .options-list {
+        max-height: 250px;
+        overflow-y: auto;
+        padding: 6px;
+      }
+
+      .option-item {
+        padding: 12px 16px;
+        cursor: pointer;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 2px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        &:hover {
+          background-color: #f1f5f9;
+          color: var(--bs-primary);
+        }
+
+        &.selected {
+          background-color: rgba(var(--bs-primary-rgb), 0.08);
+          color: var(--bs-primary);
+          font-weight: 600;
+        }
+      }
+
+      /* Custom Scrollbar */
+      .custom-scrollbar {
+        &::-webkit-scrollbar {
+          width: 6px;
+        }
+        &::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: #e2e8f0;
+          border-radius: 10px;
+        }
+        &::-webkit-scrollbar-thumb:hover {
+          background: #cbd5e1;
+        }
+      }
+
+      /* Animations */
+      .animate-slide-down {
+        animation: slideDownFade 0.2s ease-out;
+      }
+
+      @keyframes slideDownFade {
+        from {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       .animate-in {
@@ -129,21 +237,42 @@ export interface SelectOption<T = any> {
         }
       }
 
-      /* Dark Mode Specific Overrides */
+      /* Dark Mode Overrides */
       :host-context([data-theme='dark']) {
         .input-wrapper {
           background-color: var(--input-bg);
           border-color: rgba(255, 255, 255, 0.1);
+          .text-dark {
+            color: #ffffff !important;
+          }
+          .placeholder-state {
+            color: rgba(255, 255, 255, 0.4) !important;
+          }
         }
-        .custom-select {
-          color: #ffffff;
-          option {
-            background-color: var(--surface-color);
+
+        .dropdown-panel {
+          background-color: #1e293b; // slate-800
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .option-item {
+          color: #e2e8f0;
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.05);
             color: #ffffff;
           }
+          &.selected {
+            background-color: rgba(var(--bs-primary-rgb), 0.2);
+            color: #ffffff;
+          }
+        }
 
-          &.placeholder-state {
-            color: rgba(255, 255, 255, 0.4) !important;
+        .custom-scrollbar {
+          &::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+          }
+          &::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
           }
         }
       }
@@ -162,11 +291,20 @@ export class SelectComponent implements ControlValueAccessor {
   @Input() options: SelectOption[] = [];
   @Input() placeholder = 'Selecione...';
   @Input() icon = '';
-  @Input() control: any; // Used to detect validation status
+  @Input() control: any;
 
-  value: any = null;
+  private elementRef = inject(ElementRef);
+
+  internalValue = signal<any>(null);
   disabled = false;
+  isOpen = signal(false);
   isFocused = signal(false);
+
+  selectedLabel = computed(() => {
+    const value = this.internalValue();
+    const opt = this.options.find((o) => o.value === value);
+    return opt ? opt.label : null;
+  });
 
   onChange: (value: any) => void = () => {};
   onTouched: () => void = () => {};
@@ -176,8 +314,33 @@ export class SelectComponent implements ControlValueAccessor {
     return this.control.invalid && (this.control.dirty || this.control.touched);
   });
 
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    if (!this.elementRef.nativeElement.contains(event.target)) {
+      this.closeDropdown();
+    }
+  }
+
+  toggleDropdown() {
+    if (this.disabled) return;
+    this.isOpen.update((v) => !v);
+    if (this.isOpen()) {
+      this.onTouched();
+    }
+  }
+
+  closeDropdown() {
+    this.isOpen.set(false);
+  }
+
+  selectOption(option: SelectOption) {
+    this.internalValue.set(option.value);
+    this.onChange(option.value);
+    this.closeDropdown();
+  }
+
   writeValue(value: any): void {
-    this.value = value;
+    this.internalValue.set(value);
   }
 
   registerOnChange(fn: (value: any) => void): void {
@@ -190,28 +353,16 @@ export class SelectComponent implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
+    if (isDisabled) this.closeDropdown();
   }
 
-  onSelectChange(event: Event): void {
-    const selectElement = event.target as HTMLSelectElement;
-    const rawValue = selectElement.value;
-
-    // Direct comparison with Option values to support non-string types
-    // Since HTML select values are always strings, we find the first option where stringified value matches
-    const foundOption = this.options.find((opt) => String(opt.value) === rawValue);
-
-    this.value = foundOption ? foundOption.value : null;
-    this.onChange(this.value);
+  onInputBlur(): void {
+    this.isFocused.set(false);
     this.onTouched();
   }
 
   onInputFocus(): void {
     if (this.disabled) return;
     this.isFocused.set(true);
-  }
-
-  onInputBlur(): void {
-    this.isFocused.set(false);
-    this.onTouched();
   }
 }

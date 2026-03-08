@@ -13,7 +13,7 @@ export class ModalManageListComponent {
   @Input() isOpen: boolean = false;
 
   @Input() title: string = 'Gerenciar Itens';
-  @Input() subtitle: string = 'Configure a lista de iten disponíveis';
+  @Input() subtitle: string = 'Configure a lista de itens disponíveis';
   @Input() labelNew: string = 'Novo Item';
   @Input() labelEdit: string = 'Editar Item';
   @Input() inputPlaceholder: string = 'Ex: Laboratório';
