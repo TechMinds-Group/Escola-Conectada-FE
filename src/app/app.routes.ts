@@ -143,8 +143,29 @@ export const routes: Routes = [
       {
         path: 'users',
         data: { roles: [ROLES.ADMIN] },
-        loadComponent: () =>
-          import('./pages/admin/user-management/user-management').then((m) => m.UserManagement),
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./pages/admin/user-management/consulta-usuario/consulta-usuario').then(
+                (m) => m.ConsultaUsuario,
+              ),
+          },
+          {
+            path: 'novo',
+            loadComponent: () =>
+              import('./pages/admin/user-management/cadastro-usuario/cadastro-usuario').then(
+                (m) => m.CadastroUsuario,
+              ),
+          },
+          {
+            path: 'editar/:id',
+            loadComponent: () =>
+              import('./pages/admin/user-management/cadastro-usuario/cadastro-usuario').then(
+                (m) => m.CadastroUsuario,
+              ),
+          },
+        ],
       },
       {
         path: 'school-settings',

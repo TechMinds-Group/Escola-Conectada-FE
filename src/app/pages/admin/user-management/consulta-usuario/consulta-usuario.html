@@ -1,0 +1,166 @@
+<div class="container-fluid py-4 pb-5">
+  <header class="mb-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-auto">
+        <h2 class="fw-bold mb-0 text-primary fs-3">Gestão de Usuários</h2>
+        <p class="text-muted mb-0 small opacity-75">Gerencie o acesso e permissões dos usuários</p>
+      </div>
+
+      <div class="col-12 col-md-auto ms-auto">
+        <button
+          class="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-4 py-2 shadow-sm fw-bold transition-hover rounded-3 w-100"
+          (click)="navigateToNew()"
+        >
+          <i class="bi bi-person-plus-fill fs-5"></i>
+          Novo Usuário
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="row mb-3 animate-in">
+    <div class="col-12 col-md-auto ms-auto">
+      <button
+        class="btn d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 transition-hover border shadow-xs w-100"
+        [class.btn-primary]="isFilterPanelOpen()"
+        [class.btn-light]="!isFilterPanelOpen()"
+        (click)="toggleFilterPanel()"
+      >
+        <i
+          class="bi"
+          [class.bi-funnel]="!isFilterPanelOpen()"
+          [class.bi-chevron-up]="isFilterPanelOpen()"
+        ></i>
+        <span class="fw-bold">Filtros</span>
+        @if (isFilterActive()) {
+          <span
+            class="badge rounded-circle bg-primary p-1 ms-1"
+            style="width: 8px; height: 8px"
+          ></span>
+        }
+      </button>
+    </div>
+  </div>
+
+  @if (isFilterPanelOpen()) {
+    <section class="filters-panel mb-4 animate-in">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-surface">
+        <div class="card-body p-4">
+          <div
+            class="grid-layout mb-4"
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+              gap: 1rem;
+            "
+          >
+            <tm-text
+              [formControl]="searchText"
+              placeholder="Nome, username ou e-mail..."
+              icon="bi-search"
+              label="Buscar Usuário"
+            ></tm-text>
+            <tm-select
+              [formControl]="filterRole"
+              [options]="roleOptions()"
+              placeholder="Nível de Acesso"
+              icon="bi-shield-lock"
+              label="Nível de Acesso"
+            ></tm-select>
+          </div>
+
+          <div class="pt-3 border-top">
+            <div class="row g-2 justify-content-end">
+              <div class="col-12 col-lg-auto">
+                <button
+                  class="btn btn-light rounded-3 px-4 py-2 fw-bold text-muted transition-hover border w-100"
+                  (click)="clearFilters()"
+                >
+                  Limpar Filtros
+                </button>
+              </div>
+              <div class="col-12 col-lg-auto">
+                <button
+                  class="btn btn-primary rounded-3 px-4 py-2 fw-bold transition-hover shadow-sm w-100"
+                  (click)="applyFilters()"
+                >
+                  Aplicar Filtros
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <main class="animate-in d-none d-md-block">
+    <tm-table
+      [cols]="[
+        { header: 'Usuário', template: userTpl, width: '300px' },
+        { header: 'Username', key: 'username', width: '200px' },
+        { header: 'Nível de Acesso', template: roleTpl, width: '200px' },
+        { header: 'Último Acesso', key: 'lastAccess', width: '200px' },
+      ]"
+      [data]="filteredUsers()"
+      [isLoading]="isLoading()"
+      (rowClick)="navigateToEdit($event)"
+    ></tm-table>
+  </main>
+
+  <!-- Mobile Cards -->
+  <div class="d-md-none d-flex flex-column gap-3 animate-in">
+    @for (user of filteredUsers(); track user.id) {
+      <div
+        class="card border-0 shadow-sm rounded-4 p-3 bg-surface transition-hover"
+        (click)="navigateToEdit(user)"
+      >
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div
+            class="avatar-circle flex-shrink-0 bg-primary-subtle border border-primary-subtle text-primary fw-bold d-flex align-items-center justify-content-center shadow-xs"
+            style="width: 48px; height: 48px; border-radius: 12px"
+          >
+            {{ user.name.charAt(0) }}
+          </div>
+          <div class="flex-grow-1">
+            <h6 class="fw-bold text-dark mb-0">{{ user.name }}</h6>
+            <div class="extra-small text-muted fw-bold">@{{ user.username }}</div>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
+          <span
+            class="badge rounded-pill px-3 py-1 border extra-small fw-bold"
+            [ngClass]="getBadgeClass(user.role)"
+          >
+            {{ user.role }}
+          </span>
+          <div class="small text-muted"><i class="bi bi-clock me-1"></i> {{ user.lastAccess }}</div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Custom User Column -->
+<ng-template #userTpl let-user>
+  <div class="d-flex align-items-center gap-3 ps-3">
+    <div
+      class="avatar-circle flex-shrink-0 bg-light-alpha border border-theme text-primary fw-bold d-flex align-items-center justify-content-center shadow-xs"
+      style="width: 38px; height: 38px; border-radius: 50%; aspect-ratio: 1/1"
+    >
+      {{ user.name.charAt(0) }}
+    </div>
+    <span class="fw-bold text-main">{{ user.name }}</span>
+  </div>
+</ng-template>
+
+<!-- Custom Role Column -->
+<ng-template #roleTpl let-user>
+  <span
+    class="badge rounded-pill fw-medium px-3 py-2 border shadow-xs"
+    [ngClass]="getBadgeClass(user.role)"
+  >
+    {{ user.role }}
+  </span>
+</ng-template>

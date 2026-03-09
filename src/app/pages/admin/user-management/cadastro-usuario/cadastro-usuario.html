@@ -1,0 +1,135 @@
+<div class="container-fluid py-4 pb-5">
+  <!-- Sticky Header SaaS Style -->
+  <header
+    class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header border-bottom border-light"
+  >
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-lg-auto">
+        <div class="d-flex align-items-center gap-3">
+          <button
+            class="btn transition-hover border-0 shadow-sm bg-white"
+            (click)="onCancel()"
+            title="Voltar"
+          >
+            <i class="bi bi-arrow-left fs-5 text-primary"></i>
+          </button>
+          <div>
+            <h2 class="fw-bold mb-0 text-dark fs-4">
+              {{ userId() ? 'Editar Usuário' : 'Novo Usuário' }}
+            </h2>
+            <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+              {{ userId() ? 'Gerenciamento de usuário' : 'Cadastro de novo usuário' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-auto ms-auto">
+        <div class="row g-2 justify-content-end align-items-center">
+          @if (userId()) {
+            <div class="col-12 col-lg-auto order-3 order-lg-1">
+              <app-button-delete (onClick)="deleteUser()" [isSolid]="true"></app-button-delete>
+            </div>
+            <div class="col-auto d-none d-lg-block order-2">
+              <div class="vr opacity-25" style="height: 30px"></div>
+            </div>
+          }
+          <div class="col-12 col-lg-auto order-2 order-lg-2">
+            <app-button-cancel (onClick)="onCancel()"></app-button-cancel>
+          </div>
+          <div class="col-12 col-lg-auto order-1 order-lg-3">
+            <app-button-save (onClick)="onSubmit()" [isSubmitting]="isSaving()"></app-button-save>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white animate-in">
+    <form [formGroup]="userForm" class="row g-4">
+      <div class="col-12 col-lg-6">
+        <tm-text
+          formControlName="name"
+          [control]="userForm.get('name')"
+          label="Nome Completo"
+          placeholder="Ex: Maria Silva"
+          icon="bi-person"
+          [required]="true"
+        ></tm-text>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <tm-text
+          formControlName="username"
+          [control]="userForm.get('username')"
+          label="Nome de Usuário (Login)"
+          placeholder="Ex: maria.silva"
+          icon="bi-person-badge"
+          (blur)="onUsernameBlur()"
+          [required]="true"
+        ></tm-text>
+        @if (userForm.get('username')?.errors?.['alreadyExists']) {
+          <div class="text-danger small mt-1 px-1 anim-fade-in">
+            <i class="bi bi-exclamation-circle me-1"></i> Este login já está em uso nesta escola.
+          </div>
+        }
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <tm-text
+          formControlName="email"
+          [control]="userForm.get('email')"
+          label="E-mail (Opcional)"
+          placeholder="nome@escola.com.br"
+          icon="bi-envelope"
+        ></tm-text>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <tm-select
+          formControlName="role"
+          [control]="userForm.get('role')"
+          label="Nível de Acesso"
+          placeholder="Selecione o nível..."
+          [options]="roleOptions()"
+          icon="bi-shield-lock"
+          [required]="true"
+        ></tm-select>
+      </div>
+
+      <div class="col-12"><hr class="my-2 border-dashed opacity-25" /></div>
+
+      <div class="col-12 col-lg-6">
+        <tm-text
+          formControlName="password"
+          [control]="userForm.get('password')"
+          label="Senha"
+          type="password"
+          placeholder="Mínimo 6 caracteres"
+          icon="bi-shield-lock"
+          [required]="!userId()"
+        ></tm-text>
+        <p class="text-muted extra-small mt-1 px-1" *ngIf="userId()">
+          Deixe em branco para manter a senha atual.
+        </p>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <tm-text
+          formControlName="confirmPassword"
+          [control]="userForm.get('confirmPassword')"
+          label="Confirmar Senha"
+          type="password"
+          placeholder="Repita a senha"
+          icon="bi-shield-check"
+          [required]="!userId() || !!userForm.get('password')?.value"
+        ></tm-text>
+        @if (userForm.get('confirmPassword')?.errors?.['passwordMismatch']) {
+          <div class="text-danger small mt-1 px-1 anim-fade-in">
+            <i class="bi bi-exclamation-circle me-1"></i> As senhas não coincidem.
+          </div>
+        }
+      </div>
+    </form>
+  </main>
+</div>

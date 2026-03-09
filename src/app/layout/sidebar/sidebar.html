@@ -346,6 +346,18 @@
         <li>
           <a
             class="dropdown-item d-flex align-items-center gap-2 rounded-2 py-2"
+            routerLink="/users"
+          >
+            <i class="bi bi-people text-muted"></i>
+            <span class="text-main">{{ t().admin.sidebar.users || 'Gestão de Usuários' }}</span>
+          </a>
+        </li>
+      }
+
+      @if (auth.hasRole(ROLES.ADMIN)) {
+        <li>
+          <a
+            class="dropdown-item d-flex align-items-center gap-2 rounded-2 py-2"
             routerLink="/licensing"
           >
             <i class="bi bi-shield-lock text-muted"></i>
