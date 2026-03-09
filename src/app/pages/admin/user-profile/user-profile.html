@@ -1,52 +1,57 @@
 <div class="page-container animate-slide-down">
-  <!-- Sticky Header -->
-  <header class="sticky-header sticky-top py-3 px-4 mb-4">
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-      <div class="d-flex align-items-center gap-3">
-        <button
-          class="btn btn-white btn-back-responsive shadow-sm border"
-          (click)="currentTab.set('personal')"
-          [disabled]="currentTab() === 'personal'"
-          title="Início"
-        >
-          <i class="bi bi-person-circle fs-5 text-primary"></i>
-        </button>
-        <div>
-          <h2 class="fw-bold mb-0 text-primary fs-4">Minha Conta</h2>
-          <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
-            Gerencie suas informações e segurança
-          </p>
+  <header
+    class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header border-bottom border-light"
+  >
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-lg-auto">
+        <div class="d-flex align-items-center gap-3">
+          <button
+            class="btn transition-hover border-0 shadow-sm bg-white btn-back-responsive"
+            (click)="onCancel()"
+            title="Sair"
+          >
+            <i class="bi bi-arrow-left fs-5 text-primary"></i>
+          </button>
+          <div>
+            <h2 class="fw-bold mb-0 text-dark fs-4 text-truncate" style="max-width: 300px">
+              Minha Conta
+            </h2>
+            <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+              Gerencie suas informações e segurança
+            </p>
+          </div>
         </div>
       </div>
 
-      <div class="d-flex gap-2">
-        @if (currentTab() === 'personal') {
-          <button
-            class="btn btn-primary px-4 fw-bold shadow-sm rounded-3 transition-hover d-flex align-items-center gap-2"
-            (click)="savePersonal()"
-            [disabled]="!personalForm.dirty || personalForm.invalid || loading()"
-          >
-            @if (loading()) {
-              <span class="spinner-border spinner-border-sm"></span>
-            } @else {
-              <i class="bi bi-check2"></i>
-            }
-            <span class="d-none d-md-inline">Salvar Alterações</span>
-          </button>
-        } @else {
-          <button
-            class="btn btn-primary px-4 fw-bold shadow-sm rounded-3 transition-hover d-flex align-items-center gap-2"
-            (click)="saveSecurity()"
-            [disabled]="securityForm.invalid || loading()"
-          >
-            @if (loading()) {
-              <span class="spinner-border spinner-border-sm"></span>
-            } @else {
-              <i class="bi bi-shield-check"></i>
-            }
-            <span class="d-none d-md-inline">Atualizar Senha</span>
-          </button>
-        }
+      <div class="col-12 col-lg-auto ms-auto">
+        <div class="row g-2 justify-content-end align-items-center">
+          @if (isViewMode()) {
+            <div class="col-12 col-lg-auto order-1 order-lg-3">
+              <app-button-edit (onClick)="enableEdit()"></app-button-edit>
+            </div>
+          } @else {
+            <div class="col-12 col-lg-auto order-2 order-lg-2">
+              <app-button-cancel (onClick)="onCancel()"></app-button-cancel>
+            </div>
+            <div class="col-12 col-lg-auto order-1 order-lg-3">
+              @if (currentTab() === 'personal') {
+                <app-button-save
+                  (onClick)="savePersonal()"
+                  [isSubmitting]="loading()"
+                  [disabled]="!personalForm.dirty || personalForm.invalid"
+                ></app-button-save>
+              } @else {
+                <app-button-save
+                  (onClick)="saveSecurity()"
+                  text="Atualizar Senha"
+                  icon="bi bi-shield-check"
+                  [isSubmitting]="loading()"
+                  [disabled]="securityForm.invalid"
+                ></app-button-save>
+              }
+            </div>
+          }
+        </div>
       </div>
     </div>
   </header>
@@ -84,12 +89,15 @@
 
     <!-- Main Content Card -->
     <div class="card bg-surface border-theme shadow-sm rounded-4 overflow-hidden">
-      <!-- Tabs Nav -->
-      <div class="card-header bg-transparent border-bottom-0 p-4 pb-0">
-        <ul class="nav nav-pills rounded-3 mb-0" role="tablist">
-          <li class="nav-item flex-fill">
+      <div class="card-body p-4 p-md-5">
+        <!-- Tabs Nav -->
+        <ul
+          class="nav nav-pills flex-column flex-lg-row gap-2 p-1 bg-light rounded-3 mb-4 border"
+          role="tablist"
+        >
+          <li class="nav-item col-12 col-lg-auto flex-lg-fill">
             <button
-              class="nav-link w-100 fw-bold py-2 px-4 d-flex align-items-center justify-content-center gap-2"
+              class="nav-link w-100 rounded-3 small fw-bold py-2 d-flex align-items-center justify-content-center gap-2"
               [class.active]="currentTab() === 'personal'"
               (click)="setTab('personal')"
             >
@@ -97,9 +105,9 @@
               Dados Pessoais
             </button>
           </li>
-          <li class="nav-item flex-fill">
+          <li class="nav-item col-12 col-lg-auto flex-lg-fill">
             <button
-              class="nav-link w-100 fw-bold py-2 px-4 d-flex align-items-center justify-content-center gap-2"
+              class="nav-link w-100 rounded-3 small fw-bold py-2 d-flex align-items-center justify-content-center gap-2"
               [class.active]="currentTab() === 'security'"
               (click)="setTab('security')"
             >
@@ -108,9 +116,7 @@
             </button>
           </li>
         </ul>
-      </div>
 
-      <div class="card-body p-4 p-md-5">
         <!-- Error/Success Alerts -->
         @if (successMessage()) {
           <div class="alert alert-success border-0 rounded-3 mb-4 d-flex align-items-center gap-3">
@@ -157,8 +163,11 @@
               <div class="col-12 col-lg-6">
                 <tm-text
                   formControlName="phone"
+                  type="text"
                   label="Telefone / WhatsApp"
+                  placeholder="(11) 99999-9999"
                   icon="bi bi-whatsapp"
+                  mask="phone"
                   [control]="personalForm.get('phone')"
                 ></tm-text>
               </div>
@@ -174,6 +183,16 @@
                 Alterar Senha
               </h5>
               <form [formGroup]="securityForm" class="d-flex flex-column gap-4">
+                <tm-text
+                  formControlName="username"
+                  label="Nome de Usuário"
+                  placeholder="Seu nome de usuário para login"
+                  icon="bi bi-person-badge"
+                  [control]="securityForm.get('username')"
+                ></tm-text>
+
+                <hr class="my-2 border-dashed opacity-25" />
+
                 <tm-text
                   formControlName="currentPassword"
                   type="password"
@@ -232,18 +251,6 @@
                   icon="bi bi-shield-check"
                 ></tm-text>
               </form>
-            </div>
-
-            <div class="col-12 col-lg-5 ms-lg-auto">
-              <div class="alert alert-info border-0 rounded-4 p-4 shadow-sm bg-opacity-10 h-100">
-                <h6 class="fw-bold text-primary mb-3">Dicas de Segurança</h6>
-                <ul class="mb-0 small d-flex flex-column gap-2 ps-3">
-                  <li class="opacity-75">Use pelo menos 8 caracteres</li>
-                  <li class="opacity-75">Inclua letras maiúsculas e minúsculas</li>
-                  <li class="opacity-75">Adicione números e caracteres especiais</li>
-                  <li class="opacity-75">Evite usar informações pessoais como nomes ou datas</li>
-                </ul>
-              </div>
             </div>
           </div>
         }

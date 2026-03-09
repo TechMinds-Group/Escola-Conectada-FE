@@ -53,22 +53,22 @@
             </div>
           </div>
 
-          <!-- Email Field -->
+          <!-- Username Field -->
           <div class="mb-3">
             <label class="form-label xx-small fw-bold text-muted text-uppercase tracking-wider mb-1"
-              >E-mail</label
+              >Usuário</label
             >
             <div class="input-group rounded-3 overflow-hidden border bg-white">
               <span class="input-group-text bg-transparent border-0 py-2 px-3">
-                <i class="bi bi-envelope text-secondary small"></i>
+                <i class="bi bi-person-badge text-secondary small"></i>
               </span>
               <input
-                type="email"
+                type="text"
                 class="form-control border-0 bg-transparent py-2 ps-1 small text-dark"
-                placeholder="nome@escola.com.br"
-                [(ngModel)]="email"
+                placeholder="Seu nome de usuário"
+                [(ngModel)]="username"
                 (ngModelChange)="onInputChange()"
-                name="email"
+                name="username"
                 required
               />
             </div>

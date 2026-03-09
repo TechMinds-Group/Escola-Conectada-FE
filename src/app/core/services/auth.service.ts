@@ -8,6 +8,7 @@ export interface User {
   id: string;
   nome: string;
   email: string;
+  username?: string;
   roles: string[];
   tenantId: string;
 }
@@ -76,13 +77,13 @@ export class AuthService {
     return !!user && roles.some((r) => user.roles.includes(r));
   }
 
-  async login(email: string, password: string, tenantId: string): Promise<boolean> {
+  async login(username: string, password: string, tenantId: string): Promise<boolean> {
     try {
       // Ensure tenantId is in localStorage BEFORE the request so interceptor picks it up
       localStorage.setItem('ec_tenant_id', tenantId);
 
       const response = await lastValueFrom(
-        this.http.post<any>(`${this.apiUrl}/login`, { email, password, tenantId }),
+        this.http.post<any>(`${this.apiUrl}/login`, { username, password, tenantId }),
       );
 
       if (response && response.token) {
@@ -129,6 +130,24 @@ export class AuthService {
       return true;
     } catch (error) {
       console.error('Update profile error:', error);
+      throw error;
+    }
+  }
+
+  async updateUsername(username: string): Promise<boolean> {
+    try {
+      await lastValueFrom(this.http.put<any>(`${this.apiUrl}/username`, { username }));
+
+      const user = this.currentUser();
+      if (user) {
+        // We'll need to cast this or update the User interface if it doesn't have a username property
+        (user as any).username = username;
+        localStorage.setItem('ec_user', JSON.stringify(user));
+        this.currentUser.set({ ...user });
+      }
+      return true;
+    } catch (error) {
+      console.error('Update username error:', error);
       throw error;
     }
   }

@@ -1,208 +1,145 @@
-<div class="container-fluid py-4">
-  <div class="d-flex align-items-center mb-4">
-    <div class="icon-box bg-primary bg-opacity-10 text-primary p-3 rounded-4 me-3">
-      <i class="bi bi-shield-check fs-3"></i>
-    </div>
-    <div>
-      <h2 class="h4 fw-bold mb-0">Gestão de Licenciamento</h2>
-      <p class="text-muted small mb-0">Controle de unidades e chaves de acesso ao sistema</p>
-    </div>
-  </div>
-
-  <!-- Tabs Navigation -->
-  <ul class="nav nav-pills custom-pills mb-4 p-1 bg-light rounded-pill d-inline-flex border">
-    <li class="nav-item">
-      <button
-        class="nav-link rounded-pill px-4 py-2 fw-medium"
-        [class.active]="activeTab() === 'unidades'"
-        (click)="setTab('unidades')"
-      >
-        <i class="bi bi-building me-2"></i> Unidades
-      </button>
-    </li>
-    <li class="nav-item">
-      <button
-        class="nav-link rounded-pill px-4 py-2 fw-medium"
-        [class.active]="activeTab() === 'licencas'"
-        (click)="setTab('licencas')"
-      >
-        <i class="bi bi-key me-2"></i> Chaves de Licença
-      </button>
-    </li>
-  </ul>
-
-  <!-- Unidades Tab -->
-  <div *ngIf="activeTab() === 'unidades'" class="fade-in">
-    <div class="row">
-      <div class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="bg-light border-bottom">
-                <tr>
-                  <th class="ps-4">Unidade</th>
-                  <th>Identificador</th>
-                  <th>CNPJ</th>
-                  <th>Expiração</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let u of unidades()">
-                  <td class="ps-4">
-                    <div class="fw-bold">{{ u.nome }}</div>
-                  </td>
-                  <td>
-                    <code>{{ u.identificador }}</code>
-                  </td>
-                  <td>{{ u.documento || '---' }}</td>
-                  <td>
-                    <span
-                      *ngIf="u.dataExpiracao; else noExp"
-                      class="badge rounded-pill text-bg-light border fw-medium px-3"
-                    >
-                      {{ u.dataExpiracao | date: 'dd/MM/yyyy HH:mm' }}
-                    </span>
-                    <ng-template #noExp>
-                      <span class="text-muted small">Sem expiração</span>
-                    </ng-template>
-                  </td>
-                  <td>
-                    <span
-                      [class]="
-                        u.ativo
-                          ? 'badge bg-success-subtle text-success border border-success'
-                          : 'badge bg-danger-subtle text-danger border border-danger'
-                      "
-                      class="rounded-pill px-3 py-2 fw-bold small"
-                    >
-                      {{ u.ativo ? 'ATIVO' : 'BLOQUEADO' }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+<div class="container-fluid py-4 pb-5">
+  <header
+    class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header border-bottom border-light"
+  >
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-lg-auto">
+        <div class="d-flex align-items-center gap-3">
+          <div class="icon-box bg-primary bg-opacity-10 text-primary p-3 rounded-4">
+            <i class="bi bi-shield-check fs-4"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0 text-dark fs-4 text-truncate" style="max-width: 300px">
+              Gestão de Licenciamento
+            </h2>
+            <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+              Controle de unidades e chaves de acesso ao sistema
+            </p>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- Licenças Tab -->
-  <div *ngIf="activeTab() === 'licencas'" class="fade-in">
-    <div class="row g-4">
-      <!-- Create New License -->
-      <div class="col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-          <h5 class="fw-bold mb-4">Ativar Licença</h5>
-          <form (submit)="saveLicenca()">
-            <div class="mb-4">
-              <label class="form-label small fw-bold text-uppercase opacity-75"
-                >Chave de Ativação</label
-              >
-              <div class="input-group">
-                <input
-                  type="text"
-                  [(ngModel)]="newLicenca().chave"
-                  name="chave"
-                  class="form-control"
-                  placeholder="Cole sua chave de ativação aqui..."
-                  required
-                />
-              </div>
+  <main class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white">
+    <ul class="nav nav-pills flex-column flex-lg-row gap-2 p-1 bg-light rounded-3 mb-4 border">
+      <li class="nav-item col-12 col-lg-auto flex-lg-fill">
+        <button
+          class="nav-link w-100 rounded-3 small fw-bold py-2"
+          [class.active]="activeTab() === 'unidades'"
+          (click)="setTab('unidades')"
+        >
+          <i class="bi bi-building me-2"></i> Unidades
+        </button>
+      </li>
+      <li class="nav-item col-12 col-lg-auto flex-lg-fill">
+        <button
+          class="nav-link w-100 rounded-3 small fw-bold py-2"
+          [class.active]="activeTab() === 'licencas'"
+          (click)="setTab('licencas')"
+        >
+          <i class="bi bi-key me-2"></i> Chaves de Licença
+        </button>
+      </li>
+    </ul>
+
+    <!-- Unidades Tab -->
+    @if (activeTab() === 'unidades') {
+      <div class="animate-in">
+        <tm-table [cols]="unidadesCols" [data]="unidades()" [isLoading]="isLoading()"> </tm-table>
+      </div>
+    }
+
+    <!-- Licenças Tab -->
+    @if (activeTab() === 'licencas') {
+      <div class="animate-in">
+        <div class="row g-4">
+          <!-- Create New License -->
+          <div class="col-12">
+            <div class="card border border-light shadow-sm rounded-4 p-4 bg-light bg-opacity-50">
+              <h5 class="fw-bold mb-4">Ativar Licença</h5>
+              <form [formGroup]="licencaForm" (ngSubmit)="saveLicenca()">
+                <div class="row g-3 align-items-end">
+                  <div class="col-12 col-md-9 col-lg-10">
+                    <tm-text
+                      formControlName="chave"
+                      label="Chave de Ativação"
+                      placeholder="Cole sua chave aqui..."
+                      icon="bi-key"
+                      [control]="licencaForm.get('chave')"
+                    ></tm-text>
+                  </div>
+
+                  <div class="col-12 col-md-3 col-lg-2 pb-1">
+                    <app-button-save
+                      text="ATIVAR CHAVE"
+                      icon="bi bi-check2-circle"
+                      [isSubmitting]="isSubmitting()"
+                      [disabled]="licencaForm.invalid"
+                      class="w-100"
+                    ></app-button-save>
+                  </div>
+                </div>
+              </form>
             </div>
-            <button
-              type="submit"
-              class="btn btn-primary w-100 py-3 fw-bold rounded-3"
-              [disabled]="!newLicenca().chave"
-            >
-              ATIVAR CHAVE
-            </button>
-          </form>
-        </div>
-      </div>
+          </div>
 
-      <!-- List Licenses -->
-      <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="bg-light border-bottom">
-                <tr>
-                  <th class="ps-4">Chave</th>
-                  <th>Duração</th>
-                  <th>Uso</th>
-                  <th>Data Uso</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let l of licencas()">
-                  <td class="ps-4">
-                    <code class="fw-bold text-primary">{{ l.chave }}</code>
-                  </td>
-                  <td>{{ l.diasValidade }} dias</td>
-                  <td>
-                    <span *ngIf="l.utilizada" class="badge bg-secondary rounded-pill"
-                      >Utilizada</span
-                    >
-                    <span *ngIf="!l.utilizada" class="badge bg-success rounded-pill"
-                      >Disponível</span
-                    >
-                  </td>
-                  <td>{{ (l.dataUtilizacao | date: 'dd/MM/yyyy') || '---' }}</td>
-                </tr>
-              </tbody>
-            </table>
+          <!-- List Licenses -->
+          <div class="col-12">
+            <tm-table [cols]="licencasCols" [data]="licencas()" [isLoading]="isLoading()">
+            </tm-table>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    }
+  </main>
 </div>
 
-<style>
-  .custom-pills .nav-link {
-    color: #64748b;
+<!-- Cell Templates for Unidades -->
+<ng-template #nomeTpl let-row>
+  <div class="fw-bold text-dark">{{ row.nome }}</div>
+</ng-template>
+
+<ng-template #identificadorTpl let-row>
+  <code>{{ row.identificador }}</code>
+</ng-template>
+
+<ng-template #expiracaoTpl let-row>
+  @if (row.dataExpiracao) {
+    <span class="badge rounded-pill text-bg-light border fw-medium px-3">
+      {{ row.dataExpiracao | date: 'dd/MM/yyyy HH:mm' }}
+    </span>
+  } @else {
+    <span class="text-muted small">Sem expiração</span>
   }
-  .custom-pills .nav-link.active {
-    background-color: #fff;
-    color: var(--primary-color);
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+</ng-template>
+
+<ng-template #statusTpl let-row>
+  <span
+    [class]="
+      row.ativo
+        ? 'badge bg-success-subtle text-success border border-success'
+        : 'badge bg-danger-subtle text-danger border border-danger'
+    "
+    class="rounded-pill px-3 py-2 fw-bold small"
+  >
+    {{ row.ativo ? 'ATIVO' : 'BLOQUEADO' }}
+  </span>
+</ng-template>
+
+<!-- Cell Templates for Licenças -->
+<ng-template #chaveTpl let-row>
+  <code class="fw-bold text-primary">{{ row.chave }}</code>
+</ng-template>
+
+<ng-template #usoTpl let-row>
+  @if (row.utilizada) {
+    <span class="badge bg-secondary rounded-pill fw-medium px-3 py-2">Utilizada</span>
+  } @else {
+    <span class="badge bg-success rounded-pill fw-medium px-3 py-2">Disponível</span>
   }
-  .btn-icon-hover {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: none;
-    background: transparent;
-    transition: all 0.2s;
-  }
-  .btn-icon-hover:hover {
-    background: rgba(0, 0, 0, 0.05);
-    color: var(--primary-color);
-  }
-  .fade-in {
-    animation: fadeIn 0.3s ease-in;
-  }
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .xx-small {
-    font-size: 0.65rem;
-  }
-  .modal-backdrop {
-    background-color: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(4px);
-    z-index: 1040;
-  }
-  .modal.show {
-    z-index: 1050;
-  }
-</style>
+</ng-template>
+
+<ng-template #dataUsoTpl let-row>
+  <span class="text-muted">{{ (row.dataUtilizacao | date: 'dd/MM/yyyy') || '---' }}</span>
+</ng-template>

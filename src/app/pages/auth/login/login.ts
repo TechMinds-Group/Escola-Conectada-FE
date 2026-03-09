@@ -16,7 +16,7 @@ export class Login implements OnInit {
   private unidadeService = inject(UnidadeService);
   private router = inject(Router);
 
-  email = '';
+  username = '';
   password = '';
   selectedTenantId = '';
   errorMessage = '';
@@ -71,7 +71,7 @@ export class Login implements OnInit {
   }
 
   async onSubmit() {
-    if (!this.email || !this.password || !this.selectedTenantId) {
+    if (!this.username || !this.password || !this.selectedTenantId) {
       this.errorMessage = 'Por favor, preencha todos os campos.';
       return;
     }
@@ -81,7 +81,7 @@ export class Login implements OnInit {
 
     try {
       const success = await this.authService.login(
-        this.email,
+        this.username,
         this.password,
         this.selectedTenantId,
       );
@@ -96,7 +96,7 @@ export class Login implements OnInit {
 
       if (error.status === 401) {
         // Specifically handle 401 from backend
-        this.errorMessage = error.error?.message || 'E-mail ou senha incorretos.';
+        this.errorMessage = error.error?.message || 'Usuário ou senha incorretos.';
       } else if (error.status === 403) {
         this.errorMessage = error.error?.message || 'Acesso negado para esta unidade.';
       } else if (error.status === 0) {
