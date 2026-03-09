@@ -12,6 +12,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { ThemeService } from '../../services/theme.service';
 
 export interface SelectOption<T = any> {
   value: T;
@@ -21,7 +23,7 @@ export interface SelectOption<T = any> {
 @Component({
   selector: 'tm-select',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, OverlayModule],
   template: `
     <div class="tm-select-container w-100" [class.disabled]="disabled">
       @if (label) {
@@ -36,6 +38,8 @@ export interface SelectOption<T = any> {
         (click)="toggleDropdown()"
         (blur)="onInputBlur()"
         tabindex="0"
+        cdkOverlayOrigin
+        #trigger="cdkOverlayOrigin"
       >
         @if (icon) {
           <div class="icon-section ps-3 py-2 d-flex align-items-center justify-content-center">
@@ -68,9 +72,21 @@ export interface SelectOption<T = any> {
         </div>
       </div>
 
-      <!-- Dropdown Panel -->
-      @if (isOpen()) {
-        <div class="dropdown-panel shadow-lg animate-slide-down">
+      <!-- Dropdown Panel Template -->
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="trigger"
+        [cdkConnectedOverlayOpen]="isOpen()"
+        [cdkConnectedOverlayHasBackdrop]="true"
+        cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+        (backdropClick)="$event.stopPropagation(); closeDropdown()"
+        (detach)="closeDropdown()"
+        [cdkConnectedOverlayWidth]="overlayWidth()"
+      >
+        <div
+          class="dropdown-panel shadow-lg animate-slide-down shadow-xs"
+          [class.dark]="themeService.isDarkMode()"
+        >
           <div class="options-list custom-scrollbar">
             @if (optionsSignal().length === 0) {
               <div class="p-3 text-muted small text-center italic">Nenhuma opção disponível</div>
@@ -90,7 +106,7 @@ export interface SelectOption<T = any> {
             }
           </div>
         </div>
-      }
+      </ng-template>
 
       @if (isInvalid()) {
         <div class="invalid-feedback d-block extra-small mt-1 fw-medium animate-in">
@@ -179,10 +195,6 @@ export interface SelectOption<T = any> {
 
       /* Dropdown Panel Styling */
       .dropdown-panel {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
         z-index: 1050;
         margin-top: 5px;
         background-color: #ffffff;
@@ -284,11 +296,11 @@ export interface SelectOption<T = any> {
             color: rgba(255, 255, 255, 0.4) !important;
           }
         }
+      }
 
-        .dropdown-panel {
-          background-color: #1e293b; // slate-800
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+      .dropdown-panel.dark {
+        background-color: #1e293b; // slate-800
+        border: 1px solid rgba(255, 255, 255, 0.1);
 
         .option-item {
           color: #e2e8f0;
@@ -334,6 +346,7 @@ export class SelectComponent implements ControlValueAccessor {
   @Output() toggle = new EventEmitter<boolean>();
 
   private elementRef = inject(ElementRef);
+  themeService = inject(ThemeService);
 
   internalValue = signal<any>(null);
   disabled = false;
@@ -344,6 +357,10 @@ export class SelectComponent implements ControlValueAccessor {
     const value = this.internalValue();
     const opt = this.optionsSignal().find((o) => o.value === value);
     return opt ? opt.label : null;
+  });
+
+  overlayWidth = computed(() => {
+    return this.elementRef.nativeElement.querySelector('.input-wrapper')?.offsetWidth || 200;
   });
 
   onChange: (value: any) => void = () => {};

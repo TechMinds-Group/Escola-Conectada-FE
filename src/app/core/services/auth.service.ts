@@ -84,13 +84,15 @@ export class AuthService {
   }
 
   async login(username: string, password: string, tenantId: string): Promise<boolean> {
+    const loginData = { username, password, tenantId };
+    console.log('[DEBUG-AUTH] Payload de login:');
+    console.dir(loginData);
+
     try {
       // Ensure tenantId is in localStorage BEFORE the request so interceptor picks it up
       localStorage.setItem('ec_tenant_id', tenantId);
 
-      const response = await lastValueFrom(
-        this.http.post<any>(`${this.apiUrl}/login`, { username, password, tenantId }),
-      );
+      const response = await lastValueFrom(this.http.post<any>(`${this.apiUrl}/login`, loginData));
 
       if (response && response.token) {
         localStorage.setItem('ec_token', response.token);
@@ -103,8 +105,13 @@ export class AuthService {
         return true;
       }
       return false;
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: any) {
+      if (error.status === 401) {
+        const message = error.error?.message || 'Não autorizado.';
+        console.error(`[DEBUG-AUTH] Erro 401 do Backend: ${message}`);
+      } else {
+        console.error('Login error:', error);
+      }
       throw error;
     }
   }
