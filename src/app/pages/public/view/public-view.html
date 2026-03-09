@@ -215,7 +215,7 @@
             class="d-flex flex-column align-items-center justify-content-center flex-grow-1 text-white gap-3"
           >
             <i class="bi bi-calendar2-x opacity-50" style="font-size: 5rem"></i>
-            <h2 class="fw-bold opacity-75 text-center">Nenhum evento cadastrado no calendário</h2>
+            <h2 class="fw-bold opacity-75 text-center">Nenhum evento cadastrado</h2>
           </div>
         } @else {
           <div class="flex-grow-1 overflow-hidden events-container" #eventsContainer>
@@ -359,7 +359,7 @@
         (click)="activeTab.set('calendar')"
       >
         <i class="bi bi-calendar-event-fill"></i>
-        <span>Calendário</span>
+        <span>Eventos</span>
       </button>
     </nav>
   }

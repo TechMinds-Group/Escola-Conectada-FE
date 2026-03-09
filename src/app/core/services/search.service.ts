@@ -53,7 +53,7 @@ export class SearchService {
 
       {
         label: t.admin.sidebar.calendar,
-        route: '/calendar',
+        route: '/events',
         icon: 'bi-calendar-event',
         category: t.admin.sidebar.records,
       },

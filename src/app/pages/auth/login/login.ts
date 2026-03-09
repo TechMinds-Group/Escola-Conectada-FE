@@ -37,7 +37,7 @@ export class Login implements OnInit {
     localStorage.removeItem('ec_tenant_id');
 
     // Load units from real API
-    this.unidadeService.list().subscribe({
+    this.unidadeService.getPublicUnidades().subscribe({
       next: (data) => {
         if (data && data.length > 0) {
           this.unidades.set(data);
@@ -45,21 +45,21 @@ export class Login implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error loading units from API:', err);
-        // Fallback only for development if API is down
-        const mockUnits: Unidade[] = [
+        // Silent error handle: allows the form to remain usable even if units fail to load
+        // Fallback abstract unit if API is unreachable or returns 401 initially
+        const fallbackUnits: Unidade[] = [
           {
-            id: '00000000-0000-0000-0000-000000000001',
-            nome: 'Unidade Central (Fallback)',
-            identificador: 'central',
+            id: '',
+            nome: 'Unidade Padrão',
+            identificador: 'default',
             ativo: true,
             documento: '',
             dataCadastro: '',
             dataExpiracao: '',
           },
         ];
-        this.unidades.set(mockUnits);
-        this.selectedTenantId = mockUnits[0].id;
+        this.unidades.set(fallbackUnits);
+        this.selectedTenantId = fallbackUnits[0].id;
       },
     });
   }

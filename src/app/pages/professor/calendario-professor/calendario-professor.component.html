@@ -1,0 +1,170 @@
+<div class="container-fluid py-4 pb-5">
+  <!-- Header da Página -->
+  <header class="mb-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-auto">
+        <h2 class="fw-bold mb-0 text-primary fs-3">Calendário</h2>
+        <p class="text-muted mb-0 small opacity-75">Visualize os horários das aulas</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Controls and Filters Row -->
+  <div class="row mb-3 animate-in align-items-center justify-content-between g-3">
+    <!-- Calendar Navigation & Date -->
+    <div class="col-12 col-lg-auto order-2 order-lg-1">
+      <div
+        class="d-flex flex-column flex-lg-row align-items-lg-center gap-3 gap-lg-2 justify-content-lg-start w-100"
+      >
+        <div class="btn-group shadow-sm w-100 w-lg-auto d-flex">
+          <button
+            class="btn btn-white border rounded-start-4 px-3 py-2 transition-hover flex-fill"
+            (click)="decrementDate()"
+          >
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <button
+            class="btn btn-white border px-3 py-2 fw-bold transition-hover flex-fill"
+            (click)="today()"
+          >
+            Hoje
+          </button>
+          <button
+            class="btn btn-white border rounded-end-4 px-3 py-2 transition-hover flex-fill"
+            (click)="incrementDate()"
+          >
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-center gap-2 w-100 w-lg-auto">
+          <span
+            class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill text-capitalize fw-bold fs-6 shadow-xs flex-fill text-center"
+          >
+            {{ viewMonth() }}
+          </span>
+          <span
+            class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 rounded-pill fw-bold fs-6 shadow-xs flex-fill text-center"
+          >
+            {{ viewYear() }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Toggle Button -->
+    <div class="col-12 col-lg-auto ms-lg-auto order-1 order-lg-2">
+      <button
+        class="btn d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 transition-hover border shadow-xs w-100"
+        [class.btn-primary]="showFilters()"
+        [class.btn-light]="!showFilters()"
+        (click)="toggleFilters()"
+      >
+        <i
+          class="bi text-dark"
+          [class.bi-funnel]="!showFilters()"
+          [class.bi-chevron-up]="showFilters()"
+          [class.text-white]="showFilters()"
+        ></i>
+        <span class="fw-bold" [class.text-white]="showFilters()">Filtros</span>
+        @if (activeFilters().length > 0) {
+          <span
+            class="badge rounded-circle p-1 ms-1 filter-dot"
+            [class.bg-white]="showFilters()"
+            [class.bg-primary]="!showFilters()"
+          ></span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Retractable Filter Panel -->
+  @if (showFilters()) {
+    <section class="filters-panel mb-4 animate-in">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+        <div class="card-body p-4 text-center">
+          <h5 class="text-muted fw-bold">
+            O calendário está exibindo todas as turmas ativas globalmente
+          </h5>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Grade do Calendário -->
+  <div class="w-100 pb-4">
+    <div class="calendar-container rounded-4 shadow-sm p-3 p-md-4 bg-surface overflow-hidden">
+      <div class="table-responsive">
+        <div class="calendar-grid">
+          <!-- Célula Vazia no Canto Superior Esquerdo -->
+          <div class="time-header-space border-bottom border-end pb-3"></div>
+
+          <!-- Cabeçalho (Dias da Semana) -->
+          @for (day of daysOfWeek(); track day) {
+            <div class="day-header text-center border-bottom pb-3">
+              <span class="text-muted small fw-bold text-uppercase">{{ day }}</span>
+            </div>
+          }
+
+          <!-- Linhas de Horário -->
+          @for (slot of hoursArray(); track slot.timeString) {
+            <!-- Célula de Horário (Col 1) -->
+            <div
+              class="time-slot text-end pe-3 py-3 border-end text-muted small fw-bold d-flex align-items-center justify-content-end"
+            >
+              {{ slot.timeString }}
+            </div>
+
+            <!-- Grade de Dias da Semana (Col 2 a 6) -->
+            @for (day of daysOfWeek(); track day; let dayIndex = $index) {
+              <div
+                class="calendar-cell p-2 border-bottom border-end position-relative transition-all h-100 d-flex flex-column gap-2"
+              >
+                @for (
+                  assign of getAssignmentsForSlotTime(dayIndex, slot.timeString);
+                  track assign.classContext.id + assign.subjectId
+                ) {
+                  <div
+                    class="assignment-card rounded-3 p-2 shadow-sm d-flex flex-column"
+                    [style.border-left]="
+                      '4px solid ' + getSubjectColor(assign.classContext.matrixId, assign.subjectId)
+                    "
+                  >
+                    <div class="d-flex w-100 justify-content-between align-items-start mb-1 gap-1">
+                      <div
+                        class="fw-bold small text-truncate subject-name text-dark"
+                        [title]="getSubjectName(assign.classContext.matrixId, assign.subjectId)"
+                      >
+                        {{ getSubjectName(assign.classContext.matrixId, assign.subjectId) }}
+                      </div>
+                      <span class="badge bg-light text-dark border p-1 class-badge">
+                        {{ assign.classContext.name }}
+                      </span>
+                    </div>
+
+                    <div
+                      class="small text-muted text-truncate teacher-name mt-1 d-flex align-items-center gap-1"
+                      [title]="getTeacherName(assign.teacherId)"
+                    >
+                      <i class="bi bi-person-fill opacity-50"></i>
+                      {{ getTeacherName(assign.teacherId) }}
+                    </div>
+
+                    @if (getRoomInfo(assign.classContext.roomId)) {
+                      <div
+                        class="extra-small text-muted text-truncate mt-1 d-flex align-items-center gap-1"
+                      >
+                        <i class="bi bi-geo-alt-fill opacity-50"></i>
+                        {{ getRoomInfo(assign.classContext.roomId) }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

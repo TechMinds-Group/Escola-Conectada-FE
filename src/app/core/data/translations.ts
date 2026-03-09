@@ -113,6 +113,7 @@ export interface LangSchema {
       resetTutorial: string;
       users: string;
       reservasSalas: string;
+      professorCalendar: string;
       tutorial: {
         sidebarRoomsTitle: string;
         sidebarRoomsText: string;
@@ -215,7 +216,7 @@ export const TRANSLATIONS: Translation = {
         todaysSchedule: 'Grade de Hoje',
         upcomingEvents: 'Próximos Eventos',
         importantNotices: 'Avisos Importantes',
-        schoolCalendar: 'Calendário Escolar',
+        schoolCalendar: 'Eventos Escolares',
         shiftSchedule: 'Horários do Turno',
       },
       labels: {
@@ -246,7 +247,7 @@ export const TRANSLATIONS: Translation = {
         events: {
           holiday: 'Feriado Nacional',
           party: 'Evento Festivo',
-          academic: 'Calendário Acadêmico',
+          academic: 'Eventos Acadêmicos',
         },
       },
     },
@@ -260,7 +261,7 @@ export const TRANSLATIONS: Translation = {
         rooms: 'Ambientes',
         matrix: 'Matriz Escolar',
         subjects: 'Disciplinas',
-        calendar: 'Calendário',
+        calendar: 'Eventos',
         settings: 'Configurações',
         timeGrids: 'Grade de Horários',
         academicParams: 'Parâmetros Acadêmicos',
@@ -271,6 +272,7 @@ export const TRANSLATIONS: Translation = {
         logout: 'Sair',
         users: 'Gestão de Usuários',
         reservasSalas: 'Reserva de Ambientes',
+        professorCalendar: 'Calendário do Professor',
         resetTutorial: 'Resetar Tutorial',
         tutorial: {
           sidebarRoomsTitle: 'Comece por aqui!',
@@ -654,7 +656,7 @@ export const TRANSLATIONS: Translation = {
         deleteConfirm: 'Deseja excluir esta disciplina?',
       },
       calendar: {
-        title: 'Calendário Acadêmico',
+        title: 'Eventos Acadêmicos',
         subtitle: 'Gerencie feriados, recessos e eventos escolares.',
         buttons: {
           list: 'Lista',
@@ -1054,6 +1056,7 @@ export const TRANSLATIONS: Translation = {
         schoolSettings: 'Ajustes de Escuela',
         users: 'Gestión de Usuarios',
         reservasSalas: 'Reserva de Ambientes',
+        professorCalendar: 'Calendario del Profesor',
         licensing: 'Gestión de Licencias',
         logout: 'Salir',
         resetTutorial: 'Reiniciar Tutorial (Ambientes)',
@@ -1835,6 +1838,7 @@ export const TRANSLATIONS: Translation = {
         schoolSettings: 'School Settings',
         users: 'User Management',
         reservasSalas: 'Room Reservations',
+        professorCalendar: 'Teacher Calendar',
         licensing: 'License Management',
         logout: 'Logout',
         resetTutorial: 'Reset Tutorial',

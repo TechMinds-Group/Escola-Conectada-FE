@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 export interface Unidade {
   id: string;
@@ -22,7 +23,46 @@ export class UnidadeService {
   private readonly baseUrl = `${environment.apiUrl}/Unidades`;
 
   list(): Observable<Unidade[]> {
-    return this.http.get<Unidade[]>(this.baseUrl);
+    return this.http
+      .get<Unidade[]>(this.baseUrl, {
+        headers: { 'Skip-Interceptor': 'true' },
+      })
+      .pipe(
+        catchError((err) => {
+          // Fallback silencioso direto no serviço caso API bloqueie por auth (401)
+          const fallbackUnits: Unidade[] = [
+            {
+              id: '',
+              nome: 'Unidade Padrão',
+              identificador: 'default',
+              ativo: true,
+              documento: '',
+            },
+          ];
+          return of(fallbackUnits);
+        }),
+      );
+  }
+
+  getPublicUnidades(): Observable<Unidade[]> {
+    return this.http
+      .get<Unidade[]>(`${this.baseUrl}/public`, {
+        headers: { 'Skip-Interceptor': 'true' },
+      })
+      .pipe(
+        catchError((err) => {
+          const fallbackUnits: Unidade[] = [
+            {
+              id: '',
+              nome: 'Unidade Padrão',
+              identificador: 'default',
+              ativo: true,
+              documento: '',
+            },
+          ];
+          return of(fallbackUnits);
+        }),
+      );
   }
 
   getById(id: string): Observable<Unidade> {

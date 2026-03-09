@@ -106,7 +106,7 @@ export class Sidebar implements OnInit, OnDestroy {
       '/ambientes',
       '/subjects',
       '/school-matrices',
-      '/calendar',
+      '/events',
       '/avisos',
       '/reservas-salas',
     ];

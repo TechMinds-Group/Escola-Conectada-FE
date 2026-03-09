@@ -1,0 +1,102 @@
+.calendar-container {
+  background-color: var(--bg-surface);
+}
+
+.calendar-grid {
+  display: grid;
+  /* 1 fixa para horários + 5 flexíveis para os dias da semana */
+  grid-template-columns: 80px repeat(5, 1fr);
+  gap: 0;
+  min-width: 800px; // Garante que a grade não esprema demais em telas pequenas
+
+  .time-header-space {
+    border-color: var(--border-color, #dee2e6) !important;
+  }
+
+  .day-header {
+    border-color: var(--border-color, #dee2e6) !important;
+  }
+
+  .time-slot {
+    border-color: var(--border-color, #dee2e6) !important;
+  }
+
+  .calendar-cell {
+    border-color: var(--border-color, #dee2e6) !important;
+    min-height: 80px;
+
+    /* Highlight effect on hover utilizing variables */
+    &:hover {
+      background-color: var(--hover-bg, rgba(0, 0, 0, 0.02));
+    }
+
+    // Inner custom card for assignments
+    .assignment-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+      overflow: hidden;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        cursor: pointer;
+      }
+
+      .subject-name {
+        line-height: 1.2;
+      }
+
+      .teacher-name,
+      .extra-small {
+        font-size: 0.75rem;
+        line-height: 1;
+      }
+    }
+  }
+
+  /* To avoid duplicate borders on the right and bottom edges */
+  .calendar-cell:nth-child(6n + 1) {
+    border-right: none !important;
+  }
+}
+
+.class-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-dot {
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+}
+
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+
+.badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+// Suporte ao Modo Escuro para elementos customizados
+:host-context([data-theme='dark']) {
+  .btn-white {
+    background-color: var(--input-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+  }
+}

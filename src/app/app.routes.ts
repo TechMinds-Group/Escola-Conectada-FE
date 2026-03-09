@@ -69,11 +69,19 @@ export const routes: Routes = [
       { path: 'classes/edit/:id', component: CadastroTurma },
       // Reservas de Ambientes
       { path: 'reservas-salas', component: ReservasSalas },
+      // Calendário do Professor
+      {
+        path: 'calendario-professor',
+        loadComponent: () =>
+          import('./pages/professor/calendario-professor/calendario-professor.component').then(
+            (m) => m.CalendarioProfessorComponent,
+          ),
+      },
       // Ambientes
       { path: 'ambientes', component: ConsultaAmbiente },
       { path: 'ambientes/new', component: CadastroAmbiente },
       { path: 'ambientes/edit/:id', component: CadastroAmbiente },
-      { path: 'calendar', component: ConsultaCalendario },
+      { path: 'events', component: ConsultaCalendario },
       // Avisos
       {
         path: 'avisos',
