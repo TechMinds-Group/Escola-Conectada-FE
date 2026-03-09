@@ -1,6 +1,8 @@
 import {
   Component,
   Input,
+  Output,
+  EventEmitter,
   forwardRef,
   signal,
   computed,
@@ -326,6 +328,7 @@ export class SelectComponent implements ControlValueAccessor {
   @Input() icon = '';
   @Input() control: any;
   @Input() clearable = false;
+  @Output() toggle = new EventEmitter<boolean>();
 
   private elementRef = inject(ElementRef);
 
@@ -358,13 +361,17 @@ export class SelectComponent implements ControlValueAccessor {
   toggleDropdown() {
     if (this.disabled) return;
     this.isOpen.update((v) => !v);
+    this.toggle.emit(this.isOpen());
     if (this.isOpen()) {
       this.onTouched();
     }
   }
 
   closeDropdown() {
-    this.isOpen.set(false);
+    if (this.isOpen()) {
+      this.isOpen.set(false);
+      this.toggle.emit(false);
+    }
   }
 
   selectOption(option: SelectOption) {

@@ -100,3 +100,32 @@
     }
   }
 }
+
+.filters-panel,
+.d-flex.dropdown-active {
+  .card,
+  & {
+    overflow: visible !important;
+    z-index: 100;
+  }
+}
+
+.header-select {
+  --tm-select-height: 40px;
+  min-width: 140px;
+
+  ::ng-deep {
+    .select-trigger {
+      border-radius: 50px !important; // Pill style like badges
+      font-weight: 700 !important;
+      text-transform: capitalize !important;
+      background-color: var(--badge-primary-bg, #f0f7ff) !important;
+      color: var(--badge-primary-text, #0d6efd) !important;
+      border-color: rgba(13, 110, 253, 0.2) !important;
+
+      &:hover {
+        background-color: var(--badge-primary-hover, #e0efff) !important;
+      }
+    }
+  }
+}

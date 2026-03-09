@@ -166,7 +166,18 @@
 }
 
 .card {
-  overflow: hidden; // Garantir que nada escape das bordas arredondadas
+  &.dropdown-active {
+    overflow: visible !important;
+  }
+}
+
+.btn-manage {
+  height: 48px;
+  width: 48px;
+  min-width: 48px;
+  border-radius: 8px;
+  padding: 0;
+  flex-shrink: 0;
 }
 
 // Fix para tm-select + button em telas pequenas

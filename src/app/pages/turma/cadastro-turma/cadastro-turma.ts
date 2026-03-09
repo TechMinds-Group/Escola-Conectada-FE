@@ -76,6 +76,7 @@ export class CadastroTurma implements OnInit {
   isSaving = signal(false);
   turmaId: string | null = null;
   activeTab = signal('info');
+  isDropdownActive = signal(false);
 
   // Track Alocações: AlocacaoDto[]
   allocations = signal<AlocacaoDto[]>([]);
@@ -677,5 +678,9 @@ export class CadastroTurma implements OnInit {
         this.closeRoomManager();
       },
     });
+  }
+
+  toggleDropdown(isOpen: boolean) {
+    this.isDropdownActive.set(isOpen);
   }
 }

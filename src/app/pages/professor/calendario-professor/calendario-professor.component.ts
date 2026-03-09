@@ -1,11 +1,15 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { SchoolDataService } from '../../../core/services/school-data';
+import { SelectComponent } from '../../../core/components/select/select.component';
+import { addMonths, subMonths, format, startOfWeek, addDays, startOfToday } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 @Component({
   selector: 'app-calendario-professor',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, SelectComponent],
   templateUrl: './calendario-professor.component.html',
   styleUrl: './calendario-professor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,6 +22,18 @@ export class CalendarioProfessorComponent {
   currentDate = signal<Date>(new Date());
 
   daysOfWeek = signal(['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta']);
+
+  weekDates = computed(() => {
+    const start = startOfWeek(this.currentDate(), { weekStartsOn: 1 }); // Monday
+    return [0, 1, 2, 3, 4].map((i) => {
+      const date = addDays(start, i);
+      return {
+        label: this.daysOfWeek()[i],
+        dateStr: format(date, 'dd/MM'),
+        fullDate: date,
+      };
+    });
+  });
 
   // Generates a unified, sorted array of all active class slots in the system
   hoursArray = computed(() => {
@@ -50,31 +66,101 @@ export class CalendarioProfessorComponent {
     return Array.from(uniqueSlots.values()).sort((a, b) => a.start.localeCompare(b.start));
   });
 
+  isDropdownActive = signal(false);
+
   // Filtros
   showFilters = signal(false);
+  turmaFilter = signal<string | null>(null);
+  teacherFilter = signal<string | null>(null);
+  subjectFilter = signal<string | null>(null);
+
+  turmaOptions = computed(() =>
+    this.schoolData.schoolClasses().map((c) => ({ value: c.id, label: c.name })),
+  );
+
+  teacherOptions = computed(() =>
+    this.schoolData.teachers().map((t) => ({ value: t.id, label: t.name })),
+  );
+
+  subjectOptions = computed(() =>
+    this.schoolData.subjects().map((s) => ({ value: s.id, label: s.name })),
+  );
+
+  monthOptions = signal([
+    { value: 0, label: 'Janeiro' },
+    { value: 1, label: 'Fevereiro' },
+    { value: 2, label: 'Março' },
+    { value: 3, label: 'Abril' },
+    { value: 4, label: 'Maio' },
+    { value: 5, label: 'Junho' },
+    { value: 6, label: 'Julho' },
+    { value: 7, label: 'Agosto' },
+    { value: 8, label: 'Setembro' },
+    { value: 9, label: 'Outubro' },
+    { value: 10, label: 'Novembro' },
+    { value: 11, label: 'Dezembro' },
+  ]);
+
+  yearOptions = computed(() => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+      years.push({ value: i, label: String(i) });
+    }
+    return years;
+  });
+
+  currentMonthValue = computed(() => this.currentDate().getMonth());
+  currentYearValue = computed(() => this.currentDate().getFullYear());
+
+  onMonthChange(month: number) {
+    this.currentDate.update((d) => {
+      const next = new Date(d);
+      next.setMonth(month);
+      return next;
+    });
+  }
+
+  onYearChange(year: number) {
+    this.currentDate.update((d) => {
+      const next = new Date(d);
+      next.setFullYear(year);
+      return next;
+    });
+  }
 
   viewMonth = computed(() => {
-    return this.currentDate().toLocaleString('pt-BR', { month: 'long' });
+    return format(this.currentDate(), 'MMMM', { locale: ptBR });
   });
 
   viewYear = computed(() => {
-    return this.currentDate().getFullYear();
+    return format(this.currentDate(), 'yyyy', { locale: ptBR });
   });
 
   activeFilters = computed(() => {
-    return [];
+    const active = [];
+    if (this.turmaFilter()) active.push('Turma');
+    if (this.teacherFilter()) active.push('Professor');
+    if (this.subjectFilter()) active.push('Disciplina');
+    return active;
   });
 
-  // Assignment Lookup - Returns all assignments globally
+  // Assignment Lookup - Returns all assignments globally or filtered
   getAssignmentsForSlotTime(dayIndex: number, timeString: string) {
-    const classes = this.schoolData.schoolClasses();
+    const allClasses = this.schoolData.schoolClasses();
     const allGrids = this.schoolData.schoolTimeGrids();
+
+    const tFilter = this.turmaFilter();
+    const pFilter = this.teacherFilter();
+    const sFilter = this.subjectFilter();
 
     const dayOfWeek = dayIndex + 1; // 1-5 (Mon-Fri)
     const results: any[] = [];
 
+    // Filter classes first if turmaFilter is active
+    const classes = tFilter ? allClasses.filter((c) => c.id === tFilter) : allClasses;
+
     for (const cls of classes) {
-      // Find which slot index corresponds to this time string in this class's grid
       const grid = allGrids.find((g) => g.id === cls.gradeHorariaId);
       if (!grid) continue;
 
@@ -84,17 +170,39 @@ export class CalendarioProfessorComponent {
       if (!slot) continue;
 
       if (cls.assignments) {
-        const assignment = cls.assignments.find(
-          (a: any) =>
-            String(a.dayOfWeek) === String(dayOfWeek) && String(a.slotIndex) === String(slot.index),
-        );
+        const assignments = cls.assignments.filter((a: any) => {
+          const matchDay = String(a.dayOfWeek) === String(dayOfWeek);
+          const matchSlot = String(a.slotIndex) === String(slot.index);
+          if (!matchDay || !matchSlot) return false;
 
-        if (assignment) {
+          // Apply Teacher Filter
+          if (pFilter && a.teacherId !== pFilter) return false;
+
+          // Apply Subject Filter
+          if (sFilter) {
+            // Find global subject from assignment's subjectId (which is MatrixSubject.id)
+            const matrix = this.schoolData
+              .schoolMatrices()
+              .find((m) => String(m.id) === String(cls.matrixId));
+            if (!matrix) return false;
+
+            let matrixSub = null;
+            for (const level of matrix.levels) {
+              matrixSub = level.subjects.find((s) => String(s.id) === String(a.subjectId));
+              if (matrixSub) break;
+            }
+            if (!matrixSub || matrixSub.subjectId !== sFilter) return false;
+          }
+
+          return true;
+        });
+
+        assignments.forEach((assignment: any) => {
           results.push({
             classContext: cls,
             ...assignment,
           });
-        }
+        });
       }
     }
     return results;
@@ -151,19 +259,15 @@ export class CalendarioProfessorComponent {
   }
 
   decrementDate() {
-    const prev = new Date(this.currentDate());
-    prev.setDate(prev.getDate() - 7);
-    this.currentDate.set(prev);
+    this.currentDate.update((d) => subMonths(d, 1));
   }
 
   incrementDate() {
-    const next = new Date(this.currentDate());
-    next.setDate(next.getDate() + 7);
-    this.currentDate.set(next);
+    this.currentDate.update((d) => addMonths(d, 1));
   }
 
   today() {
-    this.currentDate.set(new Date());
+    this.currentDate.set(startOfToday());
   }
 
   toggleFilters() {
@@ -171,8 +275,12 @@ export class CalendarioProfessorComponent {
   }
 
   clearFilters() {
-    // No specific filters to clear currently as it's global,
-    // but the method is needed for the UI button.
-    this.showFilters.set(false);
+    this.turmaFilter.set(null);
+    this.teacherFilter.set(null);
+    this.subjectFilter.set(null);
+  }
+
+  toggleDropdown(isOpen: boolean) {
+    this.isDropdownActive.set(isOpen);
   }
 }

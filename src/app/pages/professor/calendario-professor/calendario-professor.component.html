@@ -37,17 +37,26 @@
           </button>
         </div>
 
-        <div class="d-flex align-items-center justify-content-center gap-2 w-100 w-lg-auto">
-          <span
-            class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill text-capitalize fw-bold fs-6 shadow-xs flex-fill text-center"
-          >
-            {{ viewMonth() }}
-          </span>
-          <span
-            class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 rounded-pill fw-bold fs-6 shadow-xs flex-fill text-center"
-          >
-            {{ viewYear() }}
-          </span>
+        <div
+          class="d-flex align-items-center justify-content-center gap-2 w-100 w-lg-auto"
+          [class.dropdown-active]="isDropdownActive()"
+        >
+          <tm-select
+            [options]="monthOptions()"
+            [ngModel]="currentMonthValue()"
+            (ngModelChange)="onMonthChange($event)"
+            [clearable]="false"
+            class="header-select flex-grow-1"
+            (toggle)="toggleDropdown($event)"
+          ></tm-select>
+          <tm-select
+            [options]="yearOptions()"
+            [ngModel]="currentYearValue()"
+            (ngModelChange)="onYearChange($event)"
+            [clearable]="false"
+            class="header-select flex-grow-1"
+            (toggle)="toggleDropdown($event)"
+          ></tm-select>
         </div>
       </div>
     </div>
@@ -81,11 +90,60 @@
   <!-- Retractable Filter Panel -->
   @if (showFilters()) {
     <section class="filters-panel mb-4 animate-in">
-      <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
-        <div class="card-body p-4 text-center">
-          <h5 class="text-muted fw-bold">
-            O calendário está exibindo todas as turmas ativas globalmente
-          </h5>
+      <div
+        class="card border-0 shadow-lg rounded-4 bg-white"
+        [class.dropdown-active]="isDropdownActive()"
+      >
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <tm-select
+                label="Filtrar por Turma"
+                [options]="turmaOptions()"
+                [ngModel]="turmaFilter()"
+                (ngModelChange)="turmaFilter.set($event)"
+                placeholder="Todas as turmas"
+                icon="bi-people"
+                [clearable]="true"
+                (toggle)="toggleDropdown($event)"
+              ></tm-select>
+            </div>
+            <div class="col-12 col-md-4">
+              <tm-select
+                label="Filtrar por Professor"
+                [options]="teacherOptions()"
+                [ngModel]="teacherFilter()"
+                (ngModelChange)="teacherFilter.set($event)"
+                placeholder="Todos os professores"
+                icon="bi-person-badge"
+                [clearable]="true"
+                (toggle)="toggleDropdown($event)"
+              ></tm-select>
+            </div>
+            <div class="col-12 col-md-4">
+              <tm-select
+                label="Filtrar por Disciplina"
+                [options]="subjectOptions()"
+                [ngModel]="subjectFilter()"
+                (ngModelChange)="subjectFilter.set($event)"
+                placeholder="Todas as disciplinas"
+                icon="bi-book"
+                [clearable]="true"
+                (toggle)="toggleDropdown($event)"
+              ></tm-select>
+            </div>
+          </div>
+
+          @if (activeFilters().length > 0) {
+            <div class="d-flex justify-content-center mt-3 pt-3 border-top">
+              <button
+                class="btn btn-light-danger btn-sm rounded-pill px-4 fw-bold"
+                (click)="clearFilters()"
+              >
+                <i class="bi bi-x-lg me-2"></i>Limpar Filtros
+              </button>
+            </div>
+          }
         </div>
       </div>
     </section>
@@ -100,9 +158,12 @@
           <div class="time-header-space border-bottom border-end pb-3"></div>
 
           <!-- Cabeçalho (Dias da Semana) -->
-          @for (day of daysOfWeek(); track day) {
+          @for (dayInfo of weekDates(); track dayInfo.label) {
             <div class="day-header text-center border-bottom pb-3">
-              <span class="text-muted small fw-bold text-uppercase">{{ day }}</span>
+              <span class="text-muted small fw-bold text-uppercase d-block">{{
+                dayInfo.label
+              }}</span>
+              <span class="text-primary x-small fw-bold">{{ dayInfo.dateStr }}</span>
             </div>
           }
 
