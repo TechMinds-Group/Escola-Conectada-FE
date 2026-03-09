@@ -85,8 +85,6 @@ export class AuthService {
 
   async login(username: string, password: string, tenantId: string): Promise<boolean> {
     const loginData = { username, password, tenantId };
-    console.log('[DEBUG-AUTH] Payload de login:');
-    console.dir(loginData);
 
     try {
       // Ensure tenantId is in localStorage BEFORE the request so interceptor picks it up
@@ -108,7 +106,7 @@ export class AuthService {
     } catch (error: any) {
       if (error.status === 401) {
         const message = error.error?.message || 'Não autorizado.';
-        console.error(`[DEBUG-AUTH] Erro 401 do Backend: ${message}`);
+        console.error(`Login error (401): ${message}`);
       } else {
         console.error('Login error:', error);
       }

@@ -509,9 +509,6 @@ export class CadastroMatrizEscolarPage implements OnInit {
       this.router.navigate(['/school-matrices']);
     } catch (error: any) {
       // 6. Debug e Notificação de Erro
-      console.error('--- DEBUG SAVE ERROR ---');
-      console.error('Status:', error.status);
-      console.error('Payload sent:', matrixData);
 
       const errorMessage = this.extractErrorMessage(error, 'Erro ao salvar matriz escolar.');
       this.notification.error(errorMessage);

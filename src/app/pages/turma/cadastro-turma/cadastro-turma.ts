@@ -269,12 +269,6 @@ export class CadastroTurma implements OnInit {
     ordemAula: number,
     teacherId: string | null,
   ) {
-    console.log('[ALLOCATION-DEBUG] onTeacherSelected (legacy):', {
-      matrizDisciplinaId,
-      dia,
-      ordemAula,
-      teacherId,
-    });
     if (!teacherId) {
       // Remove alocação
       this.allocations.update((current) =>
@@ -309,7 +303,6 @@ export class CadastroTurma implements OnInit {
         ]);
       }
     }
-    console.log('[ALLOCATION-DEBUG] Current allocations array:', this.allocations());
   }
 
   // New, more robust methods for the grid
@@ -325,7 +318,6 @@ export class CadastroTurma implements OnInit {
 
   onDisciplineChange(dia: number, ordemAula: number, event: any) {
     const disciplineId = event.target.value;
-    console.log('[ALLOCATION-DEBUG] onDisciplineChange:', { dia, ordemAula, disciplineId });
 
     if (!disciplineId) {
       // Remover alocação completa se desmarcar a disciplina
@@ -374,7 +366,6 @@ export class CadastroTurma implements OnInit {
   }
 
   onTeacherChange(dia: number, ordemAula: number, teacherId: string | null) {
-    console.log('[ALLOCATION-DEBUG] onTeacherChange:', { dia, ordemAula, teacherId });
     this.allocations.update((current) => {
       const existing = current.find((a) => a.diaDaSemana === dia && a.ordemAula === ordemAula);
       if (existing) {
@@ -481,7 +472,6 @@ export class CadastroTurma implements OnInit {
           this.selectedGradeId.set(turma.gradeHorariaId || null);
 
           if (turma.alocacoes) {
-            console.log('[ALLOCATION-DEBUG] Loading allocations from API:', turma.alocacoes);
             this.allocations.set([...turma.alocacoes]);
           }
 
@@ -511,20 +501,12 @@ export class CadastroTurma implements OnInit {
     );
 
     if (validAllocations.length !== this.allocations().length) {
-      console.warn(
-        '[ALLOCATION-DEBUG] Filtering out invalid/temporary allocations:',
-        this.allocations().filter(
-          (a) => !a.professorId || !a.matrizDisciplinaId || a.matrizDisciplinaId.startsWith('sub-'),
-        ),
-      );
     }
 
     const payload: Partial<TurmaDto> = {
       ...this.classForm.getRawValue(),
       alocacoes: validAllocations,
     };
-
-    console.log('[ALLOCATION-DEBUG] FINAL PAYLOAD TO SEND:', JSON.stringify(payload, null, 2));
 
     if (this.isEditMode() && this.turmaId) {
       payload.id = this.turmaId;

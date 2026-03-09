@@ -124,25 +124,22 @@ export class ModalManageEventComponent {
       dataFim: parseISO(formValue.dataFim).toISOString(),
     };
 
-    console.log('[DEBUG] Tentando salvar evento:', { id, payload });
-
     const request = id
       ? this.eventoService.update(id, payload)
       : this.eventoService.create(payload);
 
     request.subscribe({
       next: (res) => {
-        console.log('[DEBUG] Sucesso ao salvar:', res);
         this.notification.success(id ? 'Evento atualizado!' : 'Evento criado!');
         this.eventoService.notifyUpdate(); // Disparar recarregamento
         this.onSaved.emit();
         this.closeModal();
       },
       error: (err) => {
-        console.error('[DEBUG] Erro ao salvar evento:', {
+        console.error('Erro ao salvar evento:', {
           status: err.status,
           message: err.message,
-          error: err.error, // Detalhes de validação do servidor (ex: ProblemDetails)
+          error: err.error,
         });
         this.notification.error('Erro ao salvar evento.');
         this.isSubmitting.set(false);
