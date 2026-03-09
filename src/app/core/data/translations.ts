@@ -33,6 +33,7 @@ export interface LangSchema {
       professor: string;
       actions: string;
       empty: string;
+      class: string;
     };
     filters: {
       date: string;
@@ -190,6 +191,7 @@ export const TRANSLATIONS: Translation = {
         professor: 'Professor',
         actions: 'Ações',
         empty: 'Nenhum ambiente encontrado.',
+        class: 'Turma',
       },
       filters: {
         date: 'Data',
@@ -299,6 +301,7 @@ export const TRANSLATIONS: Translation = {
         },
         table: {
           teacher: 'Professor',
+          user: 'Usuário',
           subjects: 'Habilitações',
           workload: 'Utilização de Carga',
           status: 'Status',
@@ -973,9 +976,10 @@ export const TRANSLATIONS: Translation = {
         room: 'Ambiente',
         time: 'Horario',
         status: 'Estado',
-        professor: 'Profesor',
+        professor: 'Docente',
         actions: 'Acciones',
         empty: 'No se encontraron ambientes.',
+        class: 'Clase',
       },
       filters: {
         date: 'Fecha',
@@ -1755,9 +1759,10 @@ export const TRANSLATIONS: Translation = {
         room: 'Room',
         time: 'Time',
         status: 'Status',
-        professor: 'Professor',
+        professor: 'Teacher',
         actions: 'Actions',
         empty: 'No rooms found.',
+        class: 'Class',
       },
       filters: {
         date: 'Date',

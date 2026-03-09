@@ -161,16 +161,26 @@ export class ReservasSalas implements OnInit {
   selectedTurno = signal<string>('Manhã');
   selectedTimeId = signal<string>('07:00');
   selectedDate = signal<string>(new Date().toISOString().split('T')[0]); // YYYY-MM-DD
+  selectedResources = signal<string[]>([]);
+
+  appliedFilters = signal({
+    turno: 'Manhã',
+    timeId: '07:00',
+    date: new Date().toISOString().split('T')[0],
+    resources: [] as string[],
+  });
 
   // Filter Panel State
   isFilterPanelOpen = signal(false);
-  isFilterActive = computed(
-    () =>
-      this.selectedTurno() !== 'Manhã' ||
-      this.selectedTimeId() !== '07:00' ||
-      this.selectedDate() !== new Date().toISOString().split('T')[0] ||
-      this.selectedResources().length > 0,
-  );
+  isFilterActive = computed(() => {
+    const applied = this.appliedFilters();
+    return (
+      applied.turno !== 'Manhã' ||
+      applied.timeId !== '07:00' ||
+      applied.date !== new Date().toISOString().split('T')[0] ||
+      applied.resources.length > 0
+    );
+  });
 
   // Para o MatDatepicker (trabalha com objetos Date)
   selectedDateObj = computed(() => {
@@ -190,7 +200,6 @@ export class ReservasSalas implements OnInit {
   isLoadingAvailability = signal(false);
 
   // Filter by Resources
-  selectedResources = signal<string[]>([]);
   availableResources = computed(() => {
     const res = new Set<string>();
     this.availabilityData().forEach((item) => {
@@ -201,7 +210,7 @@ export class ReservasSalas implements OnInit {
 
   filteredAvailability = computed(() => {
     const data = this.availabilityData();
-    const resources = this.selectedResources();
+    const resources = this.appliedFilters().resources;
     if (resources.length === 0) return data;
     return data.filter((item) => resources.every((r) => item.recursos?.includes(r)));
   });
@@ -211,7 +220,20 @@ export class ReservasSalas implements OnInit {
   // Computed: derive RoomDisplay from rooms + real reservations
 
   // Pending reservations (Pendente status from API)
-  pendencias = computed(() => this.reservasApi().filter((r) => r.status === 'Pendente'));
+  pendencias = computed(() => {
+    const reservas = this.reservasApi();
+    const currentUser = this.user();
+    const isUserAdmin = this.isAdmin();
+
+    return reservas.filter((r) => {
+      if (r.status !== 'Pendente') return false;
+      if (isUserAdmin) return true;
+
+      const profId = currentUser?.professorId;
+      // Ver se eu sou o professor afetado (quem tem que aprovar) OU se eu sou o solicitante (quem quer a sala)
+      return r.affectedProfessorId === profId || r.professorId === profId;
+    });
+  });
 
   // Modal State
   isModalOpen = signal(false);
@@ -239,9 +261,11 @@ export class ReservasSalas implements OnInit {
       }
     });
 
-    // Auto-refresh Availability View when Date or Shift changes
+    // Auto-refresh Availability View when Applied Filters change
     effect(() => {
-      this.loadAvailability(this.selectedDate(), this.selectedTurno());
+      const applied = this.appliedFilters();
+      // Use timeId if available (HH:mm format), otherwise use the shift name
+      this.loadAvailability(applied.date, applied.timeId || applied.turno);
     });
   }
 
@@ -260,7 +284,8 @@ export class ReservasSalas implements OnInit {
 
     // Initial loads
     this.loadReservas();
-    this.loadAvailability(this.selectedDate(), this.selectedTurno());
+    const applied = this.appliedFilters();
+    this.loadAvailability(applied.date, applied.timeId || applied.turno);
 
     // Check for reservaId in query params
     this.route.queryParams.subscribe((params) => {
@@ -284,6 +309,7 @@ export class ReservasSalas implements OnInit {
             if (room) {
               this.selectedDate.set(res.data.split('T')[0]);
               this.selectedTimeId.set(res.horarioInicio);
+              this.applyFilters();
               // Additional logic to open modal if needed, but usually just highlighting or selecting is enough
               // For this UX, let's open the details/modal
               this.openRequestModal(room);
@@ -334,18 +360,31 @@ export class ReservasSalas implements OnInit {
     this.isFilterPanelOpen.update((v) => !v);
   }
 
+  applyFilters() {
+    this.appliedFilters.set({
+      date: this.selectedDate(),
+      turno: this.selectedTurno(),
+      timeId: this.selectedTimeId(),
+      resources: [...this.selectedResources()],
+    });
+    this.isFilterPanelOpen.set(false);
+  }
+
   clearFilters() {
+    const today = new Date().toISOString().split('T')[0];
+    this.selectedDate.set(today);
     this.selectedTurno.set('Manhã');
     const available = this.horariosMenu()['Manhã'];
     if (available?.length > 0) this.selectedTimeId.set(available[0].id);
-    this.selectedDate.set(new Date().toISOString().split('T')[0]);
+    else this.selectedTimeId.set('07:00');
     this.selectedResources.set([]);
+    this.applyFilters();
   }
 
   onDateChange(date: string) {
     this.selectedDate.set(date);
     this.loadReservas();
-    this.loadAvailability(this.selectedDate(), this.selectedTurno());
+    // No auto-load availability here, wait for Apply
   }
 
   onDateInputChange(value: string) {
@@ -406,8 +445,8 @@ export class ReservasSalas implements OnInit {
     this.selectedRoomForModal.set(item);
     // Auto-select professor if logged in as Professor
     const currentUser = this.user();
-    if (currentUser && currentUser.roles?.includes('Professor')) {
-      this.requestTeacherId.set(currentUser.id);
+    if (currentUser?.professorId) {
+      this.requestTeacherId.set(currentUser.professorId);
     } else {
       this.requestTeacherId.set('');
     }

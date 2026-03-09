@@ -95,9 +95,9 @@
               <div class="col-12 col-lg-auto">
                 <button
                   class="btn btn-primary rounded-3 px-4 py-2 fw-bold transition-hover shadow-sm w-100"
-                  (click)="isFilterPanelOpen.set(false)"
+                  (click)="applyFilters()"
                 >
-                  Fechar
+                  Aplicar Filtros
                 </button>
               </div>
             </div>
@@ -121,15 +121,24 @@
             class="pending-item d-flex align-items-center justify-content-between p-3 bg-white rounded-3 shadow-sm"
           >
             <div>
-              <div class="fw-bold text-dark mb-1">
-                {{ req.salaNome }}
-                <span class="badge bg-secondary-subtle text-secondary ms-2 fw-medium rounded-pill">
-                  {{ req.horarioInicio }}
+              <div class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                <span class="text-primary">{{ req.salaNome }}</span>
+                <span class="badge bg-secondary-subtle text-secondary fw-medium rounded-pill">
+                  {{ req.data | date: 'dd/MM' }} &bull; {{ req.horarioInicio }} -
+                  {{ req.horarioFim }}
                 </span>
               </div>
               <div class="small text-muted mb-1">
-                {{ t().reservas.table.professor }}:
-                <span class="fw-semibold text-primary">{{ req.professorNome }}</span>
+                @if (req.turmaConflito) {
+                  <div>
+                    {{ t().reservas.table.class }}:
+                    <span class="fw-bold text-danger">{{ req.turmaConflito }}</span>
+                  </div>
+                }
+                <div>
+                  {{ t().reservas.table.professor }}:
+                  <span class="fw-semibold text-dark">{{ req.professorNome }}</span>
+                </div>
               </div>
               @if (req.motivo) {
                 <div class="small text-secondary fst-italic">"{{ req.motivo }}"</div>
@@ -191,6 +200,16 @@
         </div>
 
         <div class="mt-auto pt-3 border-top">
+          <div class="mb-3 d-flex align-items-center gap-2">
+            <span class="badge bg-secondary-subtle text-secondary xx-small fw-bold">
+              <i class="bi bi-calendar3 me-1"></i> {{ item.data | date: 'dd/MM' }}
+            </span>
+            <span class="badge bg-info-subtle text-info xx-small fw-bold">
+              <i class="bi bi-clock me-1"></i>
+              {{ item.horario }}{{ item.horarioFim ? ' - ' + item.horarioFim : '' }}
+            </span>
+          </div>
+
           <div class="d-flex justify-content-between align-items-center">
             <span class="small text-muted">
               <i class="bi bi-people me-1"></i> {{ item.capacidade }}
@@ -213,13 +232,22 @@
                 Requisitar (Forçar)
               </button>
             } @else if (item.statusOcupacao === 'Ocupado' || item.statusOcupacao === 'Solicitado') {
-              <button
-                class="btn btn-warning btn-sm px-3 rounded-pill fw-bold text-dark border-0"
-                style="background: #f59e0b"
-                (click)="openRequestModal(item)"
-              >
-                Solicitar Uso
-              </button>
+              <!-- Só mostra se NÃO for eu mesmo o ocupante -->
+              @if (item.occupantProfessorId !== user()?.professorId) {
+                <button
+                  class="btn btn-warning btn-sm px-3 rounded-pill fw-bold text-dark border-0"
+                  style="background: #f59e0b"
+                  (click)="openRequestModal(item)"
+                >
+                  Solicitar Uso
+                </button>
+              } @else {
+                <span
+                  class="badge bg-success-subtle text-success xx-small fw-bold px-3 py-2 rounded-pill"
+                >
+                  Seu Ambiente
+                </span>
+              }
             }
           </div>
 
@@ -294,16 +322,18 @@
               </div>
             }
 
-            <div class="mb-4">
-              <tm-select
-                label="Professor Solicitante"
-                [ngModel]="requestTeacherId()"
-                (ngModelChange)="requestTeacherId.set($event)"
-                [options]="professoresApi().map(p => ({ value: p.id, label: p.name }))"
-                placeholder="Selecione seu nome..."
-                icon="bi-person-badge"
-              ></tm-select>
-            </div>
+            @if (isAdmin()) {
+              <div class="mb-4">
+                <tm-select
+                  label="Professor Solicitante"
+                  [ngModel]="requestTeacherId()"
+                  (ngModelChange)="requestTeacherId.set($event)"
+                  [options]="professoresApi().map(p => ({ value: p.id, label: p.name }))"
+                  placeholder="Selecione seu nome..."
+                  icon="bi-person-badge"
+                ></tm-select>
+              </div>
+            }
 
             <div class="mb-2">
               <label class="form-label small fw-extrabold text-muted text-uppercase tracking-wider">

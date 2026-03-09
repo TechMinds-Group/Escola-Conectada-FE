@@ -164,6 +164,22 @@
               </div>
             </div>
 
+            <div class="col-12 col-lg-8">
+              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider mb-2">
+                Usuário do Sistema (Opcional)
+              </label>
+              <tm-select
+                [options]="userOptions()"
+                formControlName="userId"
+                placeholder="Vincular a um usuário..."
+                icon="bi-person-badge"
+                [control]="teacherForm.get('userId')"
+                [clearable]="true"
+              >
+              </tm-select>
+              <p class="extra-small text-muted mt-1 mb-0">Vincule uma conta de professor</p>
+            </div>
+
             <div class="col-12 col-lg-4">
               <tm-text
                 formControlName="contractualWorkload"

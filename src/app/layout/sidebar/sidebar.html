@@ -39,19 +39,21 @@
     <hr class="mx-3 mt-1 opacity-25" />
 
     <!-- Dashboard (Inicio) -->
-    <li class="nav-item w-100">
-      <a
-        routerLink="/dashboard"
-        routerLinkActive="active"
-        class="nav-link d-flex align-items-center py-2"
-        [title]="isCollapsed ? t().admin.sidebar.dashboard : ''"
-      >
-        <div class="icon-wrapper d-flex justify-content-center align-items-center">
-          <i class="bi bi-speedometer2"></i>
-        </div>
-        <span class="text-nowrap ms-2 transition-label">{{ t().admin.sidebar.dashboard }}</span>
-      </a>
-    </li>
+    @if (auth.hasRole(ROLES.ADMIN)) {
+      <li class="nav-item w-100">
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          class="nav-link d-flex align-items-center py-2"
+          [title]="isCollapsed ? t().admin.sidebar.dashboard : ''"
+        >
+          <div class="icon-wrapper d-flex justify-content-center align-items-center">
+            <i class="bi bi-speedometer2"></i>
+          </div>
+          <span class="text-nowrap ms-2 transition-label">{{ t().admin.sidebar.dashboard }}</span>
+        </a>
+      </li>
+    }
 
     <!-- Submenu: Registros -->
     <li class="nav-item w-100">
@@ -82,71 +84,81 @@
       <!-- Registros Items -->
       <div class="collapse-menu" [class.show]="isCadastrosOpen" id="mobileRegistrosCollapse">
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-          <li>
-            <a
-              routerLink="/professores"
-              routerLinkActive="active"
-              class="nav-link d-flex align-items-center py-2 text-nowrap"
-              [title]="isCollapsed ? t().admin.sidebar.teachers : ''"
-            >
-              <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
-                <i class="bi bi-person-badge"></i>
-              </div>
-              <span class="transition-label ms-2">{{ t().admin.sidebar.teachers }}</span>
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/classes"
-              routerLinkActive="active"
-              class="nav-link d-flex align-items-center py-2 text-nowrap"
-              [title]="isCollapsed ? t().admin.sidebar.classes : ''"
-            >
-              <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
-                <i class="bi bi-people"></i>
-              </div>
-              <span class="transition-label ms-2">{{ t().admin.sidebar.classes }}</span>
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/ambientes"
-              routerLinkActive="active"
-              class="nav-link d-flex align-items-center py-2 text-nowrap"
-              [title]="isCollapsed ? t().admin.sidebar.rooms : ''"
-            >
-              <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
-                <i class="bi bi-building"></i>
-              </div>
-              <span class="transition-label ms-2">{{ t().admin.sidebar.rooms }}</span>
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/subjects"
-              routerLinkActive="active"
-              class="nav-link d-flex align-items-center py-2 text-nowrap"
-              [title]="isCollapsed ? t().admin.sidebar.subjects : ''"
-            >
-              <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
-                <i class="bi bi-journal-text"></i>
-              </div>
-              <span class="transition-label ms-2">{{ t().admin.sidebar.subjects }}</span>
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/school-matrices"
-              routerLinkActive="active"
-              class="nav-link d-flex align-items-center py-2 text-nowrap"
-              [title]="isCollapsed ? t().admin.sidebar.matrix : ''"
-            >
-              <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
-                <i class="bi bi-grid-3x3"></i>
-              </div>
-              <span class="transition-label ms-2">{{ t().admin.sidebar.matrix }}</span>
-            </a>
-          </li>
+          @if (auth.hasRole(ROLES.ADMIN)) {
+            <li>
+              <a
+                routerLink="/professores"
+                routerLinkActive="active"
+                class="nav-link d-flex align-items-center py-2 text-nowrap"
+                [title]="isCollapsed ? t().admin.sidebar.teachers : ''"
+              >
+                <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
+                  <i class="bi bi-person-badge"></i>
+                </div>
+                <span class="transition-label ms-2">{{ t().admin.sidebar.teachers }}</span>
+              </a>
+            </li>
+          }
+          @if (auth.hasRole(ROLES.ADMIN)) {
+            <li>
+              <a
+                routerLink="/classes"
+                routerLinkActive="active"
+                class="nav-link d-flex align-items-center py-2 text-nowrap"
+                [title]="isCollapsed ? t().admin.sidebar.classes : ''"
+              >
+                <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
+                  <i class="bi bi-people"></i>
+                </div>
+                <span class="transition-label ms-2">{{ t().admin.sidebar.classes }}</span>
+              </a>
+            </li>
+          }
+          @if (auth.hasRole(ROLES.ADMIN)) {
+            <li>
+              <a
+                routerLink="/ambientes"
+                routerLinkActive="active"
+                class="nav-link d-flex align-items-center py-2 text-nowrap"
+                [title]="isCollapsed ? t().admin.sidebar.rooms : ''"
+              >
+                <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
+                  <i class="bi bi-building"></i>
+                </div>
+                <span class="transition-label ms-2">{{ t().admin.sidebar.rooms }}</span>
+              </a>
+            </li>
+          }
+          @if (auth.hasRole(ROLES.ADMIN)) {
+            <li>
+              <a
+                routerLink="/subjects"
+                routerLinkActive="active"
+                class="nav-link d-flex align-items-center py-2 text-nowrap"
+                [title]="isCollapsed ? t().admin.sidebar.subjects : ''"
+              >
+                <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
+                  <i class="bi bi-journal-text"></i>
+                </div>
+                <span class="transition-label ms-2">{{ t().admin.sidebar.subjects }}</span>
+              </a>
+            </li>
+          }
+          @if (auth.hasRole(ROLES.ADMIN)) {
+            <li>
+              <a
+                routerLink="/school-matrices"
+                routerLinkActive="active"
+                class="nav-link d-flex align-items-center py-2 text-nowrap"
+                [title]="isCollapsed ? t().admin.sidebar.matrix : ''"
+              >
+                <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
+                  <i class="bi bi-grid-3x3"></i>
+                </div>
+                <span class="transition-label ms-2">{{ t().admin.sidebar.matrix }}</span>
+              </a>
+            </li>
+          }
 
           <!-- Reservas de Salas -->
           <li>
@@ -178,95 +190,101 @@
             </a>
           </li>
 
-          <li>
-            <a
-              routerLink="/events"
-              routerLinkActive="active"
-              class="nav-link d-flex align-items-center py-2 text-nowrap"
-              [title]="isCollapsed ? t().admin.sidebar.calendar : ''"
-            >
-              <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
-                <i class="bi bi-calendar-event"></i>
-              </div>
-              <span class="transition-label ms-2">{{ t().admin.sidebar.calendar }}</span>
-            </a>
-          </li>
+          @if (auth.hasRole(ROLES.ADMIN)) {
+            <li>
+              <a
+                routerLink="/events"
+                routerLinkActive="active"
+                class="nav-link d-flex align-items-center py-2 text-nowrap"
+                [title]="isCollapsed ? t().admin.sidebar.calendar : ''"
+              >
+                <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
+                  <i class="bi bi-calendar-event"></i>
+                </div>
+                <span class="transition-label ms-2">{{ t().admin.sidebar.calendar }}</span>
+              </a>
+            </li>
+          }
 
-          <li>
-            <a
-              routerLink="/avisos"
-              routerLinkActive="active"
-              class="nav-link d-flex align-items-center py-2 text-nowrap"
-              [title]="isCollapsed ? t().admin.sidebar.notices : ''"
-            >
-              <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
-                <i class="bi bi-megaphone"></i>
-              </div>
-              <span class="transition-label ms-2">{{ t().admin.sidebar.notices }}</span>
-            </a>
-          </li>
+          @if (auth.hasRole(ROLES.ADMIN)) {
+            <li>
+              <a
+                routerLink="/avisos"
+                routerLinkActive="active"
+                class="nav-link d-flex align-items-center py-2 text-nowrap"
+                [title]="isCollapsed ? t().admin.sidebar.notices : ''"
+              >
+                <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
+                  <i class="bi bi-megaphone"></i>
+                </div>
+                <span class="transition-label ms-2">{{ t().admin.sidebar.notices }}</span>
+              </a>
+            </li>
+          }
         </ul>
       </div>
     </li>
 
     <!-- Submenu: Configurações -->
-    <li class="nav-item w-100">
-      <button
-        class="btn btn-toggle d-flex align-items-center rounded border-0 w-100 text-start py-2"
-        (click)="toggleAdmin()"
-        [attr.aria-expanded]="isAdminOpen"
-        [title]="isCollapsed ? t().admin.sidebar.settings : ''"
-      >
-        <div
-          class="icon-wrapper d-flex justify-content-center align-items-center position-relative"
+    @if (auth.hasRole(ROLES.ADMIN)) {
+      <li class="nav-item w-100">
+        <button
+          class="btn btn-toggle d-flex align-items-center rounded border-0 w-100 text-start py-2"
+          (click)="toggleAdmin()"
+          [attr.aria-expanded]="isAdminOpen"
+          [title]="isCollapsed ? t().admin.sidebar.settings : ''"
         >
-          <i class="bi bi-gear"></i>
-          <!-- Mini Submenu Indicator -->
-          @if (isCollapsed) {
-            <span class="mini-indicator"></span>
-          }
-        </div>
-        <span class="text-nowrap ms-2 transition-label flex-grow-1">{{
-          t().admin.sidebar.settings || 'Configurações'
-        }}</span>
-        <i
-          class="bi bi-chevron-down toggle-icon ms-2 transition-label"
-          [style.transform]="isAdminOpen ? 'rotate(180deg)' : 'rotate(0)'"
-        ></i>
-      </button>
+          <div
+            class="icon-wrapper d-flex justify-content-center align-items-center position-relative"
+          >
+            <i class="bi bi-gear"></i>
+            <!-- Mini Submenu Indicator -->
+            @if (isCollapsed) {
+              <span class="mini-indicator"></span>
+            }
+          </div>
+          <span class="text-nowrap ms-2 transition-label flex-grow-1">{{
+            t().admin.sidebar.settings || 'Configurações'
+          }}</span>
+          <i
+            class="bi bi-chevron-down toggle-icon ms-2 transition-label"
+            [style.transform]="isAdminOpen ? 'rotate(180deg)' : 'rotate(0)'"
+          ></i>
+        </button>
 
-      <!-- Configurações Items -->
-      <div class="collapse-menu" [class.show]="isAdminOpen">
-        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
-          <li>
-            <a
-              routerLink="/time-grids"
-              routerLinkActive="active"
-              class="nav-link d-flex align-items-center py-2 text-nowrap"
-              [title]="isCollapsed ? t().admin.sidebar.timeGrids : ''"
-            >
-              <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
-                <i class="bi bi-clock-history"></i>
-              </div>
-              <span class="transition-label ms-2">{{ t().admin.sidebar.timeGrids }}</span>
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/tv-settings"
-              routerLinkActive="active"
-              class="nav-link d-flex align-items-center py-2 text-nowrap"
-              [title]="isCollapsed ? t().admin.sidebar.tvSettings : ''"
-            >
-              <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
-                <i class="bi bi-display"></i>
-              </div>
-              <span class="transition-label ms-2">{{ t().admin.sidebar.tvSettings }}</span>
-            </a>
-          </li>
-        </ul>
-      </div>
-    </li>
+        <!-- Configurações Items -->
+        <div class="collapse-menu" [class.show]="isAdminOpen">
+          <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+            <li>
+              <a
+                routerLink="/time-grids"
+                routerLinkActive="active"
+                class="nav-link d-flex align-items-center py-2 text-nowrap"
+                [title]="isCollapsed ? t().admin.sidebar.timeGrids : ''"
+              >
+                <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
+                  <i class="bi bi-clock-history"></i>
+                </div>
+                <span class="transition-label ms-2">{{ t().admin.sidebar.timeGrids }}</span>
+              </a>
+            </li>
+            <li>
+              <a
+                routerLink="/tv-settings"
+                routerLinkActive="active"
+                class="nav-link d-flex align-items-center py-2 text-nowrap"
+                [title]="isCollapsed ? t().admin.sidebar.tvSettings : ''"
+              >
+                <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
+                  <i class="bi bi-display"></i>
+                </div>
+                <span class="transition-label ms-2">{{ t().admin.sidebar.tvSettings }}</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </li>
+    }
 
     <hr class="mx-3 mt-1 opacity-25" />
   </ul>
@@ -324,15 +342,17 @@
         </a>
       </li>
 
-      <li>
-        <a
-          class="dropdown-item d-flex align-items-center gap-2 rounded-2 py-2"
-          routerLink="/licensing"
-        >
-          <i class="bi bi-shield-lock text-muted"></i>
-          <span class="text-main">{{ t().admin.sidebar.licensing }}</span>
-        </a>
-      </li>
+      @if (auth.hasRole(ROLES.ADMIN)) {
+        <li>
+          <a
+            class="dropdown-item d-flex align-items-center gap-2 rounded-2 py-2"
+            routerLink="/licensing"
+          >
+            <i class="bi bi-shield-lock text-muted"></i>
+            <span class="text-main">{{ t().admin.sidebar.licensing }}</span>
+          </a>
+        </li>
+      }
 
       <li>
         <a

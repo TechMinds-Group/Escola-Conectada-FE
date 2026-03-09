@@ -72,10 +72,10 @@ export interface SelectOption<T = any> {
       @if (isOpen()) {
         <div class="dropdown-panel shadow-lg animate-slide-down">
           <div class="options-list custom-scrollbar">
-            @if (options.length === 0) {
+            @if (optionsSignal().length === 0) {
               <div class="p-3 text-muted small text-center italic">Nenhuma opção disponível</div>
             } @else {
-              @for (option of options; track option.value) {
+              @for (option of optionsSignal(); track option.value) {
                 <div
                   class="option-item transition-all d-flex align-items-center justify-content-between"
                   [class.selected]="internalValue() === option.value"
@@ -323,7 +323,10 @@ export interface SelectOption<T = any> {
 })
 export class SelectComponent implements ControlValueAccessor {
   @Input() label = '';
-  @Input() options: SelectOption[] = [];
+  optionsSignal = signal<SelectOption[]>([]);
+  @Input() set options(val: SelectOption[]) {
+    this.optionsSignal.set(val || []);
+  }
   @Input() placeholder = 'Selecione...';
   @Input() icon = '';
   @Input() control: any;
@@ -339,7 +342,7 @@ export class SelectComponent implements ControlValueAccessor {
 
   selectedLabel = computed(() => {
     const value = this.internalValue();
-    const opt = this.options.find((o) => o.value === value);
+    const opt = this.optionsSignal().find((o) => o.value === value);
     return opt ? opt.label : null;
   });
 

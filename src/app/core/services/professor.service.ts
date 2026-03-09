@@ -10,6 +10,8 @@ export interface Professor {
   celular: string;
   contractualWorkload: number;
   mainSubjectId: string | null;
+  userId: string | null;
+  linkedUserName?: string | null;
   availability: boolean[][]; // [Day][Shift]
 
   secondarySubjectIds: string[];
@@ -34,6 +36,8 @@ interface ProfessorDto {
   ContractualWorkload: number;
   AllocatedWorkload: number;
   MainSubjectId: string | null;
+  UserId: string | null;
+  LinkedUserName: string | null;
   AvailabilityJson: string;
   SecondarySubjectIdsJson: string;
   Allocations: {
@@ -51,6 +55,7 @@ interface CreateProfessorDto {
   Celular: string;
   ContractualWorkload: number;
   MainSubjectId: string | null;
+  UserId: string | null;
   AvailabilityJson: string;
   SecondarySubjectIdsJson: string;
 }
@@ -105,6 +110,8 @@ export class ProfessorService {
       contractualWorkload: dto.contractualWorkload ?? dto.ContractualWorkload,
       allocatedWorkload: (dto.allocatedWorkload ?? dto.AllocatedWorkload) || 0,
       mainSubjectId: dto.mainSubjectId ?? dto.MainSubjectId,
+      userId: dto.userId ?? dto.UserId,
+      linkedUserName: dto.linkedUserName ?? dto.LinkedUserName,
       availability:
         (dto.availabilityJson ?? dto.AvailabilityJson)
           ? JSON.parse(dto.availabilityJson ?? dto.AvailabilityJson)
@@ -139,6 +146,7 @@ export class ProfessorService {
       Celular: professor.celular,
       ContractualWorkload: professor.contractualWorkload,
       MainSubjectId: professor.mainSubjectId,
+      UserId: (professor as any).userId,
       AvailabilityJson: JSON.stringify(professor.availability),
       SecondarySubjectIdsJson: JSON.stringify(professor.secondarySubjectIds),
     };
@@ -151,6 +159,7 @@ export class ProfessorService {
       Celular: professor.celular,
       ContractualWorkload: professor.contractualWorkload,
       MainSubjectId: professor.mainSubjectId,
+      UserId: (professor as any).userId,
       AvailabilityJson: JSON.stringify(professor.availability),
       SecondarySubjectIdsJson: JSON.stringify(professor.secondarySubjectIds),
     };

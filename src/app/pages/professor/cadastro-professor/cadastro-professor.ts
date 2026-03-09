@@ -21,6 +21,7 @@ import { TranslationService } from '../../../core/services/translation.service';
 import { ConfirmationService } from '../../../core/services/confirmation.service';
 import { SchoolDataService, Subject, ThematicAxis } from '../../../core/services/school-data';
 import { ProfessorService, Professor } from '../../../core/services/professor.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { effect } from '@angular/core';
 import { ModalManageListComponent } from '../../../core/components/modals/modal-manage-list/modal-manage-list.component';
@@ -61,6 +62,7 @@ export class CadastroProfessor implements OnInit {
   private route = inject(ActivatedRoute);
   private location = inject(Location);
   private confirmationService = inject(ConfirmationService);
+  private authService = inject(AuthService);
 
   // Modal State Control
   subjectModal = viewChild<ModalManageListComponent>('subjectModal');
@@ -71,6 +73,11 @@ export class CadastroProfessor implements OnInit {
   availableSubjects = this.schoolData.subjects;
   subjectOptions = computed(() =>
     this.availableSubjects().map((s: Subject) => ({ value: s.id, label: s.name })),
+  );
+
+  professorUsers = signal<any[]>([]);
+  userOptions = computed(() =>
+    this.professorUsers().map((u: any) => ({ value: u.id, label: u.username || u.nome })),
   );
   teacherId: string | null = null;
   isViewMode = signal(false);
@@ -100,6 +107,7 @@ export class CadastroProfessor implements OnInit {
     contractualWorkload: [0, [Validators.required, Validators.min(0), Validators.max(999)]],
     mainSubjectId: [null, [Validators.required]],
     secondarySubjectIds: [[]], // Array of IDs
+    userId: [null],
   });
 
   // Reactive Contractual Workload
@@ -129,6 +137,14 @@ export class CadastroProfessor implements OnInit {
     } else {
       this.resetForm();
     }
+    this.loadProfessorUsers();
+  }
+
+  loadProfessorUsers() {
+    this.authService.getProfessorUsers().subscribe({
+      next: (users) => this.professorUsers.set(users),
+      error: (err) => console.error('Erro ao carregar usuários:', err),
+    });
   }
 
   enableEdit() {
@@ -182,6 +198,7 @@ export class CadastroProfessor implements OnInit {
             contractualWorkload: teacher.contractualWorkload || 20,
             mainSubjectId: teacher.mainSubjectId,
             secondarySubjectIds: teacher.secondarySubjectIds || [],
+            userId: teacher.userId,
           });
 
           if (
@@ -268,6 +285,7 @@ export class CadastroProfessor implements OnInit {
       ),
       mainSubjectId: formValue.mainSubjectId || null,
       secondarySubjectIds: formValue.secondarySubjectIds,
+      userId: formValue.userId || null,
       availability: this.availabilityGrid(),
       avatar: '',
       allocations: [],

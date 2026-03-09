@@ -14,6 +14,8 @@ export interface Reserva {
   horarioFim: string;
   motivo: string;
   status: 'Pendente' | 'Aprovada' | 'Recusada' | 'Cancelada';
+  affectedProfessorId?: string;
+  turmaConflito?: string;
   createdAt: string;
 }
 
@@ -33,7 +35,11 @@ export interface AmbienteDisponibilidade {
   recursos: string[];
   statusOcupacao: 'Livre' | 'Ocupado' | 'Solicitado';
   professorNome: string | null;
+  occupantProfessorId: string | null;
   capacidade: number;
+  data: string;
+  horario: string;
+  horarioFim: string;
 }
 
 @Injectable({ providedIn: 'root' })

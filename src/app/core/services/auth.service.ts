@@ -2,7 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { catchError, tap, of, Observable, lastValueFrom } from 'rxjs';
+import { catchError, tap, of, Observable, lastValueFrom, map } from 'rxjs';
 
 export interface User {
   id: string;
@@ -11,7 +11,13 @@ export interface User {
   username?: string;
   roles: string[];
   tenantId: string;
+  professorId?: string;
 }
+
+export const ROLES = {
+  ADMIN: 'Admin',
+  PROFESSOR: 'Professor',
+};
 
 @Injectable({
   providedIn: 'root',
@@ -103,6 +109,12 @@ export class AuthService {
     }
   }
 
+  getProfessorUsers(): Observable<any[]> {
+    return this.http
+      .get<any>(`${this.apiUrl}/professores`)
+      .pipe(map((res: any) => (res && res.data ? res.data : res) || []));
+  }
+
   private setupSessionTimeout() {
     // Simple client-side timeout: 30 minutes
     // In a real app, we might check JWT 'exp' claim or listen to 401s
@@ -171,6 +183,7 @@ export class AuthService {
     localStorage.removeItem('ec_token');
     localStorage.removeItem('ec_user');
     localStorage.removeItem('ec_tenant_id');
+    localStorage.removeItem('ec_professor_id');
 
     this.authenticated.set(false);
     this.currentUser.set(null);

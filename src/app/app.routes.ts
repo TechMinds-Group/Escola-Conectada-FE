@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AuthService, ROLES } from './core/services/auth.service';
 import { MainLayout } from './layout/main-layout/main-layout';
 import { CadastroMateria } from './pages/materia/cadastro-materia/cadastro-materia';
 import { ConsultaConfiguracao } from './pages/consulta-configuracao/consulta-configuracao';
@@ -37,17 +38,37 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: Dashboard },
-      { path: 'timetable', component: Timetable },
-      { path: 'professores', component: ConsultaProfessor },
-      { path: 'professores/novo', component: CadastroProfessor },
-      { path: 'professores/editar/:id', component: CadastroProfessor },
-      { path: 'subjects', component: ConsultaMateria },
-      { path: 'subjects/new', component: CadastroMateria },
-      { path: 'subjects/edit/:id', component: CadastroMateria },
-      { path: 'school-matrices', component: ConsultaMatrizEscolarPage },
-      { path: 'school-matrices/new', component: CadastroMatrizEscolarPage },
-      { path: 'school-matrices/edit/:id', component: CadastroMatrizEscolarPage },
+      {
+        path: 'dashboard',
+        component: Dashboard,
+        data: { roles: [ROLES.ADMIN] },
+      },
+      { path: 'timetable', component: Timetable, data: { roles: [ROLES.ADMIN] } },
+      { path: 'professores', component: ConsultaProfessor, data: { roles: [ROLES.ADMIN] } },
+      { path: 'professores/novo', component: CadastroProfessor, data: { roles: [ROLES.ADMIN] } },
+      {
+        path: 'professores/editar/:id',
+        component: CadastroProfessor,
+        data: { roles: [ROLES.ADMIN] },
+      },
+      { path: 'subjects', component: ConsultaMateria, data: { roles: [ROLES.ADMIN] } },
+      { path: 'subjects/new', component: CadastroMateria, data: { roles: [ROLES.ADMIN] } },
+      { path: 'subjects/edit/:id', component: CadastroMateria, data: { roles: [ROLES.ADMIN] } },
+      {
+        path: 'school-matrices',
+        component: ConsultaMatrizEscolarPage,
+        data: { roles: [ROLES.ADMIN] },
+      },
+      {
+        path: 'school-matrices/new',
+        component: CadastroMatrizEscolarPage,
+        data: { roles: [ROLES.ADMIN] },
+      },
+      {
+        path: 'school-matrices/edit/:id',
+        component: CadastroMatrizEscolarPage,
+        data: { roles: [ROLES.ADMIN] },
+      },
       // Redirects for backward compatibility
       { path: 'consulta-matriz-escolar', redirectTo: 'school-matrices', pathMatch: 'full' },
       { path: 'cadastro-matriz-escolar', redirectTo: 'school-matrices/new', pathMatch: 'full' },
@@ -56,35 +77,44 @@ export const routes: Routes = [
         redirectTo: 'school-matrices/edit/:id',
         pathMatch: 'full',
       },
-      { path: 'structure', component: Structure },
-      { path: 'consulta-configuracao', component: ConsultaConfiguracao },
-      { path: 'tv-settings', component: ConfiguracaoTV },
+      { path: 'structure', component: Structure, data: { roles: [ROLES.ADMIN] } },
+      {
+        path: 'consulta-configuracao',
+        component: ConsultaConfiguracao,
+        data: { roles: [ROLES.ADMIN] },
+      },
+      { path: 'tv-settings', component: ConfiguracaoTV, data: { roles: [ROLES.ADMIN] } },
       // Grades de Horário
-      { path: 'time-grids', component: ConsultaGrade },
-      { path: 'time-grids/new', component: CadastroGrade },
-      { path: 'time-grids/edit/:id', component: CadastroGrade },
+      { path: 'time-grids', component: ConsultaGrade, data: { roles: [ROLES.ADMIN] } },
+      { path: 'time-grids/new', component: CadastroGrade, data: { roles: [ROLES.ADMIN] } },
+      { path: 'time-grids/edit/:id', component: CadastroGrade, data: { roles: [ROLES.ADMIN] } },
       // Turmas
-      { path: 'classes', component: ConsultaTurma },
-      { path: 'classes/new', component: CadastroTurma },
-      { path: 'classes/edit/:id', component: CadastroTurma },
-      // Reservas de Ambientes
-      { path: 'reservas-salas', component: ReservasSalas },
+      { path: 'classes', component: ConsultaTurma, data: { roles: [ROLES.ADMIN] } },
+      { path: 'classes/new', component: CadastroTurma, data: { roles: [ROLES.ADMIN] } },
+      { path: 'classes/edit/:id', component: CadastroTurma, data: { roles: [ROLES.ADMIN] } },
+      {
+        path: 'reservas-salas',
+        component: ReservasSalas,
+        data: { roles: [ROLES.ADMIN, ROLES.PROFESSOR] },
+      },
       // Calendário do Professor
       {
         path: 'calendario-professor',
+        data: { roles: [ROLES.ADMIN, ROLES.PROFESSOR] },
         loadComponent: () =>
           import('./pages/professor/calendario-professor/calendario-professor.component').then(
             (m) => m.CalendarioProfessorComponent,
           ),
       },
       // Ambientes
-      { path: 'ambientes', component: ConsultaAmbiente },
-      { path: 'ambientes/new', component: CadastroAmbiente },
-      { path: 'ambientes/edit/:id', component: CadastroAmbiente },
-      { path: 'events', component: ConsultaCalendario },
+      { path: 'ambientes', component: ConsultaAmbiente, data: { roles: [ROLES.ADMIN] } },
+      { path: 'ambientes/new', component: CadastroAmbiente, data: { roles: [ROLES.ADMIN] } },
+      { path: 'ambientes/edit/:id', component: CadastroAmbiente, data: { roles: [ROLES.ADMIN] } },
+      { path: 'events', component: ConsultaCalendario, data: { roles: [ROLES.ADMIN] } },
       // Avisos
       {
         path: 'avisos',
+        data: { roles: [ROLES.ADMIN] },
         children: [
           {
             path: '',
@@ -112,21 +142,25 @@ export const routes: Routes = [
       // Admin
       {
         path: 'users',
+        data: { roles: [ROLES.ADMIN] },
         loadComponent: () =>
           import('./pages/admin/user-management/user-management').then((m) => m.UserManagement),
       },
       {
         path: 'school-settings',
+        data: { roles: [ROLES.ADMIN] },
         loadComponent: () =>
           import('./pages/admin/school-settings/school-settings').then((m) => m.SchoolSettings),
       },
       {
         path: 'profile',
+        data: { roles: [ROLES.ADMIN, ROLES.PROFESSOR] },
         loadComponent: () =>
           import('./pages/admin/user-profile/user-profile').then((m) => m.UserProfile),
       },
       {
         path: 'licensing',
+        data: { roles: [ROLES.ADMIN] },
         loadComponent: () =>
           import('./pages/admin/licensing/licensing-management').then((m) => m.LicensingManagement),
       },

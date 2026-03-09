@@ -98,6 +98,7 @@
     <tm-table
       [cols]="[
         { header: t().admin.teachers.table.teacher, template: teacherTpl },
+        { header: t().admin.teachers.table.user, template: userTpl },
         { header: t().admin.teachers.table.subjects, template: subjectsTpl },
         { header: t().admin.teachers.table.workload, template: workloadTpl },
         { header: 'Status', template: statusTpl, class: 'text-center', headerClass: 'text-center' },
@@ -106,6 +107,20 @@
       [isLoading]="isLoading()"
       (rowClick)="navigateToEdit($event.id!)"
     ></tm-table>
+
+    <!-- User Column Template -->
+    <ng-template #userTpl let-teacher>
+      @if (teacher.linkedUserName) {
+        <span class="badge rounded-pill bg-light text-dark border px-2 py-1 fw-bold">
+          <i class="bi bi-person-badge me-1 text-primary"></i>
+          {{ teacher.linkedUserName }}
+        </span>
+      } @else {
+        <span class="badge rounded-pill bg-light text-muted border px-2 py-1 fw-normal opacity-50">
+          Não vinculado
+        </span>
+      }
+    </ng-template>
     <!-- Teacher Column Template -->
     <ng-template #teacherTpl let-teacher>
       <div class="d-flex align-items-center gap-3 ps-3">
