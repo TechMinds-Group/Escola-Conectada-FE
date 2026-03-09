@@ -20,22 +20,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
-interface TimeBlock {
-  id: string;
-  label: string;
-  slotIndex: number;
-  status: 'Livre' | 'Ocupada' | 'Pendente';
-  currentTeacher: string | null;
-  reservaId: string | null;
-}
-
-interface RoomDisplay {
-  id: string;
-  name: string;
-  capacity: number;
-  horarios: Record<string, TimeBlock>;
-}
+import { SelectComponent } from '../../core/components/select/select.component';
+import { TmDateComponent } from '../../core/components/tm-date/tm-date.component';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-reservas-salas',
@@ -47,6 +34,9 @@ interface RoomDisplay {
     MatNativeDateModule,
     MatInputModule,
     MatFormFieldModule,
+    SelectComponent,
+    TmDateComponent,
+    ReactiveFormsModule,
   ],
   templateUrl: './reservas-salas.html',
   styleUrl: './reservas-salas.scss',
@@ -172,6 +162,16 @@ export class ReservasSalas implements OnInit {
   selectedTimeId = signal<string>('07:00');
   selectedDate = signal<string>(new Date().toISOString().split('T')[0]); // YYYY-MM-DD
 
+  // Filter Panel State
+  isFilterPanelOpen = signal(false);
+  isFilterActive = computed(
+    () =>
+      this.selectedTurno() !== 'Manhã' ||
+      this.selectedTimeId() !== '07:00' ||
+      this.selectedDate() !== new Date().toISOString().split('T')[0] ||
+      this.selectedResources().length > 0,
+  );
+
   // Para o MatDatepicker (trabalha com objetos Date)
   selectedDateObj = computed(() => {
     const iso = this.selectedDate();
@@ -209,76 +209,6 @@ export class ReservasSalas implements OnInit {
   availableTimes = computed(() => this.horariosMenu()[this.selectedTurno()] || []);
 
   // Computed: derive RoomDisplay from rooms + real reservations
-  viewSalas = computed<RoomDisplay[]>(() => {
-    const rooms = this.schoolRoomsApi();
-    const classes = this.schoolClassesApi();
-    const allTeachers = this.teachersApi();
-    const turno = this.selectedTurno();
-    const timeId = this.selectedTimeId();
-    const reservas = this.reservasApi();
-
-    const menu = this.horariosMenu();
-    const slotDef = (menu[turno] || []).find((t) => t.id === timeId);
-    if (!slotDef) return [];
-
-    let currentDay = new Date().getDay() - 1;
-    if (currentDay < 0 || currentDay > 4) currentDay = 0;
-
-    return rooms.map((room) => {
-      let isOccupied = false;
-      let teacherName: string | null = null;
-      let reservaId: string | null = null;
-      let status: 'Livre' | 'Ocupada' | 'Pendente' = 'Livre';
-
-      // 1. Check grade-based allocations (permanent schedule)
-      const classInRoom = classes.find((c) => c.roomId === room.id && c.shift === turno);
-      if (classInRoom) {
-        const assignment = classInRoom.assignments?.find(
-          (a) => a.dayOfWeek === currentDay && a.slotIndex === slotDef.slotIndex,
-        );
-        if (assignment && assignment.teacherId) {
-          isOccupied = true;
-          status = 'Ocupada';
-          const t = allTeachers.find((tchr) => tchr.id === assignment.teacherId);
-          teacherName = t ? t.name : 'Professor Alocado';
-        }
-      }
-
-      // 2. Check real reservations from API (override grade if approved)
-      if (!isOccupied) {
-        const reservaForSlot = reservas.find(
-          (r) => r.salaId === room.id && r.horarioInicio === timeId,
-        );
-        if (reservaForSlot) {
-          reservaId = reservaForSlot.id;
-          if (reservaForSlot.status === 'Aprovada') {
-            status = 'Ocupada';
-            isOccupied = true;
-            teacherName = reservaForSlot.professorNome;
-          } else if (reservaForSlot.status === 'Pendente') {
-            status = 'Pendente';
-            teacherName = reservaForSlot.professorNome;
-          }
-        }
-      }
-
-      const block: TimeBlock = {
-        id: timeId,
-        label: slotDef.label,
-        slotIndex: slotDef.slotIndex,
-        status,
-        currentTeacher: teacherName,
-        reservaId,
-      };
-
-      return {
-        id: room.id,
-        name: room.name,
-        capacity: room.capacity || 0,
-        horarios: { [timeId]: block },
-      };
-    });
-  });
 
   // Pending reservations (Pendente status from API)
   pendencias = computed(() => this.reservasApi().filter((r) => r.status === 'Pendente'));
@@ -398,6 +328,18 @@ export class ReservasSalas implements OnInit {
     const available = this.horariosMenu()[newTurno];
     if (available?.length > 0) this.selectedTimeId.set(available[0].id);
     else this.selectedTimeId.set('');
+  }
+
+  toggleFilterPanel() {
+    this.isFilterPanelOpen.update((v) => !v);
+  }
+
+  clearFilters() {
+    this.selectedTurno.set('Manhã');
+    const available = this.horariosMenu()['Manhã'];
+    if (available?.length > 0) this.selectedTimeId.set(available[0].id);
+    this.selectedDate.set(new Date().toISOString().split('T')[0]);
+    this.selectedResources.set([]);
   }
 
   onDateChange(date: string) {

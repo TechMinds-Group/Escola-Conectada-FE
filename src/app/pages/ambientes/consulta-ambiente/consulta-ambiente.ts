@@ -50,20 +50,25 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
   t = this.translation.dictionary;
 
   // Filters State
-  showFilters = signal(false);
+  isFilterPanelOpen = signal(false);
   filterName = new FormControl('');
   filterType = new FormControl('Todos');
   filterStatus = new FormControl('Todos');
 
-  appliedFilters = signal<any[]>([]);
+  appliedFilters = signal({
+    name: '',
+    type: 'Todos',
+    status: 'Todos',
+  });
 
   // Data
   roomsList = signal<SchoolRoom[]>([]);
 
   rooms = computed(() => {
     let list = this.roomsList();
-    const name = this.filterName.value?.toLowerCase();
-    const type = this.filterType.value;
+    const filters = this.appliedFilters();
+    const name = filters.name.toLowerCase();
+    const type = filters.type;
 
     if (name) {
       list = list.filter((r) => r.name.toLowerCase().includes(name));
@@ -73,6 +78,13 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
     }
     return list;
   });
+
+  isFilterActive = computed(
+    () =>
+      !!this.appliedFilters().name ||
+      this.appliedFilters().type !== 'Todos' ||
+      this.appliedFilters().status !== 'Todos',
+  );
 
   ngOnInit() {
     this.loadRooms();
@@ -94,28 +106,23 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
     });
   }
 
-  toggleFilters() {
-    this.showFilters.set(!this.showFilters());
+  toggleFilterPanel() {
+    this.isFilterPanelOpen.update((v) => !v);
   }
 
   applyFilters() {
-    const filters = [];
-    if (this.filterName.value)
-      filters.push({ key: 'name', label: `Nome: ${this.filterName.value}` });
-    if (this.filterType.value !== 'Todos')
-      filters.push({ key: 'type', label: `Tipo: ${this.filterType.value}` });
-    if (this.filterStatus.value !== 'Todos')
-      filters.push({ key: 'status', label: `Status: ${this.filterStatus.value}` });
-
-    this.appliedFilters.set(filters);
-    this.showFilters.set(false);
+    this.appliedFilters.set({
+      name: this.filterName.value || '',
+      type: this.filterType.value || 'Todos',
+      status: this.filterStatus.value || 'Todos',
+    });
   }
 
   clearFilters() {
     this.filterName.setValue('');
     this.filterType.setValue('Todos');
     this.filterStatus.setValue('Todos');
-    this.appliedFilters.set([]);
+    this.applyFilters();
   }
 
   removeFilter(key: string) {

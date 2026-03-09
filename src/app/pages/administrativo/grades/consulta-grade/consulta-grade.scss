@@ -1,4 +1,54 @@
-// Redundant styles removed.
 .page-container {
   padding-bottom: 80px;
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.filters-panel {
+  overflow: hidden;
+  margin-top: -1rem;
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.transition-hover {
+  transition: all 0.2s ease-in-out !important;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:host-context([data-theme='dark']) {
+  .bg-white {
+    background-color: var(--surface-color) !important;
+  }
+  .border-light {
+    border-color: var(--border-color) !important;
+  }
+  .bg-light {
+    background-color: var(--input-bg) !important;
+  }
 }

@@ -1,0 +1,39 @@
+<div class="tm-time-container w-100" [class.disabled]="disabled">
+  @if (label) {
+    <label class="form-label small fw-bold text-muted text-uppercase tracking-wider mb-2">
+      {{ label }}
+    </label>
+  }
+
+  <div
+    class="input-wrapper d-flex align-items-center rounded-3 shadow-sm transition-all"
+    [class.focused]="isFocused()"
+    [class.invalid]="internalIsInvalid()"
+  >
+    <div
+      class="icon-section ps-3 py-2 d-flex align-items-center justify-content-center cursor-pointer"
+      (click)="focusInput()"
+    >
+      <i class="bi bi-clock text-primary fs-5"></i>
+    </div>
+
+    <input
+      #timeInput
+      type="text"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [value]="value()"
+      (input)="onInput($event)"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+      class="custom-input flex-grow-1 fw-bold border-0 bg-transparent"
+      inputmode="numeric"
+    />
+  </div>
+
+  @if (internalIsInvalid()) {
+    <div class="invalid-feedback d-block extra-small mt-1 fw-medium animate-in">
+      Horário inválido ou obrigatório.
+    </div>
+  }
+</div>

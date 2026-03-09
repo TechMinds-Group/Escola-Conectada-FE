@@ -1,256 +1,253 @@
-<div class="container-fluid py-4 animate-slide-down">
-  <!-- 1. Header de Perfil Dinâmico -->
-  <div
-    class="card bg-surface border-theme shadow-lg rounded-4 overflow-hidden mb-4 position-relative"
-  >
-    <div class="card-body p-4 p-md-5 d-flex flex-column flex-md-row align-items-center gap-4">
-      <!-- Avatar w/ Neon Border & Completeness Circle -->
-      <div class="position-relative">
-        <!-- SVG Progress Circle (Decorative Wrapper) -->
-        <div
-          class="position-absolute top-50 start-50 translate-middle"
-          style="
-            width: 136px;
-            height: 136px;
-            border-radius: 50%;
-            border: 4px solid var(--border-color);
-            border-top-color: #8b5cf6;
-            transform: rotate(-45deg);
-          "
-        ></div>
-
-        <img
-          [src]="
-            'https://ui-avatars.com/api/?name=' +
-            (user?.nome || 'Usuário') +
-            '&background=0D8ABC&color=fff'
-          "
-          class="rounded-circle border border-4 border-surface shadow-sm position-relative z-1"
-          width="120"
-          height="120"
-          style="object-fit: cover"
-        />
-
+<div class="page-container animate-slide-down">
+  <!-- Sticky Header -->
+  <header class="sticky-header sticky-top py-3 px-4 mb-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div class="d-flex align-items-center gap-3">
         <button
-          class="btn btn-primary rounded-circle shadow-sm position-absolute bottom-0 end-0 z-2 p-0 d-flex align-items-center justify-content-center"
-          style="width: 36px; height: 36px; right: 0; bottom: 5px"
+          class="btn btn-white btn-back-responsive shadow-sm border"
+          (click)="currentTab.set('personal')"
+          [disabled]="currentTab() === 'personal'"
+          title="Início"
         >
-          <i class="bi bi-camera-fill fs-6 text-dark"></i>
+          <i class="bi bi-person-circle fs-5 text-primary"></i>
         </button>
-      </div>
-
-      <!-- Identity Info -->
-      <div class="text-center text-md-start flex-grow-1">
-        <div
-          class="d-flex flex-column flex-md-row align-items-center justify-content-center justify-content-md-start gap-2 mb-2"
-        >
-          <h2 class="fw-bold text-main mb-0">
-            {{ user?.nome || 'Usuário' }}
-          </h2>
+        <div>
+          <h2 class="fw-bold mb-0 text-primary fs-4">Minha Conta</h2>
+          <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+            Gerencie suas informações e segurança
+          </p>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- 3. Organização por Abas (Tabs Modernas) -->
-  <div class="card bg-surface border-theme shadow-lg rounded-4 overflow-hidden">
-    <!-- Tabs Header -->
-    <div class="card-header bg-transparent border-bottom border-theme px-3 px-md-4 pt-3 pb-0">
-      <ul
-        class="nav nav-pills gap-2 p-1 bg-light rounded-3 mb-4 d-flex flex-column flex-md-row align-items-stretch"
-        role="tablist"
-      >
-        <li class="nav-item flex-fill">
+      <div class="d-flex gap-2">
+        @if (currentTab() === 'personal') {
           <button
-            class="nav-link w-100 rounded-3 small fw-bold py-2"
-            [class.active]="currentTab() === 'personal'"
-            (click)="setTab('personal')"
+            class="btn btn-primary px-4 fw-bold shadow-sm rounded-3 transition-hover d-flex align-items-center gap-2"
+            (click)="savePersonal()"
+            [disabled]="!personalForm.dirty || personalForm.invalid || loading()"
           >
-            <i class="bi bi-person-vcard me-2 d-md-none"></i> Dados Pessoais
+            @if (loading()) {
+              <span class="spinner-border spinner-border-sm"></span>
+            } @else {
+              <i class="bi bi-check2"></i>
+            }
+            <span class="d-none d-md-inline">Salvar Alterações</span>
           </button>
-        </li>
-        <li class="nav-item flex-fill">
+        } @else {
           <button
-            class="nav-link w-100 rounded-3 small fw-bold py-2"
-            [class.active]="currentTab() === 'security'"
-            (click)="setTab('security')"
+            class="btn btn-primary px-4 fw-bold shadow-sm rounded-3 transition-hover d-flex align-items-center gap-2"
+            (click)="saveSecurity()"
+            [disabled]="securityForm.invalid || loading()"
           >
-            <i class="bi bi-shield-lock me-2 d-md-none"></i> Acesso
+            @if (loading()) {
+              <span class="spinner-border spinner-border-sm"></span>
+            } @else {
+              <i class="bi bi-shield-check"></i>
+            }
+            <span class="d-none d-md-inline">Atualizar Senha</span>
           </button>
-        </li>
-      </ul>
+        }
+      </div>
     </div>
+  </header>
 
-    <div class="card-body p-4 p-md-5">
-      <!-- Feedback Messages -->
-
-      @if (successMessage()) {
-        <div class="alert alert-success border-0 rounded-3 mb-4 animate-fade-in">
-          <i class="bi bi-check-circle-fill me-2"></i> {{ successMessage() }}
+  <div class="container-fluid px-4">
+    <!-- Profile Header Card -->
+    <div class="card bg-surface border-theme shadow-sm rounded-4 overflow-hidden mb-4">
+      <div class="card-body p-4 d-flex flex-column flex-md-row align-items-center gap-4">
+        <div class="avatar-wrapper" style="width: 120px; height: 120px">
+          <img
+            [src]="
+              'https://ui-avatars.com/api/?name=' +
+              (user?.nome || 'Usuário') +
+              '&background=0D8ABC&color=fff'
+            "
+            class="avatar-img rounded-circle shadow-sm w-100 h-100"
+            style="border: 4px solid var(--bg-surface)"
+          />
         </div>
-      }
-      @if (errorMessage()) {
-        <div class="alert alert-danger border-0 rounded-3 mb-4 animate-fade-in">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ errorMessage() }}
-        </div>
-      }
 
-      <!-- TAB 1: PERSONAL -->
-      @if (currentTab() === 'personal') {
-        <form [formGroup]="personalForm" class="animate-fade-in-up">
-          <div class="row g-4">
-            <div class="col-12 col-md-6">
-              <label class="form-label text-muted small fw-bold text-uppercase"
-                >Nome Completo</label
-              >
-              <input
-                formControlName="name"
-                type="text"
-                maxlength="50"
-                class="form-control bg-light-alpha border-theme text-main p-3"
-                placeholder="Seu nome"
-              />
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label text-muted small fw-bold text-uppercase"
-                >Cargo / Função</label
-              >
-              <input
-                formControlName="role"
-                type="text"
-                class="form-control bg-light-alpha border-theme text-main p-3 opacity-75"
-              />
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label text-muted small fw-bold text-uppercase"
-                >E-mail Corporativo</label
-              >
-              <div class="input-group">
-                <span class="input-group-text bg-light-alpha border-theme text-muted"
-                  ><i class="bi bi-envelope"></i
-                ></span>
-                <input
-                  formControlName="email"
-                  type="email"
-                  maxlength="200"
-                  class="form-control bg-light-alpha border-theme text-main p-3"
-                />
-              </div>
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label text-muted small fw-bold text-uppercase">Telefone</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light-alpha border-theme text-muted"
-                  ><i class="bi bi-telephone"></i
-                ></span>
-                <input
-                  formControlName="phone"
-                  type="tel"
-                  class="form-control bg-light-alpha border-theme text-main p-3"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-5 d-flex justify-content-end">
-            <button
-              (click)="savePersonal()"
-              [disabled]="!personalForm.dirty || personalForm.invalid || loading()"
-              class="btn btn-primary px-5 py-3 fw-bold rounded-pill shadow-sm d-flex align-items-center gap-2"
-              [class.opacity-50]="!personalForm.dirty && !loading()"
+        <div class="text-center text-md-start">
+          <h3 class="fw-bold mb-1 text-dark">{{ user?.nome || 'Usuário' }}</h3>
+          <div
+            class="d-flex align-items-center justify-content-center justify-content-md-start gap-2"
+          >
+            <span
+              class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 small fw-bold"
             >
-              @if (loading()) {
-                <span class="spinner-border spinner-border-sm" role="status"></span>
-                Salvando...
-              } @else {
-                Salvar Alterações
-              }
-            </button>
+              {{ user?.roles?.[1] || user?.roles?.[0] || 'Usuário' }}
+            </span>
           </div>
-        </form>
-      }
+        </div>
+      </div>
+    </div>
 
-      <!-- TAB 2: SECURITY -->
-      @if (currentTab() === 'security') {
-        <div class="animate-fade-in-up">
-          <div class="row g-5">
-            <!-- Password Change -->
-            <div class="col-12 col-lg-7">
-              <h6 class="fw-bold text-main mb-4">Alterar Senha</h6>
-              <form [formGroup]="securityForm" class="d-flex flex-column gap-3">
-                <div>
-                  <input
-                    formControlName="currentPassword"
-                    type="password"
-                    class="form-control bg-light-alpha border-theme text-main p-3"
-                    placeholder="Senha Atual"
-                  />
-                </div>
+    <!-- Main Content Card -->
+    <div class="card bg-surface border-theme shadow-sm rounded-4 overflow-hidden">
+      <!-- Tabs Nav -->
+      <div class="card-header bg-transparent border-bottom-0 p-4 pb-0">
+        <ul class="nav nav-pills rounded-3 mb-0" role="tablist">
+          <li class="nav-item flex-fill">
+            <button
+              class="nav-link w-100 fw-bold py-2 px-4 d-flex align-items-center justify-content-center gap-2"
+              [class.active]="currentTab() === 'personal'"
+              (click)="setTab('personal')"
+            >
+              <i class="bi bi-person-vcard"></i>
+              Dados Pessoais
+            </button>
+          </li>
+          <li class="nav-item flex-fill">
+            <button
+              class="nav-link w-100 fw-bold py-2 px-4 d-flex align-items-center justify-content-center gap-2"
+              [class.active]="currentTab() === 'security'"
+              (click)="setTab('security')"
+            >
+              <i class="bi bi-shield-lock"></i>
+              Segurança e Acesso
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card-body p-4 p-md-5">
+        <!-- Error/Success Alerts -->
+        @if (successMessage()) {
+          <div class="alert alert-success border-0 rounded-3 mb-4 d-flex align-items-center gap-3">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <span class="fw-medium">{{ successMessage() }}</span>
+          </div>
+        }
+        @if (errorMessage()) {
+          <div class="alert alert-danger border-0 rounded-3 mb-4 d-flex align-items-center gap-3">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <span class="fw-medium">{{ errorMessage() }}</span>
+          </div>
+        }
+
+        <!-- Tab Content -->
+        @if (currentTab() === 'personal') {
+          <form [formGroup]="personalForm">
+            <div class="row g-4">
+              <div class="col-12 col-lg-6">
+                <tm-text
+                  formControlName="name"
+                  label="Nome Completo"
+                  placeholder="Seu nome"
+                  icon="bi bi-person"
+                  [control]="personalForm.get('name')"
+                ></tm-text>
+              </div>
+              <div class="col-12 col-lg-6">
+                <tm-text
+                  formControlName="role"
+                  label="Cargo / Função"
+                  icon="bi bi-briefcase"
+                  [control]="personalForm.get('role')"
+                ></tm-text>
+              </div>
+              <div class="col-12 col-lg-6">
+                <tm-text
+                  formControlName="email"
+                  label="E-mail Corporativo"
+                  icon="bi bi-envelope"
+                  [control]="personalForm.get('email')"
+                ></tm-text>
+              </div>
+              <div class="col-12 col-lg-6">
+                <tm-text
+                  formControlName="phone"
+                  label="Telefone / WhatsApp"
+                  icon="bi bi-whatsapp"
+                  [control]="personalForm.get('phone')"
+                ></tm-text>
+              </div>
+            </div>
+          </form>
+        }
+
+        @if (currentTab() === 'security') {
+          <div class="row g-4">
+            <div class="col-12 col-lg-6">
+              <h5 class="fw-bold mb-4 text-dark d-flex align-items-center gap-2">
+                <i class="bi bi-key text-primary"></i>
+                Alterar Senha
+              </h5>
+              <form [formGroup]="securityForm" class="d-flex flex-column gap-4">
+                <tm-text
+                  formControlName="currentPassword"
+                  type="password"
+                  label="Senha Atual"
+                  placeholder="Digite sua senha atual"
+                  icon="bi bi-lock"
+                ></tm-text>
+
                 <div class="position-relative">
-                  <input
+                  <tm-text
                     formControlName="newPassword"
-                    (input)="onPasswordInput()"
                     type="password"
-                    class="form-control bg-light-alpha border-theme text-main p-3"
-                    placeholder="Nova Senha"
-                  />
-                  <!-- Strength Meter -->
+                    label="Nova Senha"
+                    placeholder="Mínimo 8 caracteres"
+                    icon="bi bi-shield-plus"
+                    (input)="onPasswordInput()"
+                  ></tm-text>
+
                   @if (securityForm.get('newPassword')?.value) {
                     <div class="mt-2 d-flex gap-1" style="height: 4px">
-                      <div
-                        class="flex-grow-1 rounded-pill"
-                        [class.bg-danger]="passwordStrength() <= 1"
-                        [class.bg-warning]="passwordStrength() == 2"
-                        [class.bg-success]="passwordStrength() >= 3"
-                        [class.opacity-25]="passwordStrength() < 1"
-                      ></div>
-                      <div
-                        class="flex-grow-1 rounded-pill"
-                        [class.bg-warning]="passwordStrength() == 2"
-                        [class.bg-success]="passwordStrength() >= 3"
-                        [class.opacity-25]="passwordStrength() < 2"
-                      ></div>
-                      <div
-                        class="flex-grow-1 rounded-pill"
-                        [class.bg-success]="passwordStrength() >= 3"
-                        [class.opacity-25]="passwordStrength() < 3"
-                      ></div>
-                      <div
-                        class="flex-grow-1 rounded-pill"
-                        [class.bg-success]="passwordStrength() >= 4"
-                        [class.opacity-25]="passwordStrength() < 4"
-                      ></div>
+                      @for (i of [1, 2, 3, 4]; track i) {
+                        <div
+                          class="flex-grow-1 rounded-pill transition-all"
+                          [class.bg-danger]="passwordStrength() <= 1 && passwordStrength() >= i"
+                          [class.bg-warning]="passwordStrength() == 2 && passwordStrength() >= i"
+                          [class.bg-success]="passwordStrength() >= 3 && passwordStrength() >= i"
+                          [style.opacity]="passwordStrength() >= i ? '1' : '0.1'"
+                        ></div>
+                      }
                     </div>
-                    <small class="text-muted xx-small mt-1 d-block text-end">Força da Senha</small>
+                    <div class="d-flex justify-content-between mt-1">
+                      <span class="xx-small fw-bold text-uppercase opacity-50">Segurança</span>
+                      <span
+                        class="xx-small fw-bold text-uppercase"
+                        [class.text-danger]="passwordStrength() <= 1"
+                        [class.text-warning]="passwordStrength() == 2"
+                        [class.text-success]="passwordStrength() >= 3"
+                      >
+                        @if (passwordStrength() <= 1) {
+                          Fraca
+                        } @else if (passwordStrength() == 2) {
+                          Média
+                        } @else {
+                          Forte
+                        }
+                      </span>
+                    </div>
                   }
                 </div>
-                <div>
-                  <input
-                    formControlName="confirmPassword"
-                    type="password"
-                    class="form-control bg-light-alpha border-theme text-main p-3"
-                    placeholder="Confirmar Nova Senha"
-                  />
-                </div>
-                <div class="d-flex justify-content-end mt-2">
-                  <button
-                    (click)="saveSecurity()"
-                    [disabled]="securityForm.invalid || loading()"
-                    class="btn btn-primary px-4 rounded-pill d-flex align-items-center gap-2"
-                  >
-                    @if (loading() && currentTab() === 'security') {
-                      <span class="spinner-border spinner-border-sm" role="status"></span>
-                      Atualizando...
-                    } @else {
-                      Atualizar Senha
-                    }
-                  </button>
-                </div>
+
+                <tm-text
+                  formControlName="confirmPassword"
+                  type="password"
+                  label="Confirmar Nova Senha"
+                  placeholder="Repita a nova senha"
+                  icon="bi bi-shield-check"
+                ></tm-text>
               </form>
             </div>
+
+            <div class="col-12 col-lg-5 ms-lg-auto">
+              <div class="alert alert-info border-0 rounded-4 p-4 shadow-sm bg-opacity-10 h-100">
+                <h6 class="fw-bold text-primary mb-3">Dicas de Segurança</h6>
+                <ul class="mb-0 small d-flex flex-column gap-2 ps-3">
+                  <li class="opacity-75">Use pelo menos 8 caracteres</li>
+                  <li class="opacity-75">Inclua letras maiúsculas e minúsculas</li>
+                  <li class="opacity-75">Adicione números e caracteres especiais</li>
+                  <li class="opacity-75">Evite usar informações pessoais como nomes ou datas</li>
+                </ul>
+              </div>
+            </div>
           </div>
-        </div>
-      }
+        }
+      </div>
     </div>
   </div>
 </div>

@@ -1,48 +1,41 @@
-/* Specific Local Adjustments */
-.page-container {
-  padding-bottom: 80px;
-}
-
-// ============================================================
-// Sticky Header
-// ============================================================
 .sticky-header {
   top: 0;
   background-color: transparent !important;
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
-// ============================================================
-// Back button
-// ============================================================
-.btn-back-header {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+.btn-back-responsive {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--surface-color, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  color: #0d6efd;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f8fafc;
+    transform: translateX(-3px);
+  }
 }
 
-// ============================================================
-// Generic 40px height for gear / action buttons
-// ============================================================
-.btn-height-40-auto {
-  height: 40px;
+.border-dashed {
+  border-top: 1px dashed var(--border-color);
 }
 
-.border-start-4-info {
-  border-left: 4px solid var(--bs-info) !important;
+.animate-in {
+  animation: slideUp 0.4s ease-out;
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
+@keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(5px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -50,21 +43,23 @@
   }
 }
 
-// ============================================================
-// Hover transition
-// ============================================================
+.xx-small {
+  font-size: 0.65rem;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
 .transition-hover {
   transition: all 0.2s ease-in-out !important;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
   }
 }
 
-// ============================================================
-// Action bar — mobile full-width buttons
-// ============================================================
 @media (max-width: 991.98px) {
   .action-bar-buttons {
     width: 100%;
@@ -79,5 +74,40 @@
         justify-content: center !important;
       }
     }
+  }
+}
+
+:host-context([data-theme='dark']) {
+  .sticky-header {
+    border-color: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .bg-white,
+  .card {
+    background-color: #161b22 !important;
+    color: #f0f6fc;
+  }
+
+  .border-light {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .btn-back-responsive {
+    background: #161b22;
+    border-color: rgba(255, 255, 255, 0.1);
+
+    &:hover {
+      background: #1c2128;
+    }
+  }
+
+  .border-dashed {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .form-text,
+  .alert-info span {
+    color: #ffffff !important;
+    opacity: 0.9 !important;
   }
 }

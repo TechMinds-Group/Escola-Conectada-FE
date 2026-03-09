@@ -42,6 +42,13 @@
     opacity: 0.05;
     border-color: white;
   }
+
+  .text-muted,
+  small,
+  .form-text {
+    color: #ffffff !important;
+    opacity: 0.9 !important;
+  }
 }
 
 .btn-back-responsive {

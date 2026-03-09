@@ -24,17 +24,17 @@
     <div class="col-12 col-md-auto ms-auto">
       <button
         class="btn d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 transition-hover border shadow-xs w-100"
-        [class.btn-primary]="showFilters()"
-        [class.btn-light]="!showFilters()"
-        (click)="toggleFilters()"
+        [class.btn-primary]="isFilterPanelOpen()"
+        [class.btn-light]="!isFilterPanelOpen()"
+        (click)="toggleFilterPanel()"
       >
         <i
-          class="bi text-dark"
-          [class.bi-funnel]="!showFilters()"
-          [class.bi-chevron-up]="showFilters()"
+          class="bi"
+          [class.bi-funnel]="!isFilterPanelOpen()"
+          [class.bi-chevron-up]="isFilterPanelOpen()"
         ></i>
         <span class="fw-bold">Filtros</span>
-        @if (appliedFilters().length > 0) {
+        @if (isFilterActive()) {
           <span
             class="badge rounded-circle bg-primary p-1 ms-1"
             style="width: 8px; height: 8px"
@@ -45,70 +45,56 @@
   </div>
 
   <!-- Retractable Filter Panel -->
-  @if (showFilters()) {
+  @if (isFilterPanelOpen()) {
     <section class="filters-panel mb-4 animate-in">
-      <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-surface">
         <div class="card-body p-4">
-          <div class="row g-3">
-            <div class="col-12 col-md-4">
-              <tm-text
-                [formControl]="filterName"
-                placeholder="Ex: 101, Laboratório de Química"
-                icon="bi-search"
-                label="Nome/Número"
-              ></tm-text>
-            </div>
-            <div class="col-12 col-md-4">
-              <tm-select
-                [formControl]="filterType"
-                [options]="typeOptions()"
-                placeholder="Tipo"
-                icon="bi-building"
-                label="Tipo de Ambiente"
-              ></tm-select>
-            </div>
-            <div class="col-12 col-md-4">
-              <tm-select
-                [formControl]="filterStatus"
-                [options]="statusOptions"
-                placeholder="Status"
-                icon="bi-check-circle"
-                label="Status"
-              ></tm-select>
-            </div>
+          <div class="grid-layout mb-4">
+            <tm-text
+              [formControl]="filterName"
+              placeholder="Ex: 101, Laboratório de Química"
+              icon="bi-search"
+              label="Nome ou Número"
+            ></tm-text>
+            <tm-select
+              [formControl]="filterType"
+              [options]="typeOptions()"
+              placeholder="Tipo"
+              icon="bi-building"
+              label="Tipo de Ambiente"
+            ></tm-select>
+            <tm-select
+              [formControl]="filterStatus"
+              [options]="statusOptions"
+              placeholder="Status"
+              icon="bi-check-circle"
+              label="Status"
+            ></tm-select>
           </div>
 
-          <div class="pt-3 mt-4 border-top d-flex justify-content-end gap-2">
-            <button
-              class="btn btn-light rounded-3 px-4 py-2 fw-bold text-muted transition-hover border"
-              (click)="clearFilters()"
-            >
-              Limpar
-            </button>
-            <button
-              class="btn btn-primary rounded-3 px-4 py-2 fw-bold transition-hover shadow-sm"
-              (click)="applyFilters()"
-            >
-              Aplicar Filtros
-            </button>
+          <div class="pt-3 border-top">
+            <div class="row g-2 justify-content-end">
+              <div class="col-12 col-lg-auto">
+                <button
+                  class="btn btn-light rounded-3 px-4 py-2 fw-bold text-muted transition-hover border w-100"
+                  (click)="clearFilters()"
+                >
+                  Limpar Filtros
+                </button>
+              </div>
+              <div class="col-12 col-lg-auto">
+                <button
+                  class="btn btn-primary rounded-3 px-4 py-2 fw-bold transition-hover shadow-sm w-100"
+                  (click)="applyFilters()"
+                >
+                  Aplicar Filtros
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
-  }
-
-  <!-- Active Filters Badges -->
-  @if (appliedFilters().length > 0) {
-    <div class="d-flex flex-wrap gap-2 mb-4 animate-in">
-      @for (filter of appliedFilters(); track filter.key) {
-        <span
-          class="badge bg-primary-subtle text-primary border-0 px-3 py-2 rounded-pill d-flex align-items-center gap-2"
-        >
-          {{ filter.label }}
-          <i class="bi bi-x-lg cursor-pointer" (click)="removeFilter(filter.key)"></i>
-        </span>
-      }
-    </div>
   }
 
   <!-- Desktop Table (tm-table) -->

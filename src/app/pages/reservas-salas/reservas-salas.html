@@ -1,89 +1,111 @@
 <div class="container-fluid py-4 pb-5 content-area fade-in">
-  <!-- Header -->
-  <div class="header-section mb-4">
-    <div class="d-flex align-items-center justify-content-between">
-      <div>
-        <h2 class="fw-bold mb-0 text-dark fs-4">{{ t().reservas.title }}</h2>
-        <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
-          {{ t().reservas.subtitle }}
-        </p>
+  <header class="mb-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-auto">
+        <h2 class="fw-bold mb-0 text-primary fs-3">{{ t().reservas.title }}</h2>
+        <p class="text-muted mb-0 small opacity-75">{{ t().reservas.subtitle }}</p>
       </div>
+    </div>
+  </header>
+
+  <div class="row mb-3 animate-in">
+    <div class="col-12 col-md-auto ms-auto">
+      <button
+        class="btn d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 transition-hover border shadow-xs w-100"
+        [class.btn-primary]="isFilterPanelOpen()"
+        [class.btn-light]="!isFilterPanelOpen()"
+        (click)="toggleFilterPanel()"
+      >
+        <i
+          class="bi"
+          [class.bi-funnel]="!isFilterPanelOpen()"
+          [class.bi-chevron-up]="isFilterPanelOpen()"
+        ></i>
+        <span class="fw-bold">Filtros</span>
+        @if (isFilterActive()) {
+          <span
+            class="badge rounded-circle bg-primary p-1 ms-1"
+            style="width: 8px; height: 8px"
+          ></span>
+        }
+      </button>
     </div>
   </div>
 
-  <!-- Filter Area -->
-  <div class="frameless-card p-4 mb-4">
-    <div class="row g-3">
-      <!-- Date picker -->
-      <div class="col-12 col-md-3">
-        <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-          <i class="bi bi-calendar3 me-1"></i> {{ t().reservas.filters.date }}
-        </label>
-        <div class="input-group">
-          <input
-            type="text"
-            class="form-control border-end-0"
-            placeholder="DD/MM/AAAA"
-            [matDatepicker]="picker"
-            [ngModel]="selectedDateObj()"
-            (ngModelChange)="onDatePickerChange($event)"
-            (keyup)="onDateInputKeyup($event)"
-            (blur)="onDateInputChange($any($event.target).value)"
-          />
-          <button
-            class="btn btn-outline-secondary border-start-0 bg-white text-primary"
-            type="button"
-            (click)="picker.open()"
-          >
-            <i class="bi bi-calendar-event"></i>
-          </button>
-          <mat-datepicker #picker></mat-datepicker>
-        </div>
-      </div>
+  @if (isFilterPanelOpen()) {
+    <section class="filters-panel mb-4 animate-in">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-surface">
+        <div class="card-body p-4">
+          <div class="grid-layout mb-4">
+            <tm-date
+              label="Data da Reserva"
+              [ngModel]="selectedDate()"
+              (ngModelChange)="onDateChange($event)"
+              placeholder="DD/MM/YYYY"
+            ></tm-date>
 
-      <!-- Turno -->
-      <div class="col-12 col-md-3">
-        <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-          <i class="bi bi-brightness-high me-1"></i> {{ t().reservas.filters.shift }}
-        </label>
-        <select
-          class="form-select"
-          [ngModel]="selectedTurno()"
-          (ngModelChange)="onTurnoChange($event)"
-        >
-          @for (turno of turnos(); track turno) {
-            <option [value]="turno">{{ turno }}</option>
-          }
-        </select>
-      </div>
+            <tm-select
+              label="Turno"
+              [ngModel]="selectedTurno()"
+              (ngModelChange)="onTurnoChange($event)"
+              [options]="turnos().map(t => ({ value: t, label: t }))"
+              icon="bi-brightness-high"
+            ></tm-select>
 
-      <!-- Horário -->
-      <div class="col-12 col-md-4">
-        <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-          <i class="bi bi-clock-history me-1"></i> {{ t().reservas.filters.time }}
-        </label>
-        <select
-          class="form-select"
-          [ngModel]="selectedTimeId()"
-          (ngModelChange)="selectedTimeId.set($event)"
-        >
-          @for (time of availableTimes(); track time.id) {
-            <option [value]="time.id">{{ time.label }}</option>
-          }
-        </select>
-      </div>
+            <tm-select
+              label="Horário"
+              [ngModel]="selectedTimeId()"
+              (ngModelChange)="selectedTimeId.set($event)"
+              [options]="availableTimes().map(t => ({ value: t.id, label: t.label }))"
+              icon="bi-clock-history"
+            ></tm-select>
+          </div>
 
-      <!-- Loading indicator -->
-      @if (isLoadingReservas()) {
-        <div class="col-12 col-md-2 d-flex align-items-end">
-          <div class="d-flex align-items-center text-muted small gap-2 mb-2">
-            <div class="spinner-border spinner-border-sm" role="status"></div>
-            {{ t().common.loading }}
+          <div class="mb-4">
+            <label class="small fw-bold text-muted text-uppercase tracking-wider mb-2 d-block">
+              Filtrar por Recurso
+            </label>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              @for (res of availableResources(); track res) {
+                <div
+                  class="filter-chip"
+                  [class.active]="selectedResources().includes(res)"
+                  (click)="
+                    selectedResources().includes(res)
+                      ? selectedResources.set(selectedResources().filter((r) => r !== res))
+                      : selectedResources.set([...selectedResources(), res])
+                  "
+                >
+                  {{ res }}
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="pt-3 border-top">
+            <div class="row g-2 justify-content-end">
+              <div class="col-12 col-lg-auto">
+                <button
+                  class="btn btn-light rounded-3 px-4 py-2 fw-bold text-muted transition-hover border w-100"
+                  (click)="clearFilters()"
+                >
+                  Limpar Filtros
+                </button>
+              </div>
+              <div class="col-12 col-lg-auto">
+                <button
+                  class="btn btn-primary rounded-3 px-4 py-2 fw-bold transition-hover shadow-sm w-100"
+                  (click)="isFilterPanelOpen.set(false)"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      }
-    </div>
-  </div>
+      </div>
+    </section>
+  }
 
   <!-- Pending Requests Panel -->
   @if (pendencias().length > 0) {
@@ -126,32 +148,6 @@
       </div>
     </div>
   }
-
-  <!-- Availability Grid Filter (Resources) -->
-  <div class="mb-4">
-    <div class="d-flex align-items-center gap-2 flex-wrap">
-      <span class="small fw-bold text-muted text-uppercase tracking-wider me-2"
-        >Filtrar por Recurso:</span
-      >
-      @for (res of availableResources(); track res) {
-        <div
-          class="filter-chip"
-          [class.active]="selectedResources().includes(res)"
-          (click)="selectedResources().includes(res) ? selectedResources.set(selectedResources().filter(r => r !== res)) : selectedResources.set([...selectedResources(), res])"
-        >
-          {{ res }}
-        </div>
-      }
-      @if (selectedResources().length > 0) {
-        <button
-          class="btn btn-link btn-sm text-decoration-none text-muted p-0 ms-2"
-          (click)="selectedResources.set([])"
-        >
-          Limpar Filtros
-        </button>
-      }
-    </div>
-  </div>
 
   <!-- Main Availability Grid -->
   <div class="availability-grid mb-5">
@@ -259,117 +255,29 @@
     }
   </div>
 
-  <hr class="my-5 opacity-25" />
-
-  <h3 class="fw-bold mb-4 fs-5"><i class="bi bi-list-check me-2"></i>Detalhamento de Reservas</h3>
-
-  <!-- Mobile Grid (Clean Cards) -->
-  <div class="d-lg-none">
-    <div class="row g-3">
-      @for (room of viewSalas(); track room.id) {
-        <div class="col-12">
-          <div class="modern-mobile-card p-3">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-              <div class="d-flex align-items-center gap-2">
-                <div class="room-icon-sm bg-light text-primary rounded-2 p-2">
-                  <i class="bi bi-door-open-fill"></i>
-                </div>
-                <div>
-                  <h6 class="fw-bold mb-0 text-dark">{{ room.name }}</h6>
-                  <span class="text-muted small fw-semibold">
-                    <i class="bi bi-clock me-1"></i> {{ room.horarios[selectedTimeId()].label }}
-                  </span>
-                </div>
-              </div>
-              <span
-                class="badge-modern-sm shadow-sm"
-                [ngClass]="{
-                  'status-free': room.horarios[selectedTimeId()].status === 'Livre',
-                  'status-occupied': room.horarios[selectedTimeId()].status === 'Ocupada',
-                  'status-pending': room.horarios[selectedTimeId()].status === 'Pendente',
-                }"
-              >
-                {{
-                  room.horarios[selectedTimeId()].status === 'Livre'
-                    ? t().reservas.status.free
-                    : room.horarios[selectedTimeId()].status === 'Ocupada'
-                      ? t().reservas.status.occupied
-                      : t().reservas.status.pending
-                }}
-              </span>
-            </div>
-
-            <div class="mb-3">
-              @if (room.horarios[selectedTimeId()].status !== 'Livre') {
-                <div
-                  class="mobile-info-row d-flex align-items-center gap-2 mb-2 p-2 bg-light rounded-2"
-                >
-                  <i class="bi bi-person-workspace text-primary"></i>
-                  <span class="small">
-                    {{ t().reservas.table.professor }}:
-                    <strong class="text-dark">{{
-                      room.horarios[selectedTimeId()].currentTeacher
-                    }}</strong>
-                  </span>
-                </div>
-              } @else {
-                <div
-                  class="mobile-info-row d-flex align-items-center gap-2 mb-2 p-2 bg-success-subtle text-success rounded-2"
-                >
-                  <i class="bi bi-check-circle-fill"></i>
-                  <span class="small fw-medium">{{ t().reservas.buttons.reserve }}</span>
-                </div>
-              }
-            </div>
-
-            <div class="d-flex gap-2">
-              @if (room.horarios[selectedTimeId()].status === 'Livre') {
-                <button
-                  class="btn btn-primary-modern w-100 py-2 rounded-pill fw-bold"
-                  (click)="openRequestModal(room.id)"
-                >
-                  <i class="bi bi-calendar-plus me-1"></i>{{ t().reservas.buttons.reserve }}
-                </button>
-              } @else if (room.horarios[selectedTimeId()].status === 'Pendente') {
-                <button
-                  class="btn btn-outline-warning w-100 py-2 rounded-pill fw-bold text-dark"
-                  (click)="rejectRequest(room.horarios[selectedTimeId()].reservaId!)"
-                >
-                  <i class="bi bi-x-circle me-1"></i>{{ t().reservas.buttons.cancel }}
-                </button>
-              } @else {
-                <button class="btn btn-light w-100 py-2 rounded-pill fw-medium text-muted" disabled>
-                  <i class="bi bi-lock-fill me-1"></i>{{ t().reservas.buttons.occupied }}
-                </button>
-              }
-            </div>
-          </div>
-        </div>
-      }
-      @if (viewSalas().length === 0) {
-        <div
-          class="col-12 py-5 text-center text-muted bg-white rounded-4 shadow-sm border border-secondary-subtle border-dashed"
-        >
-          <i class="bi bi-building-slash fs-1 d-block mb-2 opacity-50"></i>
-          <p class="mb-0 fw-medium opacity-50">{{ t().reservas.table.empty }}</p>
-        </div>
-      }
-    </div>
-  </div>
-
   <!-- Reservation Modal -->
   @if (isModalOpen()) {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.4)">
       <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0 shadow-lg p-3">
-          <div class="modal-header border-0 pb-0 flex-column align-items-start p-4">
-            <h5 class="modal-title fw-bold text-dark fs-4">Identificação de Reserva</h5>
-            <p class="text-muted small mb-0 mt-1">Confirme os detalhes e selecione seu perfil.</p>
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden bg-surface">
+          <!-- Header -->
+          <div class="modal-header bg-primary text-white border-0 py-3 px-4">
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-calendar-plus me-2"></i>
+              Identificação de Reserva
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              (click)="closeModal()"
+              aria-label="Close"
+            ></button>
           </div>
 
-          <div class="modal-body p-4 pt-3">
+          <div class="modal-body p-4 bg-surface">
+            <p class="text-muted small mb-4">Confirme os detalhes e selecione seu perfil.</p>
             <!-- Context Alert -->
-            <div class="context-pill mb-4 py-2 px-3 d-flex align-items-center gap-2">
+            <div class="context-pill mb-4 py-2 px-3 d-flex align-items-center gap-2 rounded-3">
               <i class="bi bi-info-circle-fill text-primary"></i>
               <div class="small fw-semibold text-dark">
                 <span>{{ getSelectedRoomName() }}</span> &bull;
@@ -387,23 +295,18 @@
             }
 
             <div class="mb-4">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                Professor Solicitante <span class="text-danger">*</span>
-              </label>
-              <select
-                class="form-select bg-light fw-semibold py-2 rounded-3 border-0 shadow-sm"
+              <tm-select
+                label="Professor Solicitante"
                 [ngModel]="requestTeacherId()"
                 (ngModelChange)="requestTeacherId.set($event)"
-              >
-                <option value="" disabled selected>Selecione seu nome na lista</option>
-                @for (prof of professoresApi(); track prof.id) {
-                  <option [value]="prof.id">{{ prof.name }}</option>
-                }
-              </select>
+                [options]="professoresApi().map(p => ({ value: p.id, label: p.name }))"
+                placeholder="Selecione seu nome..."
+                icon="bi-person-badge"
+              ></tm-select>
             </div>
 
             <div class="mb-2">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
+              <label class="form-label small fw-extrabold text-muted text-uppercase tracking-wider">
                 Motivo da Solicitação
                 <span class="text-muted text-lowercase fw-normal">(Opcional)</span>
               </label>
@@ -417,26 +320,29 @@
             </div>
           </div>
 
-          <div class="modal-footer border-0 pt-0 p-4 gap-2 d-flex flex-nowrap w-100">
-            <button
-              type="button"
-              class="btn btn-light rounded-pill flex-grow-1 fw-semibold py-2"
-              (click)="closeModal()"
-              [disabled]="isSubmitting()"
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary-modern rounded-pill flex-grow-1 fw-bold py-2 shadow-sm"
-              (click)="submitRequest()"
-              [disabled]="!requestTeacherId() || isSubmitting()"
-            >
-              @if (isSubmitting()) {
-                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
-              }
-              Confirmar
-            </button>
+          <!-- Footer -->
+          <div class="modal-footer border-top-0 bg-surface p-4 pt-2">
+            <div class="d-flex gap-2 w-100 justify-content-end">
+              <button
+                type="button"
+                class="btn btn-light px-4 fw-bold text-muted border transition-hover rounded-3"
+                (click)="closeModal()"
+                [disabled]="isSubmitting()"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary px-4 fw-bold shadow-sm transition-hover rounded-3"
+                (click)="submitRequest()"
+                [disabled]="!requestTeacherId() || isSubmitting()"
+              >
+                @if (isSubmitting()) {
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                }
+                Confirmar Reserva
+              </button>
+            </div>
           </div>
         </div>
       </div>

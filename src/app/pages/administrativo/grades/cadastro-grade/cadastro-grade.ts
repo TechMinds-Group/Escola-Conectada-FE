@@ -15,6 +15,9 @@ import { ConfirmationService } from '../../../../core/services/confirmation.serv
 import { firstValueFrom } from 'rxjs';
 
 import { ButtonEditComponent } from '../../../../core/components/buttons/button-edit';
+import { TextInputComponent } from '../../../../core/components/text-input/text-input.component';
+import { SelectComponent } from '../../../../core/components/select/select.component';
+import { TimeInputComponent } from '../../../../core/components/time-input/time-input.component';
 
 @Component({
   selector: 'app-cadastro-grade',
@@ -29,6 +32,9 @@ import { ButtonEditComponent } from '../../../../core/components/buttons/button-
     ButtonCancelComponent,
     ButtonDeleteComponent,
     ButtonEditComponent,
+    TextInputComponent,
+    SelectComponent,
+    TimeInputComponent,
   ],
   templateUrl: './cadastro-grade.html',
   styleUrl: './cadastro-grade.scss',
@@ -260,22 +266,6 @@ export class CadastroGrade implements OnInit {
 
   cancel() {
     this.router.navigate(['/time-grids']);
-  }
-
-  onTimeInput(event: any, index: number, field: 'start' | 'end') {
-    const input = event.target as HTMLInputElement;
-    let value = input.value.replace(/\D/g, ''); // Remove não dígitos
-
-    if (value.length > 4) value = value.slice(0, 4);
-
-    if (value.length >= 3) {
-      value = value.slice(0, 2) + ':' + value.slice(2);
-    }
-
-    // Atualiza o valor no formulário
-    const slot = this.slots.at(index);
-    slot.patchValue({ [field]: value }, { emitEvent: false });
-    input.value = value;
   }
 
   async deleteGrid() {

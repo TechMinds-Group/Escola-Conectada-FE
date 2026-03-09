@@ -1,195 +1,214 @@
 <div class="container-fluid py-4 page-container">
-  <!-- Sticky Header & Action Bar -->
-  <div class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn transition-hover btn-back-header" routerLink="/time-grids">
-          <i class="bi bi-arrow-left"></i>
-        </button>
-        <div>
-          <h2 class="fw-bold mb-0 text-dark fs-4">
-            {{
-              isEditMode() ? t().admin.timegrid.form.title.edit : t().admin.timegrid.form.title.new
-            }}
-          </h2>
-          <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
-            {{ t().admin.timegrid.form.subtitle }}
-          </p>
-        </div>
-      </div>
-
-      <div
-        class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 action-bar-buttons"
-      >
-        @if (isEditMode()) {
-          <app-button-delete (onClick)="deleteGrid()"></app-button-delete>
-          <div class="vr mx-2 opacity-25 d-none d-lg-block"></div>
-        }
-
-        @if (isViewMode()) {
-          <app-button-edit (onClick)="enableEdit()"></app-button-edit>
-        } @else {
-          <app-button-cancel (onClick)="cancelEdit()"></app-button-cancel>
-          <app-button-save (onClick)="onSubmit()" [isSubmitting]="isSubmitting()"></app-button-save>
-        }
-      </div>
-    </div>
-  </div>
-
-  <div class="row justify-content-center">
-    <div class="col-12 col-lg-8">
-      <form [formGroup]="gridForm" (ngSubmit)="onSubmit()">
-        <!-- Identification Card -->
-        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-          <h6 class="text-uppercase text-muted fw-bold small mb-3">
-            {{ t().admin.timegrid.form.sections.id }}
-          </h6>
-
-          <div class="row g-3">
-            <div class="col-12 col-md-8">
-              <label class="form-label small fw-bold text-muted">{{
-                t().admin.timegrid.form.fields.name
-              }}</label>
-              <input
-                type="text"
-                class="form-control"
-                formControlName="name"
-                [placeholder]="t().admin.timegrid.form.placeholders.name"
-                [class.is-invalid]="gridForm.get('name')?.invalid && saveAttempted()"
-              />
-            </div>
-
-            <div class="col-12 col-md-4">
-              <label class="form-label small fw-bold text-muted">{{
-                t().admin.timegrid.form.fields.shift
-              }}</label>
-              <select class="form-select" formControlName="shift">
-                @for (shift of shifts; track shift) {
-                  <option [value]="shift">{{ getShiftName(shift) }}</option>
-                }
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Time Slots -->
-        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-          <div
-            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
+  <header
+    class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header border-bottom border-light"
+  >
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-lg-auto">
+        <div class="d-flex align-items-center gap-3">
+          <button
+            class="btn transition-hover border-0 shadow-sm bg-white btn-back-responsive"
+            routerLink="/time-grids"
+            title="Voltar"
           >
-            <h6 class="text-uppercase text-muted fw-bold small mb-0 tracking-wider">
-              <i class="bi bi-list-columns-reverse me-2"></i
-              >{{ t().admin.timegrid.form.sections.slots }}
-            </h6>
-            <div class="d-flex gap-2">
-              <button
-                type="button"
-                class="btn btn-outline-primary transition-hover btn-sm rounded-3 px-3"
-                (click)="addSlot('Intervalo')"
-                [disabled]="isViewMode()"
-              >
-                <i class="bi bi-cup-hot me-1"></i>
-                + {{ t().admin.timegrid.buttons.addBreak }}
-              </button>
-              <button
-                type="button"
-                class="btn btn-primary transition-hover btn-sm rounded-3 px-3 fw-bold"
-                (click)="addSlot('Aula')"
-                [disabled]="isViewMode()"
-              >
-                <i class="bi bi-plus-lg me-1"></i>
-                + {{ t().admin.timegrid.buttons.addSlot }}
-              </button>
-            </div>
-          </div>
-
-          <div class="d-flex flex-column gap-3" formArrayName="slots">
-            @for (slot of slots.controls; track $index) {
-              <div
-                [formGroupName]="$index"
-                class="slot-card d-flex flex-column flex-md-row align-items-md-center gap-3 p-3 rounded-4 border animate-in"
-                [class.bg-surface]="slot.get('type')?.value === 'Intervalo' && !isViewMode()"
-                [class.opacity-75]="isViewMode()"
-                [class.border-primary-subtle]="slot.get('type')?.value === 'Aula'"
-                [class.border-secondary-subtle]="slot.get('type')?.value === 'Intervalo'"
-              >
-                <!-- Identification -->
-                <div class="d-flex align-items-center gap-3" style="min-width: 100px">
-                  <div
-                    class="turma-icon d-flex align-items-center justify-content-center rounded-3 p-2"
-                    [class.bg-primary-subtle]="slot.get('type')?.value === 'Aula'"
-                    [class.text-primary]="slot.get('type')?.value === 'Aula'"
-                    [class.bg-secondary-subtle]="slot.get('type')?.value === 'Intervalo'"
-                    [class.text-secondary]="slot.get('type')?.value === 'Intervalo'"
-                    style="width: 40px; height: 40px"
-                  >
-                    @if (slot.get('type')?.value === 'Aula') {
-                      <span class="fw-bold">{{ slot.get('index')?.value }}º</span>
-                    } @else {
-                      <i class="bi bi-cup-hot fs-5"></i>
-                    }
-                  </div>
-                  <div class="fw-bold text-dark text-uppercase small tracking-wider">
-                    {{ slot.get('type')?.value }}
-                  </div>
-                </div>
-
-                <!-- Time Inputs -->
-                <div class="d-flex align-items-center gap-2 flex-grow-1">
-                  <div class="input-group">
-                    <span class="input-group-text border-end-0">
-                      <i class="bi bi-clock text-muted"></i>
-                    </span>
-                    <input
-                      type="text"
-                      class="form-control border-start-0 ps-0 fw-bold"
-                      formControlName="start"
-                      maxlength="5"
-                      placeholder="00:00"
-                      (input)="onTimeInput($event, $index, 'start')"
-                      [class.is-invalid]="slot.get('start')?.invalid && saveAttempted()"
-                    />
-                  </div>
-                  <i class="bi bi-arrow-right text-muted mx-1"></i>
-                  <div class="input-group">
-                    <span class="input-group-text border-end-0">
-                      <i class="bi bi-clock text-muted"></i>
-                    </span>
-                    <input
-                      type="text"
-                      class="form-control ps-0 fw-bold"
-                      formControlName="end"
-                      maxlength="5"
-                      placeholder="00:00"
-                      (input)="onTimeInput($event, $index, 'end')"
-                      [class.is-invalid]="slot.get('end')?.invalid && saveAttempted()"
-                    />
-                  </div>
-                </div>
-
-                <!-- Delete -->
-                <app-button-delete
-                  variant="full"
-                  [responsiveLabel]="true"
-                  (onClick)="removeSlot($index)"
-                  title="Excluir Horário"
-                  [disabled]="isViewMode()"
-                ></app-button-delete>
-              </div>
-            }
-
-            @if (slots.length === 0) {
-              <div
-                class="text-center py-5 text-muted border-dashed border-2 rounded-4 bg-light opacity-75"
-              >
-                <i class="bi bi-alarm fs-1 d-block mb-2 opacity-25"></i>
-                <p class="mb-0 fw-medium">{{ t().admin.timegrid.form.slots.empty }}</p>
-                <small>Adicione horários de aula ou intervalos para configurar a grade.</small>
-              </div>
-            }
+            <i class="bi bi-arrow-left fs-5 text-primary"></i>
+          </button>
+          <div>
+            <h2 class="fw-bold mb-0 text-dark fs-4 text-truncate" style="max-width: 300px">
+              {{
+                isEditMode()
+                  ? t().admin.timegrid.form.title.edit
+                  : t().admin.timegrid.form.title.new
+              }}
+            </h2>
+            <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+              {{ t().admin.timegrid.form.subtitle }}
+            </p>
           </div>
         </div>
-      </form>
+      </div>
+
+      <div class="col-12 col-lg-auto ms-auto">
+        <div class="row g-2 justify-content-end align-items-center">
+          @if (isEditMode()) {
+            <div class="col-12 col-lg-auto order-3 order-lg-1">
+              <app-button-delete (onClick)="deleteGrid()" [isSolid]="true"></app-button-delete>
+            </div>
+            <div class="col-auto d-none d-lg-block order-2">
+              <div class="vr opacity-25" style="height: 30px"></div>
+            </div>
+          }
+
+          @if (isViewMode()) {
+            <div class="col-12 col-lg-auto order-1 order-lg-3">
+              <app-button-edit (onClick)="enableEdit()"></app-button-edit>
+            </div>
+          } @else {
+            <div class="col-12 col-lg-auto order-2 order-lg-2">
+              <app-button-cancel (onClick)="cancelEdit()"></app-button-cancel>
+            </div>
+            <div class="col-12 col-lg-auto order-1 order-lg-3">
+              <app-button-save
+                (onClick)="onSubmit()"
+                [isSubmitting]="isSubmitting()"
+              ></app-button-save>
+            </div>
+          }
+        </div>
+      </div>
     </div>
-  </div>
+  </header>
+
+  <main class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white overflow-hidden">
+    <form [formGroup]="gridForm" (ngSubmit)="onSubmit()">
+      <!-- Identification Section -->
+      <div class="animate-in">
+        <h6 class="text-uppercase text-muted fw-bold small mb-3 tracking-wider">
+          {{ t().admin.timegrid.form.sections.id }}
+        </h6>
+
+        <div class="row g-3">
+          <div class="col-12 col-lg-8">
+            <tm-text
+              formControlName="name"
+              [label]="t().admin.timegrid.form.fields.name"
+              [placeholder]="t().admin.timegrid.form.placeholders.name"
+              icon="bi-type"
+              [class.is-invalid]="gridForm.get('name')?.invalid && saveAttempted()"
+            ></tm-text>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <tm-select
+              formControlName="shift"
+              [label]="t().admin.timegrid.form.fields.shift"
+              [options]="shifts.map((s) => ({ value: s, label: getShiftName(s) }))"
+              icon="bi-clock"
+            ></tm-select>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12"><hr class="my-4 border-dashed opacity-25" /></div>
+
+      <!-- Time Slots Table -->
+      <div class="animate-in">
+        <div
+          class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
+        >
+          <h6 class="text-uppercase text-muted fw-bold small mb-0 tracking-wider">
+            <i class="bi bi-list-columns-reverse me-2"></i
+            >{{ t().admin.timegrid.form.sections.slots }}
+          </h6>
+          <div class="d-flex gap-2">
+            <button
+              type="button"
+              class="btn btn-outline-primary transition-hover btn-sm rounded-3 px-3"
+              (click)="addSlot('Intervalo')"
+              [disabled]="isViewMode()"
+            >
+              <i class="bi bi-cup-hot me-1"></i>
+              {{ t().admin.timegrid.buttons.addBreak }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary transition-hover btn-sm rounded-3 px-3 fw-bold"
+              (click)="addSlot('Aula')"
+              [disabled]="isViewMode()"
+            >
+              <i class="bi bi-plus-lg me-1"></i>
+              {{ t().admin.timegrid.buttons.addSlot }}
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive rounded-4 border bg-white shadow-xs">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light bg-opacity-50">
+              <tr class="small text-uppercase fw-bold text-muted">
+                <th class="ps-4 border-0 py-3" style="width: 180px">Ordem / Tipo</th>
+                <th class="text-center border-0 py-3">Horário de Início</th>
+                <th class="text-center border-0 py-3">Horário de Término</th>
+                <th class="text-end pe-4 border-0 py-3" style="width: 80px">Ações</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="slots" class="border-top-0">
+              @for (slot of slots.controls; track $index) {
+                <tr
+                  [formGroupName]="$index"
+                  class="border-bottom-light"
+                  [class.opacity-75]="isViewMode()"
+                >
+                  <td class="ps-4 py-3">
+                    <div class="d-flex align-items-center gap-3">
+                      <div
+                        class="turma-icon d-flex align-items-center justify-content-center rounded-3 shadow-xs"
+                        [class.bg-primary-subtle]="slot.get('type')?.value === 'Aula'"
+                        [class.text-primary]="slot.get('type')?.value === 'Aula'"
+                        [class.bg-secondary-subtle]="slot.get('type')?.value === 'Intervalo'"
+                        [class.text-secondary]="slot.get('type')?.value === 'Intervalo'"
+                        style="width: 38px; height: 38px"
+                      >
+                        @if (slot.get('type')?.value === 'Aula') {
+                          <span class="fw-bold">{{ slot.get('index')?.value }}º</span>
+                        } @else {
+                          <i class="bi bi-cup-hot fs-6"></i>
+                        }
+                      </div>
+                      <div class="fw-bold text-dark text-uppercase xx-small tracking-widest">
+                        {{ slot.get('type')?.value }}
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3">
+                    <div class="mx-auto" style="max-width: 140px">
+                      <tm-time
+                        formControlName="start"
+                        placeholder="00:00"
+                        [control]="slot.get('start')"
+                      ></tm-time>
+                    </div>
+                  </td>
+                  <td class="py-3">
+                    <div class="mx-auto" style="max-width: 140px">
+                      <tm-time
+                        formControlName="end"
+                        placeholder="00:00"
+                        [control]="slot.get('end')"
+                      ></tm-time>
+                    </div>
+                  </td>
+                  <td class="text-end pe-4 py-3">
+                    <div class="d-flex justify-content-end">
+                      <app-button-delete
+                        variant="icon"
+                        [isSolid]="true"
+                        (onClick)="removeSlot($index)"
+                        [disabled]="isViewMode()"
+                        title="Excluir Horário"
+                        style="width: 48px; height: 48px"
+                      ></app-button-delete>
+                    </div>
+                  </td>
+                </tr>
+              }
+
+              @if (slots.length === 0) {
+                <tr>
+                  <td colspan="4" class="text-center py-5">
+                    <div class="text-muted opacity-75">
+                      <i class="bi bi-alarm fs-1 d-block mb-2 opacity-25"></i>
+                      <p class="mb-0 fw-medium">{{ t().admin.timegrid.form.slots.empty }}</p>
+                      <small
+                        >Adicione horários de aula ou intervalos para configurar a grade.</small
+                      >
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </form>
+  </main>
 </div>

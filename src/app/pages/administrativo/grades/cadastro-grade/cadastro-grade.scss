@@ -1,35 +1,96 @@
-/* Specific Local Adjustments */
 .page-container {
   padding-bottom: 80px;
 }
 
-.border-start-4-primary {
-  border-left: 4px solid var(--primary-color) !important;
+.sticky-header {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.6) !important;
 }
 
-.border-start-4-secondary {
-  border-left: 4px solid var(--text-secondary) !important;
+.btn-back-responsive {
+  border-radius: 12px !important;
+  padding: 0.75rem 1.5rem !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  @media (min-width: 768px) {
+    padding: 0 !important;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 8px !important;
+  }
 }
 
-.hover-danger:hover {
-  color: var(--bs-danger) !important;
-  background-color: rgba(var(--bs-danger-rgb), 0.1);
-  border-radius: 50%;
+.border-bottom-light {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.form-floating > .form-control {
-  height: calc(3.5rem + 2px);
-  line-height: 1.25;
+.xx-small {
+  font-size: 0.65rem;
 }
 
-.form-floating > label {
-  padding: 1rem 0.75rem;
-  color: var(--text-secondary);
+.tracking-widest {
+  letter-spacing: 0.1em;
+}
+
+.shadow-xs {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.transition-hover {
+  transition: all 0.2s ease-in-out !important;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 // Dark Mode Specifics
 :host-context([data-theme='dark']) {
-  .slot-row {
-    border-color: var(--border-color) !important;
+  .sticky-header {
+    background-color: rgba(var(--bg-color-rgb), 0.7) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .bg-white {
+    background-color: var(--surface-color) !important;
+  }
+
+  .bg-light {
+    background-color: var(--input-bg) !important;
+  }
+
+  .border-dashed {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .border-bottom-light {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .text-muted,
+  small,
+  .form-text {
+    color: #ffffff !important;
+    opacity: 0.9 !important;
   }
 }

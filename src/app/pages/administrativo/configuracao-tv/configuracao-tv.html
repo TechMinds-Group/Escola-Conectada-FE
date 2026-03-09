@@ -1,216 +1,185 @@
 <div class="container-fluid py-4 pb-5">
-  <!-- Sticky Header & Action Bar -->
-  <div class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-      <div class="d-flex align-items-center gap-3">
-        <button class="btn transition-hover btn-back-header" (click)="onBack()">
-          <i class="bi bi-arrow-left"></i>
-        </button>
-        <div>
-          <h2 class="fw-bold mb-0 text-dark fs-4">
-            {{ t().admin.tvConfig.title }}
-          </h2>
-          <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
-            {{ t().admin.tvConfig.subtitle }}
-          </p>
+  <!-- Sticky Header SaaS Style -->
+  <header
+    class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header border-bottom border-light"
+  >
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-lg-auto">
+        <div class="d-flex align-items-center gap-3">
+          <button
+            class="btn transition-hover border-0 shadow-sm bg-white btn-back-responsive"
+            (click)="onBack()"
+            title="Voltar"
+          >
+            <i class="bi bi-arrow-left fs-5 text-primary"></i>
+          </button>
+          <div>
+            <h2 class="fw-bold mb-0 text-dark fs-4 text-truncate" style="max-width: 300px">
+              {{ t().admin.tvConfig.title }}
+            </h2>
+            <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+              {{ t().admin.tvConfig.subtitle }}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div
-        class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 action-bar-buttons"
-      >
-        <button
-          class="btn btn-outline-primary rounded-3 transition-hover d-flex align-items-center justify-content-center gap-2 px-3 btn-height-40-auto"
-          (click)="openPreview()"
-          title="Visualizar Agora"
+      <div class="col-12 col-lg-auto ms-auto">
+        <div
+          class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 action-bar-buttons"
         >
-          <i class="bi bi-display"></i>
-          <span class="fw-bold">Visualizar Agora</span>
-        </button>
+          <button
+            class="btn btn-outline-primary rounded-3 transition-hover d-flex align-items-center justify-content-center gap-2 px-3 fw-bold"
+            style="height: 48px"
+            (click)="openPreview()"
+            title="Visualizar Agora"
+          >
+            <i class="bi bi-display fs-5"></i>
+            <span>Visualizar Agora</span>
+          </button>
 
-        <div class="vr mx-2 opacity-25 d-none d-lg-block"></div>
+          <div class="vr mx-2 opacity-25 d-none d-lg-block"></div>
 
-        @if (isViewMode()) {
-          <app-button-edit (onClick)="enableEdit()"></app-button-edit>
-        } @else {
-          <app-button-cancel (onClick)="cancelEdit()"></app-button-cancel>
-          <app-button-save (onClick)="onSubmit()"></app-button-save>
-        }
+          @if (isViewMode()) {
+            <app-button-edit (onClick)="enableEdit()"></app-button-edit>
+          } @else {
+            <app-button-cancel (onClick)="cancelEdit()"></app-button-cancel>
+            <app-button-save (onClick)="onSubmit()"></app-button-save>
+          }
+        </div>
       </div>
     </div>
-  </div>
+  </header>
 
-  <div class="row justify-content-center">
-    <div class="col-12 col-xl-10">
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <!-- Scene Duration -->
-        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
-          <h6 class="form-label small fw-bold text-muted text-uppercase tracking-wider mb-3">
-            <i class="bi bi-stopwatch me-2"></i>{{ t().admin.tvConfig.cards.timing.title }}
+  <!-- Unified Settings Card -->
+  <main
+    class="card border-0 shadow-sm rounded-4 p-3 p-md-4 bg-white animate-in"
+    [formGroup]="form"
+    (ngSubmit)="onSubmit()"
+  >
+    <div class="card-body p-0">
+      <!-- Section: Timing -->
+      <section class="mb-5">
+        <div class="d-flex align-items-center gap-2 mb-4">
+          <div
+            class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center"
+            style="width: 38px; height: 38px"
+          >
+            <i class="bi bi-stopwatch fs-5"></i>
+          </div>
+          <h6 class="fw-bold mb-0 text-dark text-uppercase small tracking-wider">
+            {{ t().admin.tvConfig.cards.timing.title }}
           </h6>
+        </div>
 
-          <div class="row g-4" formGroupName="sceneDurations">
-            <div class="col-md-4">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                {{ t().admin.tvConfig.cards.timing.timetable.label }}
-              </label>
-              <div class="input-group">
-                <span class="input-group-text bg-light rounded-start-3">
-                  <i class="bi bi-calendar3 text-primary"></i>
-                </span>
-                <input
-                  type="number"
-                  class="form-control bg-light fw-bold py-2"
-                  formControlName="timetable"
-                  [class.is-invalid]="
-                    form.get('sceneDurations.timetable')?.invalid && saveAttempted()
-                  "
-                />
-                <span class="input-group-text bg-light text-muted rounded-end-3">{{
-                  t().admin.tvConfig.cards.timing.unit
-                }}</span>
-              </div>
-              <div class="form-text xx-small mt-1 opacity-75">
-                {{ t().admin.tvConfig.cards.timing.timetable.hint }}
-              </div>
+        <div class="row g-4" formGroupName="sceneDurations">
+          <div class="col-12 col-lg-4">
+            <tm-text
+              formControlName="timetable"
+              [label]="t().admin.tvConfig.cards.timing.timetable.label"
+              type="number"
+              icon="bi bi-calendar3"
+              [suffix]="t().admin.tvConfig.cards.timing.unit"
+              [control]="form.get('sceneDurations.timetable')"
+            ></tm-text>
+            <div class="form-text xx-small mt-1 opacity-75 ps-1">
+              {{ t().admin.tvConfig.cards.timing.timetable.hint }}
             </div>
+          </div>
 
-            <div class="col-md-4">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                {{ t().admin.tvConfig.cards.timing.events.label }}
-              </label>
-              <div class="input-group">
-                <span class="input-group-text bg-light rounded-start-3">
-                  <i class="bi bi-calendar-event text-primary"></i>
-                </span>
-                <input
-                  type="number"
-                  class="form-control bg-light fw-bold py-2"
-                  formControlName="events"
-                  [class.is-invalid]="form.get('sceneDurations.events')?.invalid && saveAttempted()"
-                />
-                <span class="input-group-text bg-light text-muted rounded-end-3">{{
-                  t().admin.tvConfig.cards.timing.unit
-                }}</span>
-              </div>
-              <div class="form-text xx-small mt-1 opacity-75">
-                {{ t().admin.tvConfig.cards.timing.events.hint }}
-              </div>
+          <div class="col-12 col-lg-4">
+            <tm-text
+              formControlName="events"
+              [label]="t().admin.tvConfig.cards.timing.events.label"
+              type="number"
+              icon="bi bi-calendar-event"
+              [suffix]="t().admin.tvConfig.cards.timing.unit"
+              [control]="form.get('sceneDurations.events')"
+            ></tm-text>
+            <div class="form-text xx-small mt-1 opacity-75 ps-1">
+              {{ t().admin.tvConfig.cards.timing.events.hint }}
             </div>
+          </div>
 
-            <div class="col-md-4">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                {{ t().admin.tvConfig.cards.timing.notices.label }}
-              </label>
-              <div class="input-group">
-                <span class="input-group-text bg-light rounded-start-3">
-                  <i class="bi bi-megaphone text-primary"></i>
-                </span>
-                <input
-                  type="number"
-                  class="form-control bg-light fw-bold py-2"
-                  formControlName="notices"
-                  [class.is-invalid]="
-                    form.get('sceneDurations.notices')?.invalid && saveAttempted()
-                  "
-                />
-                <span class="input-group-text bg-light text-muted rounded-end-3">{{
-                  t().admin.tvConfig.cards.timing.unit
-                }}</span>
-              </div>
-              <div class="form-text xx-small mt-1 opacity-75">
-                {{ t().admin.tvConfig.cards.timing.notices.hint }}
-              </div>
+          <div class="col-12 col-lg-4">
+            <tm-text
+              formControlName="notices"
+              [label]="t().admin.tvConfig.cards.timing.notices.label"
+              type="number"
+              icon="bi bi-megaphone"
+              [suffix]="t().admin.tvConfig.cards.timing.unit"
+              [control]="form.get('sceneDurations.notices')"
+            ></tm-text>
+            <div class="form-text xx-small mt-1 opacity-75 ps-1">
+              {{ t().admin.tvConfig.cards.timing.notices.hint }}
             </div>
           </div>
         </div>
+      </section>
 
-        <!-- Shift Triggers -->
-        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
-          <h6 class="form-label small fw-bold text-muted text-uppercase tracking-wider mb-3">
-            <i class="bi bi-clock-history me-2"></i>{{ t().admin.tvConfig.cards.triggers.title }}
-          </h6>
+      <hr class="border-dashed my-5 opacity-25" />
+
+      <!-- Section: Shift Triggers -->
+      <section>
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+          <div class="d-flex align-items-center gap-2">
+            <div
+              class="bg-secondary-subtle text-secondary rounded-3 d-flex align-items-center justify-content-center"
+              style="width: 38px; height: 38px"
+            >
+              <i class="bi bi-clock-history fs-5"></i>
+            </div>
+            <h6 class="fw-bold mb-0 text-dark text-uppercase small tracking-wider">
+              {{ t().admin.tvConfig.cards.triggers.title }}
+            </h6>
+          </div>
 
           <div
-            class="alert alert-light border border-info border-start-0 border-end-0 border-top-0 border-bottom-0 border-start-4-info mb-4 bg-info bg-opacity-10 py-2"
+            class="alert alert-info border-0 rounded-3 py-2 px-3 mb-0 d-flex align-items-center gap-2 bg-opacity-10"
           >
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-info-circle-fill text-info"></i>
-              <small class="fw-medium text-info">{{
-                t().admin.tvConfig.cards.triggers.info
-              }}</small>
-            </div>
-          </div>
-
-          <div class="row g-4" formGroupName="shiftTriggers">
-            <div class="col-md-4">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                {{ t().admin.tvConfig.cards.triggers.morning }}
-              </label>
-              <div class="input-group">
-                <span class="input-group-text bg-light rounded-start-3">
-                  <i class="bi bi-sunrise text-primary"></i>
-                </span>
-                <input
-                  type="time"
-                  class="form-control bg-light fw-bold py-2 rounded-end-3"
-                  formControlName="morning"
-                  step="60"
-                  [class.is-invalid]="form.get('shiftTriggers.morning')?.invalid && saveAttempted()"
-                />
-              </div>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                {{ t().admin.tvConfig.cards.triggers.afternoon }}
-              </label>
-              <div class="input-group">
-                <span class="input-group-text bg-light rounded-start-3">
-                  <i class="bi bi-sun text-primary"></i>
-                </span>
-                <input
-                  type="time"
-                  class="form-control bg-light fw-bold py-2 rounded-end-3"
-                  formControlName="afternoon"
-                  step="60"
-                  [class.is-invalid]="
-                    form.get('shiftTriggers.afternoon')?.invalid && saveAttempted()
-                  "
-                />
-              </div>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label small fw-bold text-muted text-uppercase tracking-wider">
-                {{ t().admin.tvConfig.cards.triggers.night }}
-              </label>
-              <div class="input-group">
-                <span class="input-group-text bg-light rounded-start-3">
-                  <i class="bi bi-moon-stars text-primary"></i>
-                </span>
-                <input
-                  type="time"
-                  class="form-control bg-light fw-bold py-2 rounded-end-3"
-                  formControlName="night"
-                  step="60"
-                  [class.is-invalid]="form.get('shiftTriggers.night')?.invalid && saveAttempted()"
-                />
-              </div>
-            </div>
+            <i class="bi bi-info-circle fs-6"></i>
+            <span class="xx-small fw-bold text-uppercase tracking-wider">{{
+              t().admin.tvConfig.cards.triggers.info
+            }}</span>
           </div>
         </div>
 
-        <!-- Success Toast-like Alert -->
-        @if (showSuccess()) {
-          <div class="position-fixed bottom-0 start-50 translate-middle-x mb-4 z-3 animate-fade-in">
-            <div
-              class="alert alert-success shadow-lg rounded-pill px-4 py-2 border-0 d-flex align-items-center gap-2"
-            >
-              <i class="bi bi-check-circle-fill"></i>
-              <span class="fw-bold">{{ t().admin.tvConfig.success }}</span>
-            </div>
+        <div class="row g-4" formGroupName="shiftTriggers">
+          <div class="col-12 col-lg-4">
+            <tm-time
+              formControlName="morning"
+              [label]="t().admin.tvConfig.cards.triggers.morning"
+              [control]="form.get('shiftTriggers.morning')"
+            ></tm-time>
           </div>
-        }
-      </form>
+          <div class="col-12 col-lg-4">
+            <tm-time
+              formControlName="afternoon"
+              [label]="t().admin.tvConfig.cards.triggers.afternoon"
+              [control]="form.get('shiftTriggers.afternoon')"
+            ></tm-time>
+          </div>
+          <div class="col-12 col-lg-4">
+            <tm-time
+              formControlName="night"
+              [label]="t().admin.tvConfig.cards.triggers.night"
+              [control]="form.get('shiftTriggers.night')"
+            ></tm-time>
+          </div>
+        </div>
+      </section>
+
+      <!-- Success Toast-like Alert -->
+      @if (showSuccess()) {
+        <div class="position-fixed bottom-0 start-50 translate-middle-x mb-4 z-3 animate-fade-in">
+          <div
+            class="alert alert-success shadow-lg rounded-pill px-4 py-2 border-0 d-flex align-items-center gap-2 animate-in"
+          >
+            <i class="bi bi-check-circle-fill"></i>
+            <span class="fw-bold">{{ t().admin.tvConfig.success }}</span>
+          </div>
+        </div>
+      }
     </div>
-  </div>
+  </main>
 </div>
