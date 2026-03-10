@@ -7,6 +7,7 @@ import { TranslationService } from '../../../core/services/translation.service';
 import { ButtonEditComponent } from '../../../core/components/buttons/button-edit';
 import { ButtonSaveComponent } from '../../../core/components/buttons/button-save';
 import { ButtonCancelComponent } from '../../../core/components/buttons/button-cancel';
+import { ButtonPreviewComponent } from '../../../core/components/buttons/button-preview';
 import { Router } from '@angular/router';
 import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
 import { TimeInputComponent } from '../../../core/components/time-input/time-input.component';
@@ -20,6 +21,7 @@ import { TimeInputComponent } from '../../../core/components/time-input/time-inp
     ButtonEditComponent,
     ButtonSaveComponent,
     ButtonCancelComponent,
+    ButtonPreviewComponent,
     TextInputComponent,
     TimeInputComponent,
   ],

@@ -164,40 +164,15 @@
           <!-- Heat Legend -->
           <div class="d-flex flex-wrap gap-4 mb-4 small opacity-75 fw-bold">
             <div class="d-flex align-items-center gap-2">
-              <div
-                class="rounded-circle"
-                style="
-                  width: 12px;
-                  height: 12px;
-                  background: rgba(16, 185, 129, 0.2);
-                  border: 1px solid #10b981;
-                "
-              ></div>
+              <div class="legend-dot status-occupied"></div>
               {{ t().admin.dashboard.monitor.legend.occupied }}
             </div>
             <div class="d-flex align-items-center gap-2">
-              <div
-                class="rounded-circle"
-                style="
-                  width: 12px;
-                  height: 12px;
-                  background: var(--input-bg);
-                  border: 1px solid var(--border-color);
-                  border-style: dashed;
-                "
-              ></div>
+              <div class="legend-dot status-free"></div>
               {{ t().admin.dashboard.monitor.legend.free }}
             </div>
             <div class="d-flex align-items-center gap-2">
-              <div
-                class="rounded-circle"
-                style="
-                  width: 12px;
-                  height: 12px;
-                  background: rgba(239, 68, 68, 0.2);
-                  border: 1px solid #ef4444;
-                "
-              ></div>
+              <div class="legend-dot status-conflict"></div>
               {{ t().admin.dashboard.monitor.legend.conflict }}
             </div>
           </div>
@@ -206,18 +181,22 @@
             @for (room of roomHeatmap(); track room.id) {
               <div class="col-12 col-sm-6 col-md-4 col-xl-3">
                 <div
-                  class="d-flex flex-column p-3 rounded-4 border h-100 bg-surface shadow-sm hover-lift position-relative overflow-hidden"
+                  class="d-flex flex-column p-3 rounded-4 border h-100 shadow-sm hover-lift position-relative overflow-hidden"
+                  [class.bg-surface]="room.indicator !== 'gray'"
+                  [class.bg-empty]="room.indicator === 'gray'"
                   [class.border-success]="room.indicator === 'green'"
                   [class.border-danger]="room.indicator === 'red'"
                   [class.border-theme]="room.indicator === 'gray'"
+                  [class.border-dashed]="room.indicator === 'gray'"
                   [style.min-height.px]="160"
                   [style.border-left-width.px]="4"
                 >
                   <div class="d-flex flex-column align-items-start mb-3 gap-2">
                     <span
-                      class="fw-bolder fs-5 text-main lh-sm"
-                      [class.text-success]="room.indicator === 'green'"
-                      [class.text-danger]="room.indicator === 'red'"
+                      class="fw-bolder fs-5 lh-sm"
+                      [class.status-occupied-text]="room.indicator === 'green'"
+                      [class.status-conflict-text]="room.indicator === 'red'"
+                      [class.status-free-text]="room.indicator === 'gray'"
                       >{{ room.name }}</span
                     >
                     <span
@@ -259,24 +238,26 @@
           </h6>
           <div class="row g-3">
             <div class="col-6">
-              <button
-                class="btn btn-light w-100 p-3 h-100 d-flex flex-column align-items-center gap-2 rounded-4 hover-lift border-theme bg-surface"
+              <a
+                routerLink="/time-grids/new"
+                class="btn btn-light w-100 p-3 h-100 d-flex flex-column align-items-center gap-2 rounded-4 hover-lift border-theme bg-surface text-decoration-none"
               >
                 <i class="bi bi-grid-3x3-gap-fill text-primary fs-3"></i>
                 <small class="fw-bold text-muted">{{
                   t().admin.dashboard.quickAccess.newGrid
                 }}</small>
-              </button>
+              </a>
             </div>
             <div class="col-6">
-              <button
-                class="btn btn-light w-100 p-3 h-100 d-flex flex-column align-items-center gap-2 rounded-4 hover-lift border-theme bg-surface"
+              <a
+                routerLink="/professores"
+                class="btn btn-light w-100 p-3 h-100 d-flex flex-column align-items-center gap-2 rounded-4 hover-lift border-theme bg-surface text-decoration-none"
               >
                 <i class="bi bi-person-plus-fill text-success fs-3"></i>
                 <small class="fw-bold text-muted">{{
                   t().admin.dashboard.quickAccess.linkTeacher
                 }}</small>
-              </button>
+              </a>
             </div>
             <div class="col-6">
               <a

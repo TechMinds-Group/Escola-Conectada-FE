@@ -1,4 +1,4 @@
-<div class="container-fluid py-4 pb-5 content-area fade-in">
+<div class="container-fluid py-4 pb-5 content-area animate-in">
   <header class="mb-3">
     <div class="row g-3 align-items-center">
       <div class="col-12 col-md-auto">
@@ -158,127 +158,171 @@
     </div>
   }
 
-  <!-- Main Availability Grid -->
-  <div class="availability-grid mb-5">
-    @for (item of filteredAvailability(); track item.salaId) {
-      <div class="room-card" [class]="'status-card-' + item.statusOcupacao">
-        <div class="d-flex justify-content-between align-items-start mb-3">
-          <div>
-            <span
-              class="badge bg-light text-muted xx-small fw-bold text-uppercase mb-2 d-inline-block px-2"
-            >
-              {{ item.bloco }}
-            </span>
-            <h4 class="fw-bold text-dark mb-0">{{ item.salaNome }}</h4>
-          </div>
-          <div class="d-flex flex-column align-items-end">
-            <div class="status-badge d-flex align-items-center gap-2">
-              <span
-                class="status-indicator-dot"
-                [class.animate-pulse-subtle]="item.statusOcupacao === 'Solicitado'"
-              ></span>
-              <span
-                class="xx-small fw-bold text-uppercase tracking-wider"
-                [class.text-success]="item.statusOcupacao === 'Livre'"
-                [class.text-danger]="item.statusOcupacao === 'Ocupado'"
-                [class.text-warning]="item.statusOcupacao === 'Solicitado'"
-              >
-                {{ item.statusOcupacao }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Resources list -->
-        <div class="d-flex flex-wrap gap-1 mb-4">
-          @for (res of item.recursos; track res) {
-            <span class="resource-chip">{{ res }}</span>
-          }
-          @if (item.recursos.length === 0) {
-            <span class="xx-small text-muted opacity-50">Sem recursos cadastrados</span>
-          }
-        </div>
-
-        <div class="mt-auto pt-3 border-top">
-          <div class="mb-3 d-flex align-items-center gap-2">
-            <span class="badge bg-secondary-subtle text-secondary xx-small fw-bold">
-              <i class="bi bi-calendar3 me-1"></i> {{ item.data | date: 'dd/MM' }}
-            </span>
-            <span class="badge bg-info-subtle text-info xx-small fw-bold">
-              <i class="bi bi-clock me-1"></i>
-              {{ item.horario }}{{ item.horarioFim ? ' - ' + item.horarioFim : '' }}
-            </span>
-          </div>
-
-          <div class="d-flex justify-content-between align-items-center">
-            <span class="small text-muted">
-              <i class="bi bi-people me-1"></i> {{ item.capacidade }}
-            </span>
-
-            <!-- Dynamic Actions -->
-            @if (item.statusOcupacao === 'Livre') {
-              <button
-                class="btn btn-primary-modern btn-sm px-4 rounded-pill fw-bold"
-                (click)="openRequestModal(item)"
-              >
-                Reservar
-              </button>
-            } @else if (isAdmin()) {
-              <button
-                class="btn btn-danger btn-sm px-3 rounded-pill fw-bold border-0"
-                style="background: #ef4444"
-                (click)="openRequestModal(item)"
-              >
-                Requisitar (Forçar)
-              </button>
-            } @else if (item.statusOcupacao === 'Ocupado' || item.statusOcupacao === 'Solicitado') {
-              <!-- Só mostra se NÃO for eu mesmo o ocupante -->
-              @if (item.occupantProfessorId !== user()?.professorId) {
-                <button
-                  class="btn btn-warning btn-sm px-3 rounded-pill fw-bold text-dark border-0"
-                  style="background: #f59e0b"
-                  (click)="openRequestModal(item)"
+  <!-- Desktop Table View -->
+  <!-- Desktop Card View -->
+  <main class="animate-in d-none d-md-block">
+    <div class="row g-4">
+      @for (item of filteredAvailability(); track item.salaId) {
+        <div class="col-12 col-lg-6 col-xl-4">
+          <div
+            class="card border-0 shadow-sm rounded-4 h-100 bg-surface transition-hover overflow-hidden"
+          >
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center gap-3 mb-4">
+                <div
+                  class="rounded-4 bg-primary-subtle text-primary d-flex align-items-center justify-content-center shadow-xs"
+                  style="width: 56px; height: 56px"
                 >
-                  Solicitar Uso
-                </button>
-              } @else {
-                <span
-                  class="badge bg-success-subtle text-success xx-small fw-bold px-3 py-2 rounded-pill"
-                >
-                  Seu Ambiente
-                </span>
-              }
-            }
-          </div>
-
-          @if (item.statusOcupacao !== 'Livre') {
-            <div
-              class="mt-3 p-2 rounded-3"
-              [class.bg-danger-subtle]="item.statusOcupacao === 'Ocupado'"
-              [class.bg-warning-subtle]="item.statusOcupacao === 'Solicitado'"
-            >
-              <div class="d-flex align-items-center gap-2">
-                <i
-                  class="bi bi-person-circle fs-5"
-                  [class.text-danger]="item.statusOcupacao === 'Ocupado'"
-                  [class.text-warning]="item.statusOcupacao === 'Solicitado'"
-                ></i>
+                  <i class="bi bi-door-open-fill fs-3"></i>
+                </div>
                 <div class="flex-grow-1 overflow-hidden">
-                  <div class="xx-small text-muted text-uppercase fw-bold opacity-75">
-                    {{ item.statusOcupacao === 'Ocupado' ? 'Ocupado por' : 'Solicitado por' }}
+                  <h5 class="fw-bold text-dark mb-1 text-truncate">{{ item.salaNome }}</h5>
+                  <div
+                    class="badge rounded-pill px-3 py-1 border extra-small fw-bold"
+                    [ngClass]="getStatusBadgeClass(item.statusOcupacao)"
+                  >
+                    {{ item.statusOcupacao }}
                   </div>
-                  <div class="small fw-bold text-dark text-truncate">{{ item.professorNome }}</div>
                 </div>
               </div>
+
+              @if (item.professorNome && item.statusOcupacao !== 'Livre') {
+                <div class="p-3 mb-4 rounded-3 bg-light-subtle border small text-muted">
+                  <div class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-person-circle text-primary"></i>
+                    {{ item.statusOcupacao === 'Ocupado' ? 'Ocupado por' : 'Solicitado por' }}:
+                  </div>
+                  <span class="fw-semibold text-dark fs-6">{{ item.professorNome }}</span>
+                </div>
+              }
+
+              <div class="mb-4">
+                <div class="d-flex justify-content-between mb-2 small">
+                  <span class="text-muted fw-bold text-uppercase tracking-wider">Localização</span>
+                  <span class="text-dark fw-bold">{{ item.bloco }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 small">
+                  <span class="text-muted fw-bold text-uppercase tracking-wider">Capacidade</span>
+                  <span class="text-dark fw-bold">{{ item.capacidade }} Vagas</span>
+                </div>
+              </div>
+
+              <div class="mb-4 pt-3 border-top">
+                <label
+                  class="xx-small fw-bold text-muted text-uppercase tracking-wider mb-2 d-block"
+                  >Recursos Disponíveis</label
+                >
+                <div class="d-flex flex-wrap gap-2">
+                  @for (res of item.recursos; track res) {
+                    <span class="resource-chip px-3 py-2 fs-6">{{ res }}</span>
+                  }
+                  @if (item.recursos.length === 0) {
+                    <span class="text-muted small italic opacity-50">Nenhum recurso listado</span>
+                  }
+                </div>
+              </div>
+
+              <div class="mt-auto">
+                @if (item.statusOcupacao === 'Livre') {
+                  <button
+                    class="btn btn-primary w-100 py-2 rounded-3 fw-bold shadow-sm transition-hover"
+                    (click)="openRequestModal(item)"
+                  >
+                    <i class="bi bi-calendar-plus me-2"></i>Reservar Agora
+                  </button>
+                } @else if (isAdmin()) {
+                  <button
+                    class="btn btn-danger w-100 py-2 rounded-3 fw-bold transition-hover border-0"
+                    (click)="openRequestModal(item)"
+                  >
+                    <i class="bi bi-exclamation-triangle me-2"></i>Requisitar Ambiente
+                  </button>
+                } @else if (item.occupantProfessorId !== user()?.professorId) {
+                  <button
+                    class="btn btn-warning w-100 py-2 rounded-3 fw-bold text-dark transition-hover border-0"
+                    (click)="openRequestModal(item)"
+                  >
+                    <i class="bi bi-question-circle me-2"></i>Solicitar Troca
+                  </button>
+                } @else {
+                  <div
+                    class="alert alert-success border-0 rounded-3 py-2 px-3 mb-0 text-center small fw-bold"
+                  >
+                    <i class="bi bi-check-circle-fill me-2"></i>Seu Ambiente Reservado
+                  </div>
+                }
+              </div>
             </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Empty State -->
+    @if (filteredAvailability().length === 0 && !(isLoadingAvailability() || isLoading())) {
+      <div
+        class="w-100 py-5 text-center d-flex flex-column align-items-center justify-content-center"
+      >
+        <div
+          class="rounded-circle bg-light d-flex align-items-center justify-content-center mb-4 shadow-sm"
+          style="width: 80px; height: 80px"
+        >
+          <i class="bi bi-search fs-1 opacity-25"></i>
+        </div>
+        <h4 class="text-dark fw-bold mb-2">Nenhum ambiente encontrado</h4>
+        <p class="text-muted mb-0">Tente ajustar os filtros para encontrar o que procura.</p>
+      </div>
+    }
+  </main>
+
+  <!-- Mobile View -->
+  <div class="d-md-none d-flex flex-column gap-3">
+    @for (item of filteredAvailability(); track item.salaId) {
+      <div
+        class="card border-0 shadow-sm rounded-4 p-3 bg-surface transition-hover"
+        (click)="openRequestModal(item)"
+      >
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div
+            class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center shadow-xs"
+            style="width: 48px; height: 48px"
+          >
+            <i class="bi bi-door-open-fill fs-4"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h6 class="fw-bold text-dark mb-0">{{ item.salaNome }}</h6>
+            <div class="extra-small text-muted text-uppercase fw-bold">
+              {{ item.bloco }} &bull; {{ item.capacidade }} Vagas
+            </div>
+          </div>
+          <span
+            class="badge rounded-pill px-3 py-1 border extra-small fw-bold"
+            [ngClass]="getStatusBadgeClass(item.statusOcupacao)"
+          >
+            {{ item.statusOcupacao }}
+          </span>
+        </div>
+
+        @if (item.professorNome && item.statusOcupacao !== 'Livre') {
+          <div class="p-2 mb-3 rounded-3 bg-light-subtle border small text-muted">
+            <i class="bi bi-person-circle me-1"></i>
+            {{ item.statusOcupacao === 'Ocupado' ? 'Ocupado por' : 'Solicitado por' }}:
+            <span class="fw-bold text-dark">{{ item.professorNome }}</span>
+          </div>
+        }
+
+        <div class="d-flex flex-wrap gap-1">
+          @for (res of item.recursos; track res) {
+            <span class="resource-chip">{{ res }}</span>
           }
         </div>
       </div>
     }
-    @if (filteredAvailability().length === 0 && !isLoadingAvailability()) {
-      <div class="col-12 py-5 text-center">
+
+    @if (filteredAvailability().length === 0 && !(isLoadingAvailability() || isLoading())) {
+      <div class="py-5 text-center w-100">
         <i class="bi bi-search fs-1 opacity-25 d-block mb-3"></i>
-        <h5 class="text-muted">Nenhum ambiente encontrado com estes filtros.</h5>
+        <h5 class="text-muted fw-semibold">Nenhum ambiente encontrado com estes filtros.</h5>
       </div>
     }
   </div>
@@ -308,7 +352,7 @@
             <div class="context-pill mb-4 py-2 px-3 d-flex align-items-center gap-2 rounded-3">
               <i class="bi bi-info-circle-fill text-primary"></i>
               <div class="small fw-semibold text-dark">
-                <span>{{ getSelectedRoomName() }}</span> &bull;
+                <span>{{ selectedRoomForModal()?.salaNome }}</span> &bull;
                 <span>{{ getSelectedTimeLabel() }}</span> &bull;
                 <span>{{ displayDate() }}</span>
               </div>

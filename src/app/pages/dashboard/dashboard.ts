@@ -69,20 +69,27 @@ export class Dashboard implements AfterViewInit, OnInit {
     };
   });
 
-  // 3. Monitor Slot Logic (Keeping only the Slot name/type logic for context)
-  monitor = computed(() => {
+  // 3. Monitor Slot Logic
+  currentSlotData = computed(() => {
     const shift = this.selectedShift();
     const now = new Date();
+    const dayOfWeek = now.getDay(); // 0-6 (Sun-Sat)
     const currentHhMm = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
     const grid = this.grids().find((g) => g.shift === shift);
     const currentSlot = grid?.slots.find((s) => s.start <= currentHhMm && s.end >= currentHhMm);
 
     return {
-      slot: currentSlot
+      slot: currentSlot,
+      dayOfWeek: dayOfWeek,
+      display: currentSlot
         ? `${currentSlot.index ? currentSlot.index + 'º' : ''} ${currentSlot.type} (${currentSlot.start} - ${currentSlot.end})`
         : 'Intervalo / Sem Aula',
     };
   });
+
+  monitor = computed(() => ({
+    slot: this.currentSlotData().display,
+  }));
 
   // 4. Critical Alerts (Management by Exception)
   criticalAlerts = computed(() => {
@@ -133,7 +140,7 @@ export class Dashboard implements AfterViewInit, OnInit {
         icon: 'bi-person-badge',
         title: t.missingTeacher,
         message: `${missingCount} disciplinas ainda não possuem docente vinculado.`,
-        link: '/records/professor',
+        link: '/professores',
       });
     }
 
@@ -157,13 +164,24 @@ export class Dashboard implements AfterViewInit, OnInit {
 
   // 5. Refined Room Heatmap (Detailed with Class/Teacher)
   roomHeatmap = computed(() => {
+    const { slot, dayOfWeek } = this.currentSlotData();
     const shift = this.selectedShift();
-    const classes = this.classes().filter((c) => c.shift === shift);
     const rooms = this.rooms();
     const teachers = this.teachers();
 
+    // Filter classes that are active in this specific shift, day, and slot
+    const activeClasses = this.classes().filter((c) => {
+      if (c.shift !== shift) return false;
+      if (!slot || slot.type === 'Intervalo') return false;
+
+      // If we have a slot, check if this class has an assignment for TODAY at this SLOT
+      return c.assignments?.some(
+        (a) => Number(a.dayOfWeek) === dayOfWeek && Number(a.slotIndex) === slot.index,
+      );
+    });
+
     return rooms.map((room) => {
-      const roomClasses = classes.filter((c) => String(c.roomId) === String(room.id));
+      const roomClasses = activeClasses.filter((c) => String(c.roomId) === String(room.id));
 
       let status: 'green' | 'gray' | 'red' = 'gray';
       let details = '';

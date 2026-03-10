@@ -28,15 +28,7 @@
         <div
           class="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 action-bar-buttons"
         >
-          <button
-            class="btn btn-outline-primary rounded-3 transition-hover d-flex align-items-center justify-content-center gap-2 px-3 fw-bold"
-            style="height: 48px"
-            (click)="openPreview()"
-            title="Visualizar Agora"
-          >
-            <i class="bi bi-display fs-5"></i>
-            <span>Visualizar Agora</span>
-          </button>
+          <app-button-preview (onClick)="openPreview()"></app-button-preview>
 
           <div class="vr mx-2 opacity-25 d-none d-lg-block"></div>
 

@@ -294,6 +294,17 @@
       }
     }
   }
+
+  // Adjust "Resolver" button for dark mode
+  .btn-outline-secondary {
+    color: #fff !important;
+    border-color: rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff !important;
+    }
+  }
 }
 
 .monthly-scrollbar {
@@ -321,6 +332,59 @@
     &::-webkit-scrollbar {
       display: none;
     }
+  }
+}
+
+.bg-empty {
+  background: var(--input-bg) !important;
+}
+
+.border-dashed {
+  border-style: dashed !important;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+
+  &.status-occupied {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: #10b981;
+  }
+
+  &.status-free {
+    background: transparent;
+    border: 1px solid #000000;
+
+    [data-theme='dark'] & {
+      background: #ffffff !important;
+      border-color: #ffffff !important;
+      border-style: solid !important;
+      opacity: 1 !important;
+    }
+  }
+
+  &.status-conflict {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: #ef4444;
+  }
+}
+
+.status-occupied-text {
+  color: #10b981 !important;
+}
+
+.status-conflict-text {
+  color: #ef4444 !important;
+}
+
+.status-free-text {
+  color: #333333 !important;
+
+  [data-theme='dark'] & {
+    color: #ffffff !important;
   }
 }
 

@@ -351,11 +351,7 @@ export class SchoolDataService {
   readonly schoolAvisos = signal<Aviso[]>([]);
   readonly schoolTimeGrids = signal<SchoolTimeGrid[]>([]);
   readonly units = signal<any[]>([]);
-  readonly schoolUsers = signal<any[]>([
-    { name: 'Michel Bittencourt', email: 'michel@escola.com.br', role: 'Administrador' },
-    { name: 'Ana Silva', email: 'ana.secretaria@escola.com.br', role: 'Secretaria' },
-    { name: 'Carlos Santos', email: 'carlos.coord@escola.com.br', role: 'Coordenador' },
-  ]);
+  readonly schoolUsers = signal<any[]>([]);
   readonly schoolInfo = signal({
     name: 'Escola Conectada Elite',
     cnpj: '00.000.000/0001-00',
@@ -364,63 +360,7 @@ export class SchoolDataService {
   });
 
   // Teachers Mock Data (Will be unmocked later)
-  readonly teachers = signal<Teacher[]>([
-    {
-      id: '1',
-      name: 'Dr. Ricardo Oliveira',
-      allocations: [{ subjectId: '1', workload: 40 }],
-      avatar: 'https://ui-avatars.com/api/?name=Ricardo+Oliveira&background=0d6efd&color=fff',
-      availability: this.generateMockAvailability(),
-      email: 'ricardo@escola.com',
-      phone: '(11) 99999-9999',
-      cpf: '111.111.111-11',
-      contractualWorkload: 40,
-      allocatedWorkload: 0,
-      mainSubjectId: '1',
-      secondarySubjectIds: ['3'],
-    },
-    {
-      id: '2',
-      name: 'Profa. Amanda Costa',
-      allocations: [{ subjectId: '2', workload: 32 }],
-      avatar: 'https://ui-avatars.com/api/?name=Amanda+Costa&background=d63384&color=fff',
-      availability: this.generateMockAvailability(),
-      email: 'amanda@escola.com',
-      phone: '(11) 88888-8888',
-      cpf: '222.222.222-22',
-      contractualWorkload: 32,
-      allocatedWorkload: 0,
-      mainSubjectId: '2',
-      secondarySubjectIds: ['5', '7'],
-    },
-    {
-      id: '3',
-      name: 'Dr. Marcos Santos',
-      allocations: [{ subjectId: '3', workload: 40 }],
-      avatar: 'https://ui-avatars.com/api/?name=Marcos+Santos&background=6610f2&color=fff',
-      availability: this.generateMockAvailability(),
-      email: 'marcos@escola.com',
-      phone: '(11) 77777-7777',
-      cpf: '333.333.333-33',
-      contractualWorkload: 40,
-      allocatedWorkload: 0,
-      mainSubjectId: '3',
-      secondarySubjectIds: ['1'],
-    },
-  ]);
-
-  // Helpers
-  private generateMockAvailability(): boolean[][] {
-    const grid: boolean[][] = [];
-    for (let day = 0; day < 5; day++) {
-      const dailySlots: boolean[] = [];
-      for (let slot = 0; slot < 3; slot++) {
-        dailySlots.push(Math.random() > 0.3);
-      }
-      grid.push(dailySlots);
-    }
-    return grid;
-  }
+  readonly teachers = signal<Teacher[]>([]);
 
   checkRoomConflict(
     roomId: string,

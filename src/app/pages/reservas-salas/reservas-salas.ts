@@ -64,7 +64,9 @@ export class ReservasSalas implements OnInit {
   professoresApi = signal<Professor[]>([]);
   schoolRoomsApi = signal<SchoolRoom[]>([]);
   reservasApi = signal<Reserva[]>([]);
-  isLoadingReservas = signal(false);
+  isLoading = signal(true);
+  isLoadingAvailability = signal(false);
+  isFilterPanelOpen = signal(false);
 
   schoolClassesApi = computed(() => this.schoolData.schoolClasses());
   teachersApi = computed(() => this.schoolData.teachers());
@@ -170,8 +172,6 @@ export class ReservasSalas implements OnInit {
     resources: [] as string[],
   });
 
-  // Filter Panel State
-  isFilterPanelOpen = signal(false);
   isFilterActive = computed(() => {
     const applied = this.appliedFilters();
     return (
@@ -197,7 +197,6 @@ export class ReservasSalas implements OnInit {
 
   // Availability View Data
   availabilityData = signal<any[]>([]);
-  isLoadingAvailability = signal(false);
 
   // Filter by Resources
   availableResources = computed(() => {
@@ -216,8 +215,6 @@ export class ReservasSalas implements OnInit {
   });
 
   availableTimes = computed(() => this.horariosMenu()[this.selectedTurno()] || []);
-
-  // Computed: derive RoomDisplay from rooms + real reservations
 
   // Pending reservations (Pendente status from API)
   pendencias = computed(() => {
@@ -336,15 +333,15 @@ export class ReservasSalas implements OnInit {
   }
 
   loadReservas() {
-    this.isLoadingReservas.set(true);
+    this.isLoading.set(true);
     this.reservaService.list(this.selectedDate()).subscribe({
       next: (reservas) => {
         this.reservasApi.set(reservas);
-        this.isLoadingReservas.set(false);
+        this.isLoading.set(false);
       },
       error: (err) => {
         console.error('Erro ao carregar reservas', err);
-        this.isLoadingReservas.set(false);
+        this.isLoading.set(false);
       },
     });
   }
@@ -412,8 +409,8 @@ export class ReservasSalas implements OnInit {
     this.selectedDate.set(this.selectedDate());
   }
 
-  onDatePickerChange(date: Date | null) {
-    if (date) {
+  onDatePickerChange(date: Date | null | undefined) {
+    if (date && date instanceof Date && !isNaN(date.getTime())) {
       // Ajustar para evitar problemas de timezone ao converter para ISO string
       const year = date.getFullYear();
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -541,5 +538,18 @@ export class ReservasSalas implements OnInit {
     const timeId = this.selectedTimeId();
     const turno = this.selectedTurno();
     return this.horariosMenu()[turno]?.find((t) => t.id === timeId)?.label || '';
+  }
+
+  getStatusBadgeClass(status: string): string {
+    switch (status) {
+      case 'Livre':
+        return 'bg-success-subtle text-success border-success-subtle';
+      case 'Ocupado':
+        return 'bg-danger-subtle text-danger border-danger-subtle';
+      case 'Solicitado':
+        return 'bg-warning-subtle text-warning-emphasis border-warning-subtle';
+      default:
+        return 'bg-light text-secondary';
+    }
   }
 }
