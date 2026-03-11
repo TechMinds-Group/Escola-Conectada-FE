@@ -104,12 +104,6 @@ export class AuthService {
       }
       return false;
     } catch (error: any) {
-      if (error.status === 401) {
-        const message = error.error?.message || 'Não autorizado.';
-        console.error(`Login error (401): ${message}`);
-      } else {
-        console.error('Login error:', error);
-      }
       throw error;
     }
   }
@@ -126,7 +120,6 @@ export class AuthService {
     setTimeout(
       () => {
         if (this.isAuthenticated()) {
-          console.warn('Session expired (client-side timeout)');
           this.logout();
         }
       },
@@ -146,7 +139,6 @@ export class AuthService {
       }
       return true;
     } catch (error) {
-      console.error('Update profile error:', error);
       throw error;
     }
   }
@@ -164,7 +156,6 @@ export class AuthService {
       }
       return true;
     } catch (error) {
-      console.error('Update username error:', error);
       throw error;
     }
   }
@@ -179,7 +170,6 @@ export class AuthService {
       );
       return true;
     } catch (error) {
-      console.error('Change password error:', error);
       throw error;
     }
   }

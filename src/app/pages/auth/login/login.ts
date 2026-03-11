@@ -92,7 +92,6 @@ export class Login implements OnInit {
         this.errorMessage = 'Dados de acesso inválidos. Verifique suas credenciais.';
       }
     } catch (error: any) {
-      console.error('Login submission error:', error);
 
       if (error.status === 401) {
         // Specifically handle 401 from backend

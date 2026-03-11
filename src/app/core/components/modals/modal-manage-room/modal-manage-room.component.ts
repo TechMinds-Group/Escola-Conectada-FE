@@ -152,8 +152,7 @@ export class ModalManageRoomComponent implements OnInit {
         this.viewMode.set('list');
         this.isSubmitting.set(false);
       },
-      error: (err) => {
-        console.error('Erro ao salvar ambiente:', err);
+      error: () => {
         this.notification.error('Erro ao salvar ambiente.');
         this.isSubmitting.set(false);
       },
@@ -174,7 +173,7 @@ export class ModalManageRoomComponent implements OnInit {
           // Refresh list logic would be here if rooms were a signal in schoolData
           // But since they come from parent, we rely on parent refreshing or local list
         },
-        error: (err) => console.error('Erro ao excluir ambiente:', err),
+        error: () => {},
       });
     }
   }

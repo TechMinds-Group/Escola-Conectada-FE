@@ -102,7 +102,7 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
         // Sync with mock schoolData for consistency in other parts of app if needed
         this.schoolData.schoolRooms.set(rooms);
       },
-      error: (err) => console.error('Erro ao carregar ambientes:', err),
+      error: () => {},
     });
   }
 
@@ -155,7 +155,7 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
     if (confirmed) {
       this.ambienteService.delete(id).subscribe({
         next: () => this.loadRooms(),
-        error: (err) => console.error('Erro ao excluir ambiente:', err),
+        error: () => {},
       });
     }
   }

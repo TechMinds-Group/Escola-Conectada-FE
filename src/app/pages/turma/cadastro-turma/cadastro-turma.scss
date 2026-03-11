@@ -93,21 +93,38 @@
     &:hover {
       background-color: rgba(var(--bs-primary-rgb), 0.02);
     }
-  }
 
-  .discipline-select {
-    font-weight: 700;
-    font-size: 0.75rem;
-    border-color: rgba(0, 0, 0, 0.05);
-    &:focus {
-      border-color: var(--bs-primary);
+    &.bg-vaga {
+      background-color: var(--bs-gray-100, #f8f9fa);
+      .discipline-select {
+        color: var(--bs-danger);
+        border-color: var(--bs-danger-subtle);
+      }
     }
   }
 
-  .teacher-select {
-    font-size: 0.7rem;
-    color: var(--text-muted, #6c757d);
-    border-color: rgba(0, 0, 0, 0.05);
+  .discipline-select-tm,
+  .teacher-select-tm {
+    ::ng-deep .tm-select-container {
+      min-width: 0 !important;
+      .input-wrapper {
+        min-height: 36px !important;
+        padding-right: 0 !important;
+        .selected-value-container {
+          padding: 0 8px !important;
+          font-size: 0.75rem !important;
+        }
+        .arrow-section {
+          padding-right: 8px !important;
+        }
+      }
+    }
+  }
+
+  .discipline-select-tm {
+    ::ng-deep .tm-select-container .input-wrapper .selected-value-container span {
+      font-weight: 700 !important;
+    }
   }
 }
 

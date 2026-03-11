@@ -271,12 +271,12 @@ export class ReservasSalas implements OnInit {
 
     this.ambienteService.list().subscribe({
       next: (salas) => this.schoolRoomsApi.set(salas),
-      error: (err) => console.error('Erro ao listar ambientes', err),
+      error: () => {},
     });
 
     this.professorService.getAll().subscribe({
       next: (profs) => this.professoresApi.set(profs),
-      error: (err) => console.error('Erro ao listar professores', err),
+      error: () => {},
     });
 
     // Initial loads
@@ -325,8 +325,7 @@ export class ReservasSalas implements OnInit {
         this.availabilityData.set(res);
         this.isLoadingAvailability.set(false);
       },
-      error: (err) => {
-        console.error('Erro ao carregar disponibilidade', err);
+      error: () => {
         this.isLoadingAvailability.set(false);
       },
     });
@@ -339,8 +338,7 @@ export class ReservasSalas implements OnInit {
         this.reservasApi.set(reservas);
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Erro ao carregar reservas', err);
+      error: () => {
         this.isLoading.set(false);
       },
     });
@@ -504,7 +502,7 @@ export class ReservasSalas implements OnInit {
         this.loadAvailability(this.selectedDate(), this.selectedTurno());
         this.notification.success('Reserva aprovada!');
       },
-      error: (err) => console.error('Erro ao aprovar reserva', err),
+      error: () => {},
     });
   }
 
@@ -515,7 +513,7 @@ export class ReservasSalas implements OnInit {
         this.loadAvailability(this.selectedDate(), this.selectedTurno());
         this.notification.info('Solicitação recusada.');
       },
-      error: (err) => console.error('Erro ao recusar reserva', err),
+      error: () => {},
     });
   }
 
@@ -526,7 +524,7 @@ export class ReservasSalas implements OnInit {
         this.loadAvailability(this.selectedDate(), this.selectedTurno());
         this.notification.info('Reserva removida.');
       },
-      error: (err) => console.error('Erro ao excluir reserva', err),
+      error: () => {},
     });
   }
 

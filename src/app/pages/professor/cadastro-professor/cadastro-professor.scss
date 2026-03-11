@@ -80,6 +80,22 @@
       }
     }
   }
+
+  /* 5. Ajuste de Contraste na aba de Disciplinas (Habilitações) */
+  .form-label.text-muted {
+    color: #ffffff !important;
+    opacity: 0.9;
+  }
+
+  .btn.rounded-pill:not(.btn-primary) {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+  }
 }
 
 .estimate-icon-box {

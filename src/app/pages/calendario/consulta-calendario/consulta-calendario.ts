@@ -137,7 +137,7 @@ export class ConsultaCalendario implements OnInit {
   loadEvents() {
     this.eventoService.getAll().subscribe({
       next: (events) => this.rawEvents.set(events),
-      error: (err) => console.error('Erro ao carregar eventos:', err),
+      error: () => {},
     });
   }
 

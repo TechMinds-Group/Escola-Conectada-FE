@@ -91,8 +91,7 @@ export class ConsultaAvisos implements OnInit {
         this.avisosList.set(res);
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Erro ao carregar avisos:', err);
+      error: () => {
         this.isLoading.set(false);
       },
     });
@@ -142,7 +141,7 @@ export class ConsultaAvisos implements OnInit {
     const updated = { ...aviso, active: !aviso.active };
     this.avisoService.update(aviso.id!, updated).subscribe({
       next: () => this.loadAvisos(),
-      error: (err) => console.error('Erro ao alternar status:', err),
+      error: () => {},
     });
   }
 
@@ -164,7 +163,7 @@ export class ConsultaAvisos implements OnInit {
     if (confirmed) {
       this.avisoService.delete(id).subscribe({
         next: () => this.loadAvisos(),
-        error: (err) => console.error('Erro ao excluir aviso:', err),
+        error: () => {},
       });
     }
   }

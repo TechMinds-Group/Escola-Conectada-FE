@@ -141,7 +141,7 @@ export class CadastroAmbiente {
         const rooms = res && res.data ? res.data : res;
         this.schoolData.schoolRooms.set(rooms);
       },
-      error: (err) => console.error('Erro ao carregar ambientes:', err),
+      error: () => {},
     });
   }
 
@@ -167,7 +167,7 @@ export class CadastroAmbiente {
         const types = res && res.data ? res.data : res;
         this.schoolData.roomTypes.set(types);
       },
-      error: (err) => console.error('Erro ao carregar tipos de sala:', err),
+      error: () => {},
     });
   }
 
@@ -177,7 +177,7 @@ export class CadastroAmbiente {
         const blocks = res && res.data ? res.data : res;
         this.schoolData.schoolBlocks.set(blocks);
       },
-      error: (err) => console.error('Erro ao carregar blocos:', err),
+      error: () => {},
     });
   }
 
@@ -195,7 +195,7 @@ export class CadastroAmbiente {
           });
         }
       },
-      error: (err) => console.error('Erro ao carregar sala:', err),
+      error: () => {},
     });
   }
 
@@ -233,8 +233,7 @@ export class CadastroAmbiente {
             this.notificationService.success('Ambiente atualizado com sucesso!');
             this.router.navigate(['/ambientes']);
           },
-          error: (err) => {
-            console.error('Erro ao atualizar ambiente:', err);
+          error: () => {
             this.isSubmitting.set(false);
           },
         });
@@ -244,8 +243,7 @@ export class CadastroAmbiente {
             this.notificationService.success('Ambiente cadastrado com sucesso!');
             this.router.navigate(['/ambientes']);
           },
-          error: (err) => {
-            console.error('Erro ao cadastrar ambiente:', err);
+          error: () => {
             this.isSubmitting.set(false);
           },
         });
@@ -269,7 +267,7 @@ export class CadastroAmbiente {
             this.notificationService.success('Ambiente excluído com sucesso!');
             this.router.navigate(['/ambientes']);
           },
-          error: (err) => console.error('Erro ao excluir ambiente:', err),
+          error: () => {},
         });
       }
     }
@@ -305,9 +303,7 @@ export class CadastroAmbiente {
           this.typeModal?.reset();
           this.notificationService.success('Tipo de ambiente atualizado!');
         },
-        error: (err) => {
-          console.error('Erro ao atualizar tipo:', err);
-        },
+        error: () => {},
       });
     } else {
       this.ambienteService.saveType({ name: name }).subscribe({
@@ -316,9 +312,7 @@ export class CadastroAmbiente {
           this.typeModal?.reset();
           this.notificationService.success('Tipo de ambiente criado!');
         },
-        error: (err) => {
-          console.error('Erro ao salvar tipo:', err);
-        },
+        error: () => {},
       });
     }
   }
@@ -337,7 +331,6 @@ export class CadastroAmbiente {
           this.notificationService.success('Tipo removido.');
         },
         error: (err) => {
-          console.error('Erro ao excluir tipo:', err);
           this.notificationService.error(this.extractErrorMessage(err, 'Erro ao excluir tipo.'));
         },
       });
@@ -374,9 +367,7 @@ export class CadastroAmbiente {
           this.blockModal?.reset();
           this.notificationService.success('Bloco atualizado!');
         },
-        error: (err) => {
-          console.error('Erro ao atualizar bloco:', err);
-        },
+        error: () => {},
       });
     } else {
       this.ambienteService.saveBlock({ name: name }).subscribe({
@@ -385,9 +376,7 @@ export class CadastroAmbiente {
           this.blockModal?.reset();
           this.notificationService.success('Bloco criado!');
         },
-        error: (err) => {
-          console.error('Erro ao salvar bloco:', err);
-        },
+        error: () => {},
       });
     }
   }
@@ -406,7 +395,6 @@ export class CadastroAmbiente {
           this.notificationService.success('Bloco removido.');
         },
         error: (err) => {
-          console.error('Erro ao excluir bloco:', err);
           this.notificationService.error(this.extractErrorMessage(err, 'Erro ao excluir bloco.'));
         },
       });
@@ -444,9 +432,7 @@ export class CadastroAmbiente {
           this.resourceModal?.reset();
           this.notificationService.success('Recurso atualizado!');
         },
-        error: (err) => {
-          console.error('Erro ao atualizar recurso:', err);
-        },
+        error: () => {},
       });
     } else {
       this.ambienteService.saveResource({ name: name }).subscribe({
@@ -455,9 +441,7 @@ export class CadastroAmbiente {
           this.resourceModal?.reset();
           this.notificationService.success('Recurso criado!');
         },
-        error: (err) => {
-          console.error('Erro ao salvar recurso:', err);
-        },
+        error: () => {},
       });
     }
   }
@@ -476,7 +460,6 @@ export class CadastroAmbiente {
           this.notificationService.success('Recurso removido.');
         },
         error: (err) => {
-          console.error('Erro ao excluir recurso:', err);
           this.notificationService.error(this.extractErrorMessage(err, 'Erro ao excluir recurso.'));
         },
       });

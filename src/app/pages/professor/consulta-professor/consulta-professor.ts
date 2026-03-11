@@ -46,21 +46,17 @@ export class ConsultaProfessor implements OnInit {
   // Form Controls
   nameFilter = new FormControl('');
   subjectFilter = new FormControl<string | null>(null);
-  unidadeFilter = new FormControl<string | null>(null);
-
   // Values currently applied to the list
   appliedFilters = signal({
     name: '',
-    subject: null as string | null,
-    unidade: null as string | null,
+    subject: null as string | null
   });
 
   // Determines if any filter is applied
   isFilterActive = computed(
     () =>
       !!this.appliedFilters().name ||
-      !!this.appliedFilters().subject ||
-      !!this.appliedFilters().unidade,
+      !!this.appliedFilters().subject,
   );
 
   subjectOptions = computed(() => [
@@ -68,10 +64,7 @@ export class ConsultaProfessor implements OnInit {
     ...this.schoolData.subjects().map((s) => ({ value: s.id, label: s.name })),
   ]);
 
-  unidadeOptions = computed(() => [
-    { value: null, label: 'Todas as Unidades' },
-    ...this.schoolData.units().map((u: any) => ({ value: u.id, label: u.name })),
-  ]);
+
 
   ngOnInit() {
     this.loadTeachers();
@@ -86,8 +79,7 @@ export class ConsultaProfessor implements OnInit {
         this.rawTeachers.set(data);
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Error loading teachers:', err);
+      error: () => {
         this.isLoading.set(false);
         this.notificationService.error('Erro ao carregar lista de professores');
       },
@@ -111,10 +103,7 @@ export class ConsultaProfessor implements OnInit {
           .map((id) => subjects.find((s) => s.id === id))
           .filter((s) => !!s);
 
-        const usagePercentage = Math.min(
-          100,
-          Math.round((allocatedWorkload / contractualWorkload) * 100),
-        );
+        const usagePercentage = Math.round((allocatedWorkload / contractualWorkload) * 100);
         const isOverloaded = allocatedWorkload > contractualWorkload;
         const isFull = allocatedWorkload >= contractualWorkload;
 
@@ -147,15 +136,13 @@ export class ConsultaProfessor implements OnInit {
   applyFilters() {
     this.appliedFilters.set({
       name: this.nameFilter.value || '',
-      subject: this.subjectFilter.value,
-      unidade: this.unidadeFilter.value,
+      subject: this.subjectFilter.value
     });
   }
 
   clearFilters() {
     this.nameFilter.setValue('');
     this.subjectFilter.setValue(null);
-    this.unidadeFilter.setValue(null);
     this.applyFilters();
   }
 

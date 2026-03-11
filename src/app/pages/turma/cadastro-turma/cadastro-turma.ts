@@ -27,7 +27,7 @@ import { ConfirmationService } from '../../../core/services/confirmation.service
 import { ModalManageTimeGridComponent } from '../../../core/components/modals/modal-manage-time-grid/modal-manage-time-grid.component';
 import { ModalManageRoomComponent } from '../../../core/components/modals/modal-manage-room/modal-manage-room.component';
 import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
-import { SelectComponent } from '../../../core/components/select/select.component';
+import { SelectComponent, SelectOption } from '../../../core/components/select/select.component';
 import { ButtonSaveComponent } from '../../../core/components/buttons/button-save';
 import { ButtonCancelComponent } from '../../../core/components/buttons/button-cancel';
 import { ButtonDeleteComponent } from '../../../core/components/buttons/button-delete';
@@ -131,11 +131,17 @@ export class CadastroTurma implements OnInit {
   gradeSummary = computed(() => {
     const matrixId = this.selectedMatrixId();
     if (!matrixId) return [];
-    const matrix = this.matrices().find((m) => m.id === matrixId);
+    
+    const allMatrices = this.matrices();
+    if (allMatrices.length === 0) return [];
+
+    // Case-insensitive lookup for the matrix
+    const matrix = allMatrices.find((m) => m.id.toLowerCase() === matrixId.toLowerCase());
+    
     if (!matrix) return [];
 
     let summaryItems: {
-      id: string; // Fake ID ou subjectId para o Angular vincular os controles
+      id: string;
       subjectId: string;
       name: string;
       color: string;
@@ -144,9 +150,8 @@ export class CadastroTurma implements OnInit {
       weeklyHours: number;
     }[] = [];
 
-    let index = 0;
     matrix.levels.forEach((level) => {
-      level.subjects.forEach((ms) => {
+      level.subjects.forEach((ms, subjectIndex) => {
         const subjectDef = this.subjects().find(
           (s) => s.id.toLowerCase() === ms.subjectId.toLowerCase(),
         );
@@ -154,7 +159,7 @@ export class CadastroTurma implements OnInit {
           id:
             ms.id && ms.id !== '00000000-0000-0000-0000-000000000000'
               ? ms.id
-              : `temp-${ms.subjectId}-${index++}`,
+              : `temp-${ms.subjectId}-${subjectIndex}`,
           subjectId: ms.subjectId,
           name: subjectDef?.name || 'Desconhecida',
           color: subjectDef?.color || '#ccc',
@@ -229,6 +234,21 @@ export class CadastroTurma implements OnInit {
       label: this.getMatrixLabel(m),
     })),
   );
+
+  disciplineOptions = computed(() => {
+    const opts = this.gradeSummary().map((item) => ({
+      value: item.id,
+      label: item.name,
+    }));
+    return [{ value: 'AULA_VAGA', label: 'Aula Vaga' }, ...opts];
+  });
+
+  getTeacherOptions(matrizDisciplinaId: string): SelectOption[] {
+    return this.getQualifiedTeachers(matrizDisciplinaId).map((t) => ({
+      value: t.id,
+      label: t.name,
+    }));
+  }
 
   teacherOptions = computed(() =>
     this.teachers().map((t) => ({
@@ -308,19 +328,53 @@ export class CadastroTurma implements OnInit {
   // New, more robust methods for the grid
   getSelectedDiscipline(dia: number, ordemAula: number): string {
     const aloc = this.allocations().find((a) => a.diaDaSemana === dia && a.ordemAula === ordemAula);
-    return aloc ? aloc.matrizDisciplinaId : '';
+
+    if (!aloc) return 'AULA_VAGA';
+
+    const summary = this.gradeSummary();
+    const mDisId = (aloc.matrizDisciplinaId || '').toLowerCase();
+    const profId = (aloc.professorId || '').toLowerCase();
+
+    // 1. Tentar busca exata pelo matrizDisciplinaId
+    let found = summary.find(s => s.id.toLowerCase() === mDisId);
+
+    // 2. Se não encontrou, tenta pelo SubjectId (caso o banco retorne ID da matéria)
+    if (!found && mDisId) {
+      found = summary.find(s => s.subjectId.toLowerCase() === mDisId);
+    }
+
+    // 3. Fallback agressivo: Pelo professor alocado (se tem professor, tem disciplina)
+    if (!found && profId && profId !== 'aula_vaga') {
+      const teacher = this.teachers().find((t) => t.id.toLowerCase() === profId);
+      if (teacher) {
+        const qualifiedSubjects = [teacher.mainSubjectId, ...(teacher.secondarySubjectIds || [])]
+          .filter(id => !!id)
+          .map(id => id!.toLowerCase());
+        
+        // Busca no summary qualquer disciplina que o professor lecione
+        found = summary.find(s => qualifiedSubjects.includes(s.subjectId.toLowerCase()));
+      }
+    }
+
+    if (found) return found.id;
+    
+    // Se não achou no summary mas temos uma alocação, retorna o ID original para manter o @if
+    // e permitir que o seletor de professor apareça, mesmo que o de disciplina resete visualmente.
+    return aloc.matrizDisciplinaId || 'AULA_VAGA';
   }
 
   getSelectedTeacher(dia: number, ordemAula: number): string | null {
     const aloc = this.allocations().find((a) => a.diaDaSemana === dia && a.ordemAula === ordemAula);
-    return aloc ? aloc.professorId : null;
+    if (!aloc || !aloc.professorId) return null;
+
+    // Normalização para garantir match com o select mesmo em caso de diferença de caixa
+    const found = this.teachers().find((t) => t.id.toLowerCase() === aloc.professorId.toLowerCase());
+    return found ? found.id : aloc.professorId;
   }
 
-  onDisciplineChange(dia: number, ordemAula: number, event: any) {
-    const disciplineId = event.target.value;
-
-    if (!disciplineId) {
-      // Remover alocação completa se desmarcar a disciplina
+  onDisciplineChange(dia: number, ordemAula: number, disciplineId: string | null) {
+    if (!disciplineId || disciplineId === 'AULA_VAGA') {
+      // Para nós, Aula Vaga é o estado "sem alocação no sinal"
       this.allocations.update((current) =>
         current.filter((a) => !(a.diaDaSemana === dia && a.ordemAula === ordemAula)),
       );
@@ -458,7 +512,7 @@ export class CadastroTurma implements OnInit {
       this.turmaId = id;
       this.classForm.disable({ emitEvent: false });
 
-      this.turmaService.getById(id).subscribe({
+          this.turmaService.getById(id).subscribe({
         next: (turma) => {
           this.classForm.patchValue({
             nome: turma.nome,
@@ -495,17 +549,24 @@ export class CadastroTurma implements OnInit {
 
     this.isSaving.set(true);
 
-    // Validar e limpar alocações sem professor antes de enviar
-    const validAllocations = this.allocations().filter(
-      (a) => a.professorId && a.matrizDisciplinaId && !a.matrizDisciplinaId.startsWith('sub-'),
-    );
-
-    if (validAllocations.length !== this.allocations().length) {
-    }
+    // Para o backend, 'Aula Vaga' é a AUSÊNCIA de alocação no horário.
+    // Filtrar alocações que não são Aula Vaga e possuem professor
+    const backendAllocations = this.allocations()
+      .filter(
+        (a) =>
+          a.matrizDisciplinaId &&
+          a.matrizDisciplinaId !== 'AULA_VAGA' &&
+          a.professorId &&
+          !a.matrizDisciplinaId.startsWith('sub-'),
+      )
+      .map((a) => ({
+        ...a,
+        professorId: a.professorId || null,
+      }));
 
     const payload: Partial<TurmaDto> = {
       ...this.classForm.getRawValue(),
-      alocacoes: validAllocations,
+      alocacoes: backendAllocations as AlocacaoDto[],
     };
 
     if (this.isEditMode() && this.turmaId) {
@@ -519,7 +580,6 @@ export class CadastroTurma implements OnInit {
 
     request$.subscribe({
       next: (res) => {
-        console.log('Resposta de sucesso:', res);
         this.isSaving.set(false);
         this.notification.success(
           this.isEditMode() ? 'Turma configurada com sucesso!' : 'Turma criada com sucesso!',
@@ -527,10 +587,6 @@ export class CadastroTurma implements OnInit {
         this.router.navigate(['/classes']);
       },
       error: (err) => {
-        console.error('--- ERRO AO SALVAR TURMA ---');
-        console.error('Status Code:', err.status);
-        console.error('Mensagem:', err.message);
-        console.error('Error Object:', err.error);
 
         let errorMessage = 'Falha ao salvar a turma.';
 

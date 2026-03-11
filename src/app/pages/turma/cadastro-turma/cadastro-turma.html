@@ -227,41 +227,35 @@
                       <div class="text-muted smaller">{{ slot.end }}</div>
                     </td>
                     @for (day of days; track day.value) {
-                      <td class="p-2 slot-cell border-start">
+                      <td
+                      class="p-2 slot-cell border-start"
+                      [class.bg-vaga]="getSelectedDiscipline(day.value, slot.order) === 'AULA_VAGA'"
+                    >
                         @if (slot.type === 'Intervalo') {
                           <div class="text-center text-muted small fw-bold opacity-25">
                             INTERVALO
                           </div>
                         } @else {
                           <div class="d-flex flex-column gap-2">
-                            <select
-                              class="form-select form-select-sm discipline-select"
-                              [value]="getSelectedDiscipline(day.value, slot.order)"
-                              (change)="onDisciplineChange(day.value, slot.order, $event)"
+                            <tm-select
+                              [options]="disciplineOptions()"
+                              [ngModel]="getSelectedDiscipline(day.value, slot.order)"
+                              [ngModelOptions]="{ standalone: true }"
+                              (ngModelChange)="onDisciplineChange(day.value, slot.order, $event)"
                               [disabled]="isViewMode()"
-                            >
-                              <option value="">Disciplina</option>
-                              @for (item of gradeSummary(); track item.id) {
-                                <option [value]="item.id">{{ item.name }}</option>
-                              }
-                            </select>
-                            @if (getSelectedDiscipline(day.value, slot.order)) {
-                              <select
-                                class="form-select form-select-sm teacher-select"
+                              class="discipline-select-tm"
+                            ></tm-select>
+
+                            @if (getSelectedDiscipline(day.value, slot.order) && getSelectedDiscipline(day.value, slot.order) !== 'AULA_VAGA') {
+                              <tm-select
+                                [options]="getTeacherOptions(getSelectedDiscipline(day.value, slot.order))"
                                 [ngModel]="getSelectedTeacher(day.value, slot.order)"
                                 [ngModelOptions]="{ standalone: true }"
                                 (ngModelChange)="onTeacherChange(day.value, slot.order, $event)"
                                 [disabled]="isViewMode()"
-                              >
-                                @for (
-                                  teacher of getQualifiedTeachers(
-                                    getSelectedDiscipline(day.value, slot.order)
-                                  );
-                                  track teacher.id
-                                ) {
-                                  <option [ngValue]="teacher.id">{{ teacher.name }}</option>
-                                }
-                              </select>
+                                placeholder="Professor..."
+                                class="teacher-select-tm"
+                              ></tm-select>
                             }
                           </div>
                         }

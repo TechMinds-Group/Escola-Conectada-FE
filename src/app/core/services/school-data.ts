@@ -440,8 +440,6 @@ export class SchoolDataService {
   async updateMatrix(id: string, matrixData: Partial<SchoolMatrix>) {
     const dto = this.mapToMatrixDto({ ...matrixData, id });
 
-    console.log('[SchoolData] PUT Payload:', dto);
-
     const result = await firstValueFrom(
       this.http.put<any>(`${this.apiUrl}/MatrizesEscolares/${id}`, dto),
     );

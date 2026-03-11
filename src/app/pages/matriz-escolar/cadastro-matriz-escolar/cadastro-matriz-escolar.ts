@@ -394,7 +394,6 @@ export class CadastroMatrizEscolarPage implements OnInit {
       this.ambienteService.deleteType(String(id)).subscribe({
         next: () => this.loadTypes(),
         error: (err) => {
-          console.error('Erro ao excluir tipo de ambiente:', err);
           this.notification.error(
             this.extractErrorMessage(err, 'Erro ao excluir tipo de ambiente.'),
           );
@@ -508,13 +507,8 @@ export class CadastroMatrizEscolarPage implements OnInit {
       this.originalMatrixSnapshot.set(matrixData);
       this.router.navigate(['/school-matrices']);
     } catch (error: any) {
-      // 6. Debug e Notificação de Erro
-
       const errorMessage = this.extractErrorMessage(error, 'Erro ao salvar matriz escolar.');
       this.notification.error(errorMessage);
-
-      console.error('Full Error Object:', error);
-      console.error('------------------------');
     } finally {
       this.isSubmitting.set(false);
     }

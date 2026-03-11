@@ -168,7 +168,7 @@ export class ModalManageTimeGridComponent implements OnInit {
       this.onSaved.emit(newId);
       this.viewMode.set('list');
     } catch (error) {
-      console.error('Erro ao salvar grade:', error);
+      // Error handling
     } finally {
       this.isSubmitting.set(false);
     }
@@ -185,7 +185,7 @@ export class ModalManageTimeGridComponent implements OnInit {
       try {
         await this.schoolData.deleteTimeGrid(id);
       } catch (error) {
-        console.error('Erro ao deletar grade:', error);
+        // Error handling
       }
     }
   }

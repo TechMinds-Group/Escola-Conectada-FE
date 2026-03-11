@@ -88,8 +88,7 @@ export class CadastroAvisos implements OnInit {
           expirationDate: aviso.expirationDate || null,
         });
       },
-      error: (err) => {
-        console.error('Erro ao carregar aviso:', err);
+      error: () => {
         this.notificationService.error('Erro ao carregar os dados do aviso.');
       },
     });
@@ -142,9 +141,8 @@ export class CadastroAvisos implements OnInit {
           );
           this.router.navigate(['/avisos']);
         },
-        error: (err) => {
+        error: () => {
           this.isSaving.set(false);
-          console.error('Erro ao processar aviso:', err);
           this.notificationService.error('Erro ao salvar aviso.');
         },
       });
@@ -168,8 +166,7 @@ export class CadastroAvisos implements OnInit {
             this.notificationService.success('Aviso excluído com sucesso!');
             this.router.navigate(['/avisos']);
           },
-          error: (err) => {
-            console.error('Erro ao excluir aviso:', err);
+          error: () => {
             this.notificationService.error('Erro ao excluir aviso.');
           },
         });

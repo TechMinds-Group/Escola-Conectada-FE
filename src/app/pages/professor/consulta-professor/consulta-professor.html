@@ -58,14 +58,7 @@
               [options]="subjectOptions()"
               placeholder="Filtrar por Disciplina..."
               icon="bi-funnel"
-              label="Especialidade"
-            ></tm-select>
-            <tm-select
-              [formControl]="unidadeFilter"
-              [options]="unidadeOptions()"
-              placeholder="Filtrar por Unidade..."
-              icon="bi-building"
-              label="Unidade"
+              label="Disciplina"
             ></tm-select>
           </div>
 
@@ -182,7 +175,7 @@
             [class.bg-danger]="teacher.isOverloaded"
             [class.bg-primary]="teacher.isFull && !teacher.isOverloaded"
             [class.bg-success]="!teacher.isOverloaded && !teacher.isFull"
-            [style.width.%]="teacher.usagePercentage"
+            [style.width.%]="teacher.usagePercentage > 100 ? 100 : teacher.usagePercentage"
           ></div>
         </div>
         <div class="text-end d-flex align-items-center" style="min-width: 45px">

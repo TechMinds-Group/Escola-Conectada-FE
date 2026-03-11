@@ -245,7 +245,7 @@ export class CadastroGrade implements OnInit {
 
       this.router.navigate(['/time-grids']);
     } catch (error) {
-      console.error('Erro ao salvar grade:', error);
+      // Error handling
     } finally {
       this.isSubmitting.set(false);
     }
@@ -274,7 +274,7 @@ export class CadastroGrade implements OnInit {
         await this.schoolData.deleteTimeGrid(this.gridId);
         this.router.navigate(['/time-grids']);
       } catch (error) {
-        console.error('Erro ao deletar grade:', error);
+        // Error handling
       }
     }
   }

@@ -135,12 +135,7 @@ export class ModalManageEventComponent {
         this.onSaved.emit();
         this.closeModal();
       },
-      error: (err) => {
-        console.error('Erro ao salvar evento:', {
-          status: err.status,
-          message: err.message,
-          error: err.error,
-        });
+      error: () => {
         this.notification.error('Erro ao salvar evento.');
         this.isSubmitting.set(false);
       },
@@ -159,8 +154,7 @@ export class ModalManageEventComponent {
           this.onSaved.emit();
           this.closeModal();
         },
-        error: (err) => {
-          console.error('Erro ao excluir evento:', err);
+        error: () => {
           this.notification.error('Erro ao excluir evento.');
         },
       });

@@ -138,7 +138,6 @@ export class PublicView implements OnInit, OnDestroy {
 
     // Polling every 30 seconds
     this.dataSyncInterval = setInterval(() => {
-      console.log('[PublicView] Heartbeat: Syncing real-time data...');
       this.schoolData.loadAll().then(() => {
         this.lastSync.set(new Date());
       });

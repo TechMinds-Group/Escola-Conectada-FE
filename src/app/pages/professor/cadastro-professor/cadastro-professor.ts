@@ -187,9 +187,7 @@ export class CadastroProfessor implements OnInit {
   loadTeacher(id: string) {
     this.professorService.getById(id).subscribe({
       next: (res: any) => {
-        console.log('[CADASTRO-PROFESSOR] Raw API Response:', res);
         const teacher = res; // Since ProfessorService.getById already maps and returns Professor
-        console.log('[CADASTRO-PROFESSOR] Mapped Teacher object:', teacher);
         if (teacher) {
           this.teacherForm.patchValue({
             name: teacher.name,
@@ -212,7 +210,6 @@ export class CadastroProfessor implements OnInit {
           }
 
           // Map allocations to displayable format
-          console.log('[CADASTRO-PROFESSOR] Teacher Allocations from API:', teacher.allocations);
           this.currentAllocations.set(teacher.allocations || []);
         }
       },
