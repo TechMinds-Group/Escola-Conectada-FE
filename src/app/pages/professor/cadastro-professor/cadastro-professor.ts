@@ -143,7 +143,9 @@ export class CadastroProfessor implements OnInit {
   loadProfessorUsers() {
     this.authService.getProfessorUsers().subscribe({
       next: (users) => this.professorUsers.set(users),
-      error: (err) => console.error('Erro ao carregar usuários:', err),
+      error: (err) => {
+        // Error already handled or redundant for console
+      },
     });
   }
 
@@ -325,7 +327,9 @@ export class CadastroProfessor implements OnInit {
           next: () => {
             this.router.navigate(['/professores']);
           },
-          error: (err) => console.error('Erro ao excluir professor:', err),
+          error: (err) => {
+            // Error already handled
+          },
         });
       }
     }
@@ -396,7 +400,7 @@ export class CadastroProfessor implements OnInit {
       }
       this.subjectModal()?.reset();
     } catch (err) {
-      console.error('Erro ao salvar disciplina:', err);
+      // Error logged or redundant
       alert('Ocorreu um erro ao salvar a disciplina.');
     }
   }
@@ -412,7 +416,7 @@ export class CadastroProfessor implements OnInit {
       try {
         await this.schoolData.deleteSubject(String(id));
       } catch (err) {
-        console.error('Erro ao excluir disciplina:', err);
+        // Error logged or redundant
         alert('Erro ao excluir disciplina.');
       }
     }

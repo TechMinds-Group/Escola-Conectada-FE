@@ -87,8 +87,8 @@
       @if (activeTab() === 'info') {
         <div class="animate-in">
           <div class="row g-3">
-            <!-- Linha 1: Nome e Turno -->
-            <div class="col-12 col-lg-8">
+            <!-- Linha 1: Nome e Grade -->
+            <div class="col-12 col-lg-7">
               <tm-text
                 formControlName="nome"
                 label="Nome da Turma"
@@ -97,15 +97,28 @@
                 [required]="true"
               ></tm-text>
             </div>
-            <div class="col-12 col-lg-4">
-              <tm-select
-                formControlName="turno"
-                [options]="turnoOptions"
-                label="Turno"
-                placeholder="Selecione o turno..."
-                icon="bi-clock"
-                [required]="true"
-              ></tm-select>
+            <div class="col-12 col-lg-5">
+              <div class="d-flex align-items-end gap-2">
+                <tm-select
+                  formControlName="gradeHorariaId"
+                  label="Grade Horária"
+                  [options]="timeGridOptions()"
+                  placeholder="Grade Horária..."
+                  icon="bi-gear"
+                  [required]="true"
+                  class="flex-fill"
+                  (toggle)="toggleDropdown($event)"
+                ></tm-select>
+                <button
+                  type="button"
+                  class="btn btn-light border shadow-sm transition-hover d-flex align-items-center justify-content-center btn-manage"
+                  (click)="openGradeManager()"
+                  [disabled]="isViewMode()"
+                  title="Gerenciar Grades"
+                >
+                  <i class="bi bi-plus-lg text-primary fs-5"></i>
+                </button>
+              </div>
             </div>
 
             <!-- Linha 2: Professor e Capacidade -->
@@ -132,8 +145,8 @@
 
             <div class="col-12"><hr class="my-3 border-dashed opacity-25" /></div>
 
-            <!-- Linha 3: Matriz e Grade -->
-            <div class="col-12 col-lg-6">
+            <!-- Linha 3: Matriz e Módulo -->
+            <div class="col-12 col-lg-8">
               <tm-select
                 formControlName="matrizId"
                 label="Matriz Curricular"
@@ -144,28 +157,16 @@
               ></tm-select>
             </div>
 
-            <div class="col-12 col-lg-6">
-              <div class="d-flex align-items-end gap-2">
-                <tm-select
-                  formControlName="gradeHorariaId"
-                  label="Grade Horária"
-                  [options]="timeGridOptions()"
-                  placeholder="Grade Horária..."
-                  icon="bi-gear"
-                  [required]="true"
-                  class="flex-fill"
-                  (toggle)="toggleDropdown($event)"
-                ></tm-select>
-                <button
-                  type="button"
-                  class="btn btn-light border shadow-sm transition-hover d-flex align-items-center justify-content-center btn-manage"
-                  (click)="openGradeManager()"
-                  [disabled]="isViewMode()"
-                  title="Gerenciar Grades"
-                >
-                  <i class="bi bi-plus-lg text-primary fs-5"></i>
-                </button>
-              </div>
+            <div class="col-12 col-lg-4">
+              <tm-select
+                formControlName="modulo"
+                label="Módulo"
+                [options]="moduleOptions()"
+                placeholder="Selecione o módulo..."
+                icon="bi-layers"
+                [required]="true"
+                (toggle)="toggleDropdown($event)"
+              ></tm-select>
             </div>
 
             <!-- Linha 4: Ambiente -->
@@ -237,14 +238,16 @@
                           </div>
                         } @else {
                           <div class="d-flex flex-column gap-2">
-                            <tm-select
-                              [options]="disciplineOptions()"
-                              [ngModel]="getSelectedDiscipline(day.value, slot.order)"
-                              [ngModelOptions]="{ standalone: true }"
-                              (ngModelChange)="onDisciplineChange(day.value, slot.order, $event)"
-                              [disabled]="isViewMode()"
-                              class="discipline-select-tm"
-                            ></tm-select>
+                              <tm-select
+                                [options]="disciplineOptions()"
+                                [ngModel]="getSelectedDiscipline(day.value, slot.order)"
+                                [ngModelOptions]="{ standalone: true }"
+                                (ngModelChange)="onDisciplineChange(day.value, slot.order, $event)"
+                                [disabled]="isViewMode()"
+                                dropdownWidth="400px"
+                                [searchable]="true"
+                                class="discipline-select-tm"
+                              ></tm-select>
 
                             @if (getSelectedDiscipline(day.value, slot.order) && getSelectedDiscipline(day.value, slot.order) !== 'AULA_VAGA') {
                               <tm-select
@@ -254,6 +257,8 @@
                                 (ngModelChange)="onTeacherChange(day.value, slot.order, $event)"
                                 [disabled]="isViewMode()"
                                 placeholder="Professor..."
+                                dropdownWidth="300px"
+                                [searchable]="true"
                                 class="teacher-select-tm"
                               ></tm-select>
                             }

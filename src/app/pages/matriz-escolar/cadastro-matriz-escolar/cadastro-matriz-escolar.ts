@@ -30,6 +30,7 @@ import { ButtonEditComponent } from '../../../core/components/buttons/button-edi
 import { ModalManageListComponent } from '../../../core/components/modals/modal-manage-list/modal-manage-list.component';
 import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
 import { SelectComponent } from '../../../core/components/select/select.component';
+import { TableComponent } from '../../../core/components/table/table.component';
 
 @Component({
   selector: 'app-cadastro-matriz-escolar',
@@ -47,6 +48,7 @@ import { SelectComponent } from '../../../core/components/select/select.componen
     ModalManageListComponent,
     TextInputComponent,
     SelectComponent,
+    TableComponent,
   ],
   templateUrl: './cadastro-matriz-escolar.html',
   styleUrl: './cadastro-matriz-escolar.scss',
@@ -78,6 +80,22 @@ export class CadastroMatrizEscolarPage implements OnInit {
 
   setActiveTab(tab: 'info' | 'subjects') {
     this.activeTab.set(tab);
+  }
+
+  // Modules Collapse State
+  collapsedModules = signal<Record<string, boolean>>({});
+
+  toggleModuleCollapse(levelIndex: number, moduleIndex: number) {
+    const key = `${levelIndex}-${moduleIndex}`;
+    const currentState = this.isModuleCollapsed(levelIndex, moduleIndex);
+    this.collapsedModules.update((states) => ({
+      ...states,
+      [key]: !currentState,
+    }));
+  }
+
+  isModuleCollapsed(levelIndex: number, moduleIndex: number) {
+    return this.collapsedModules()[`${levelIndex}-${moduleIndex}`] ?? true;
   }
 
   // Expose schoolData for template (subjects list)
@@ -182,14 +200,32 @@ export class CadastroMatrizEscolarPage implements OnInit {
 
     const lessonDuration = Number(levelGroup.get('lessonDuration')?.value) || 0;
     const schoolWeeks = Number(levelGroup.get('schoolWeeks')?.value) || 0;
-    const subjects = (levelGroup.get('subjects') as any as FormArray).getRawValue();
+    const modules = (levelGroup.get('modules') as any as FormArray).controls;
 
-    const totalWeeklyLessons = subjects.reduce(
-      (acc: number, curr: any) => acc + (Number(curr.weeklyLessons) || 0),
-      0,
-    );
+    let totalWeeklyLessons = 0;
+    modules.forEach((module: any) => {
+      if (module.get('isInternship').value) {
+        // For internship, we convert annual hours back to weekly for the internal aggregator
+        // or just add to totalHours separately.
+        // Let's just track annual hours directly for internship.
+        return;
+      }
+      const subjects = (module.get('subjects') as FormArray).getRawValue();
+      totalWeeklyLessons += subjects.reduce(
+        (acc: number, curr: any) => acc + (Number(curr.weeklyLessons) || 0),
+        0,
+      );
+    });
 
-    const totalHours = Math.round((totalWeeklyLessons * lessonDuration * schoolWeeks) / 60);
+    let totalHours = Math.round((totalWeeklyLessons * lessonDuration * schoolWeeks) / 60);
+
+    modules.forEach((module: any) => {
+      const isInternship = module.get('isInternship')?.value;
+      if (isInternship) {
+        totalHours += Number(module.get('internshipHours')?.value) || 0;
+      }
+    });
+
     const mecGoal = this.matrixForm.get('mecAnnualHours')?.value || 0;
 
     return {
@@ -197,6 +233,30 @@ export class CadastroMatrizEscolarPage implements OnInit {
       isValid: totalHours >= mecGoal,
       percent: mecGoal > 0 ? Math.min((totalHours / mecGoal) * 100, 100) : 0,
     };
+  }
+
+  getModuleHours(levelIndex: number, moduleIndex: number): number {
+    const levelGroup = (this.levelsArray as any as FormArray).at(levelIndex);
+    if (!levelGroup) return 0;
+
+    const lessonDuration = Number(levelGroup.get('lessonDuration')?.value) || 0;
+    const schoolWeeks = Number(levelGroup.get('schoolWeeks')?.value) || 0;
+
+    const modules = this.getModulesArray(levelIndex);
+    const module = modules.at(moduleIndex);
+    if (!module) return 0;
+
+    if (module.get('isInternship')?.value) {
+      return Number(module.get('internshipHours')?.value) || 0;
+    }
+
+    const subjects = (module.get('subjects') as FormArray).getRawValue();
+    const totalWeeklyLessons = subjects.reduce(
+      (acc: number, curr: any) => acc + (Number(curr.weeklyLessons) || 0),
+      0,
+    );
+
+    return Math.round((totalWeeklyLessons * lessonDuration * schoolWeeks) / 60);
   }
 
   createMatrix() {
@@ -265,19 +325,40 @@ export class CadastroMatrizEscolarPage implements OnInit {
       level: [levelName, Validators.required],
       lessonDuration: [data?.lessonDuration ?? 50, [Validators.required, Validators.min(1)]],
       schoolWeeks: [data?.schoolWeeks ?? 40, [Validators.required, Validators.min(1)]],
-      subjects: this.fb.array([]),
+      modules: this.fb.array([]),
     });
 
-    const subjectsArray = levelGroup.get('subjects') as FormArray;
+    const modulesArray = levelGroup.get('modules') as FormArray;
     if (data?.subjects && data.subjects.length > 0) {
+      // Group subjects by modulo
+      const modulesMap = new Map<string, MatrixSubject[]>();
       data.subjects.forEach((s) => {
-        subjectsArray.push(this.createSubjectGroup(s));
+        const modName = s.modulo || 'Geral';
+        if (!modulesMap.has(modName)) modulesMap.set(modName, []);
+        modulesMap.get(modName)!.push(s);
+      });
+
+      const sortedModules = Array.from(modulesMap.entries())
+        .map(([name, subjects]) => ({
+          name,
+          subjects,
+          type: (subjects.some((s) => s.isInternship) ? 'internship' : 'common') as 'common' | 'internship'
+        }))
+        .sort((a, b) => {
+          // 1. Common modules first
+          if (a.type !== b.type) {
+            return a.type === 'common' ? -1 : 1;
+          }
+          // 2. Alphabetical by name
+          return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+        });
+
+      sortedModules.forEach((mod) => {
+        modulesArray.push(this.createModuleGroup(mod.name, mod.type, mod.subjects));
       });
     } else {
-      // Add one empty subject row by default ONLY if we are NOT loading existing data from a saved matrix
-      // (This prevents adding an empty row when a matrix level has NO subjects saved yet but exists)
       if (!data) {
-        subjectsArray.push(this.createSubjectGroup());
+        modulesArray.push(this.createModuleGroup('Módulo 1'));
       }
     }
 
@@ -295,25 +376,60 @@ export class CadastroMatrizEscolarPage implements OnInit {
     this.levelsArray.removeAt(index);
   }
 
-  getSubjectsArray(levelIndex: number) {
-    return (this.levelsArray as any as FormArray)
-      .at(levelIndex)
-      .get('subjects') as any as FormArray;
+  getModulesArray(levelIndex: number) {
+    return (this.levelsArray as any as FormArray).at(levelIndex).get('modules') as any as FormArray;
+  }
+
+  getSubjectsArray(levelIndex: number, moduleIndex: number) {
+    return this.getModulesArray(levelIndex).at(moduleIndex).get('subjects') as any as FormArray;
   }
 
   isSubjectSelectedInLevel(
     levelIndex: number,
     subjectId: string,
+    currentModuleIndex: number,
     currentSubjectIndex: number,
   ): boolean {
     if (!subjectId) return false;
 
-    const subjectsArray = this.getSubjectsArray(levelIndex);
-    const subjects = subjectsArray.getRawValue();
+    const modulesArray = this.getModulesArray(levelIndex);
+    let found = false;
 
-    return subjects.some((s: any, index: number) => {
-      return index !== currentSubjectIndex && s.subjectId === subjectId;
+    modulesArray.controls.forEach((moduleControl: any, modIdx: number) => {
+      const subjectsArray = moduleControl.get('subjects') as FormArray;
+      const subjects = subjectsArray.getRawValue();
+
+      subjects.forEach((s: any, subIdx: number) => {
+        if ((modIdx !== currentModuleIndex || subIdx !== currentSubjectIndex) && s.subjectId === subjectId) {
+          found = true;
+        }
+      });
     });
+
+    return found;
+  }
+
+  createModuleGroup(name: string, type: 'common' | 'internship' = 'common', subjects?: MatrixSubject[]) {
+    const isInternshipValue = type === 'internship' || (subjects && subjects.some(s => s.isInternship));
+    const internshipHoursValue = subjects && subjects.length > 0 && isInternshipValue ? subjects[0].internshipHours : 0;
+
+    const moduleGroup = this.fb.group({
+      name: [name, Validators.required],
+      isInternship: [isInternshipValue],
+      internshipHours: [internshipHoursValue || 0, [Validators.min(0)]],
+      subjects: this.fb.array([]),
+    });
+
+    const subjectsArray = moduleGroup.get('subjects') as FormArray;
+    if (!isInternshipValue) {
+      if (subjects && subjects.length > 0) {
+        subjects.forEach((s) => subjectsArray.push(this.createSubjectGroup(s)));
+      } else {
+        subjectsArray.push(this.createSubjectGroup());
+      }
+    }
+
+    return moduleGroup;
   }
 
   createSubjectGroup(data?: MatrixSubject) {
@@ -329,16 +445,32 @@ export class CadastroMatrizEscolarPage implements OnInit {
     });
   }
 
-  addSubjectRow(levelIndex: number) {
-    this.getSubjectsArray(levelIndex).push(this.createSubjectGroup());
+  addModuleRow(levelIndex: number, type: 'common' | 'internship' = 'common') {
+    const modules = this.getModulesArray(levelIndex);
+    const newModuleIndex = modules.length;
+    modules.push(this.createModuleGroup(`Módulo ${newModuleIndex + 1}`, type));
+
+    // When adding a new module, we want it to be expanded
+    this.collapsedModules.update((states) => ({
+      ...states,
+      [`${levelIndex}-${newModuleIndex}`]: false,
+    }));
   }
 
-  removeSubjectRow(levelIndex: number, subjectIndex: number) {
-    this.getSubjectsArray(levelIndex).removeAt(subjectIndex);
+  removeModuleRow(levelIndex: number, moduleIndex: number) {
+    this.getModulesArray(levelIndex).removeAt(moduleIndex);
   }
 
-  toggleAdvanced(levelIndex: number, subjectIndex: number) {
-    const control = this.getSubjectsArray(levelIndex).at(subjectIndex).get('showAdvanced');
+  addSubjectRow(levelIndex: number, moduleIndex: number) {
+    this.getSubjectsArray(levelIndex, moduleIndex).push(this.createSubjectGroup());
+  }
+
+  removeSubjectRow(levelIndex: number, moduleIndex: number, subjectIndex: number) {
+    this.getSubjectsArray(levelIndex, moduleIndex).removeAt(subjectIndex);
+  }
+
+  toggleAdvanced(levelIndex: number, moduleIndex: number, subjectIndex: number) {
+    const control = this.getSubjectsArray(levelIndex, moduleIndex).at(subjectIndex).get('showAdvanced');
     control?.setValue(!control.value);
   }
 
@@ -428,19 +560,36 @@ export class CadastroMatrizEscolarPage implements OnInit {
     let duplicateLevelName = '';
 
     const allSubjectsValid = this.levelsArray.controls.every((levelControl: any) => {
-      const subjectsArray = levelControl.get('subjects') as FormArray;
+      const modulesArray = levelControl.get('modules') as FormArray;
+      
+      let levelSubjectIds: string[] = [];
+      let allModulesValid = true;
 
-      const subjectIds = subjectsArray
-        .getRawValue()
-        .map((s: any) => s.subjectId)
-        .filter((id: string) => id);
-      const uniqueSubjectIds = new Set(subjectIds);
-      if (subjectIds.length !== uniqueSubjectIds.size) {
+      modulesArray.controls.forEach((moduleControl: any, modIdx: number) => {
+        const subjectsArray = moduleControl.get('subjects') as FormArray;
+        const isInternship = moduleControl.get('isInternship')?.value;
+        const moduleName = moduleControl.get('name')?.value;
+        
+        const subjects = subjectsArray.getRawValue();
+        const subjectIds = subjects.map((s: any) => s.subjectId).filter((id: string) => id);
+        levelSubjectIds.push(...subjectIds);
+
+        if (isInternship) {
+          // Internship modules don't need subjects
+        } else {
+          if (subjectsArray.length === 0 || !subjectsArray.valid) {
+            allModulesValid = false;
+          }
+        }
+      });
+
+      const uniqueSubjectIds = new Set(levelSubjectIds);
+      if (levelSubjectIds.length !== uniqueSubjectIds.size) {
         hasDuplicateSubjects = true;
         duplicateLevelName = levelControl.get('level')?.value;
       }
 
-      return subjectsArray.length > 0 && subjectsArray.valid;
+      return modulesArray.length > 0 && allModulesValid;
     });
 
     if (!allSubjectsValid) {
@@ -472,16 +621,37 @@ export class CadastroMatrizEscolarPage implements OnInit {
         level: l.level,
         lessonDuration: Number(l.lessonDuration),
         schoolWeeks: Number(l.schoolWeeks),
-        subjects: (l.subjects as any[]).map((s) => ({
-          // TRATAMENTO CRÍTICO: Se a disciplina for nova, o ID deve ir como NULL para o C# usar EntityState.Added
-          id: s.id && s.id.length > 10 ? s.id : null,
-          subjectId: s.subjectId || null,
-          weeklyLessons: Number(s.weeklyLessons),
-          isBaseComum: s.isBaseComum ?? true,
-          allowConsecutive: s.allowConsecutive ?? true,
-          resourceId: s.resourceId && s.resourceId !== 'null' ? s.resourceId : null,
-          maxDailyLessons: s.maxDailyLessons,
-        })),
+        subjects: ((l as any).modules as any[]).flatMap((mod) => {
+          if (mod.isInternship) {
+            // Map internship module to a virtual subject
+            return [{
+              id: null, // Always new or tracked by Modulo if exists
+              subjectId: null,
+              weeklyLessons: 0,
+              isBaseComum: false,
+              allowConsecutive: false,
+              resourceId: null,
+              modulo: mod.name,
+              isInternship: true as boolean,
+              internshipHours: Number(mod.internshipHours),
+              maxDailyLessons: undefined
+            }];
+          } else {
+            // Map common module subjects
+            return (mod.subjects as any[]).map((s) => ({
+              id: s.id && s.id.length > 10 ? s.id : null,
+              subjectId: s.subjectId || null,
+              weeklyLessons: Number(s.weeklyLessons),
+              isBaseComum: s.isBaseComum ?? true,
+              allowConsecutive: s.allowConsecutive ?? true,
+              resourceId: s.resourceId && s.resourceId !== 'null' ? s.resourceId : null,
+              maxDailyLessons: s.maxDailyLessons,
+              modulo: mod.name,
+              isInternship: false as boolean,
+              internshipHours: 0
+            }));
+          }
+        }),
       }));
 
       const levelNames = levelsData.map((l) => l.level).join(', ');

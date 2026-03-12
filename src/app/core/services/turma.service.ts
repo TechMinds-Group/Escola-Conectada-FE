@@ -1,11 +1,11 @@
-﻿import { HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface AlocacaoDto {
   matrizDisciplinaId: string;
-  professorId: string;
+  professorId: string | null;
   diaDaSemana: number;
   ordemAula: number;
 }
@@ -14,7 +14,6 @@ export interface TurmaDto {
   id: string;
   nome: string;
   codigo?: string;
-  turno: string;
   matrizId: string;
   matrizNome?: string;
   salaId?: string;
@@ -23,6 +22,7 @@ export interface TurmaDto {
   professorRegenteId?: string;
   gradeHorariaId?: string;
   gradeHorariaNome?: string;
+  modulo: string;
   statusCronograma: string;
   alocacoes?: AlocacaoDto[];
 }

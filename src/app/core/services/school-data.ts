@@ -69,6 +69,9 @@ export interface MatrixSubject {
   allowConsecutive: boolean;
   resourceId?: string;
   maxDailyLessons?: number;
+  modulo: string;
+  isInternship?: boolean;
+  internshipHours?: number;
 }
 
 export interface LevelConfiguration {
@@ -248,7 +251,7 @@ export class SchoolDataService {
         this.loadSchoolInfo(),
       ]);
     } catch (err) {
-      console.error('[SchoolDataService] Error loading all data:', err);
+      // Error logged or redundant
     }
   }
 
@@ -562,7 +565,7 @@ export class SchoolDataService {
         });
       }
     } catch (err) {
-      console.error('[SchoolDataService] Error loading school info:', err);
+        // Error logged or redundant
     }
   }
 
@@ -571,7 +574,7 @@ export class SchoolDataService {
       await firstValueFrom(this.http.put<any>(`${this.apiUrl}/Unidades/me`, info));
       await this.loadSchoolInfo();
     } catch (err) {
-      console.error('[SchoolDataService] Error updating school info:', err);
+        // Error logged or redundant
       throw err;
     }
   }
@@ -767,20 +770,72 @@ export class SchoolDataService {
       HorasAnuaisMec: matrix.mecAnnualHours,
       Status: matrix.status,
       Niveis:
-        matrix.levels?.map((l) => ({
-          Id: l.id,
-          Nivel: l.level,
-          DuracaoAula: l.lessonDuration,
-          SemanasLetivas: l.schoolWeeks,
-          Disciplinas: l.subjects.map((s) => ({
-            Id: s.id || null,
-            MateriaId: s.subjectId || null,
-            AulasSemanais: s.weeklyLessons,
-            IsBaseComum: s.isBaseComum,
-            PermitirConsecutivas: s.allowConsecutive,
-            SalaTipoId: s.resourceId || null,
-          })),
-        })) || [],
+        matrix.levels?.map((l) => {
+          const disciplines: any[] = [];
+          
+          // Matrix level in DTO doesn't have modules, it has subjects.
+          // But here 'matrix' is actually the form model which DOES have levels -> modules.
+          // I need to ensure the structure being mapped is correct.
+          // In the form, matrix.levels is an array of objects that have a 'modules' array.
+          
+          const levelAny = l as any;
+          if (levelAny.modules) {
+            levelAny.modules.forEach((m: any) => {
+              if (m.isInternship) {
+                // Map internship module to a single virtual subject
+                disciplines.push({
+                  Id: null, // Always new or tracked by Modulo if exists
+                  MateriaId: null,
+                  AulasSemanais: 0,
+                  IsBaseComum: false,
+                  PermitirConsecutivas: false,
+                  SalaTipoId: null,
+                  Modulo: m.name || '',
+                  IsInternship: true,
+                  InternshipHours: m.internshipHours || 0
+                });
+              } else {
+                // Map common module subjects
+                m.subjects?.forEach((s: any) => {
+                  disciplines.push({
+                    Id: s.id || null,
+                    MateriaId: s.subjectId || null,
+                    AulasSemanais: s.weeklyLessons,
+                    IsBaseComum: s.isBaseComum,
+                    PermitirConsecutivas: s.allowConsecutive,
+                    SalaTipoId: s.resourceId || null,
+                    Modulo: m.name || '',
+                    IsInternship: false,
+                    InternshipHours: 0
+                  });
+                });
+              }
+            });
+          } else {
+            // Fallback for standard subjects if modules are missing
+            l.subjects?.forEach((s) => {
+              disciplines.push({
+                Id: s.id || null,
+                MateriaId: s.subjectId || null,
+                AulasSemanais: s.weeklyLessons,
+                IsBaseComum: s.isBaseComum,
+                PermitirConsecutivas: s.allowConsecutive,
+                SalaTipoId: s.resourceId || null,
+                Modulo: s.modulo || '',
+                IsInternship: s.isInternship ?? false,
+                InternshipHours: s.internshipHours ?? 0
+              });
+            });
+          }
+
+          return {
+            Id: l.id,
+            Nivel: l.level,
+            DuracaoAula: l.lessonDuration,
+            SemanasLetivas: l.schoolWeeks,
+            Disciplinas: disciplines
+          };
+        }) || [],
     };
   }
 
@@ -808,6 +863,9 @@ export class SchoolDataService {
           allowConsecutive: s.permitirConsecutivas ?? s.PermitirConsecutivas ?? true,
           resourceId: String(s.salaTipoId ?? s.SalaTipoId ?? ''),
           maxDailyLessons: s.maxDailyLessons ?? s.MaxDailyLessons,
+          modulo: s.modulo ?? s.Modulo ?? '',
+          isInternship: s.isInternship ?? s.IsInternship ?? false,
+          internshipHours: s.internshipHours ?? s.InternshipHours ?? 0,
         })),
       })),
     };

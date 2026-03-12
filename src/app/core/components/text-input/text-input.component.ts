@@ -98,7 +98,7 @@ import { MaskDirective } from '../../directives/mask.directive';
     `
       .tm-text-container {
         position: relative;
-        min-width: 200px;
+        min-width: 0;
 
         &.disabled {
           .input-wrapper {

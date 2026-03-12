@@ -127,7 +127,7 @@
   <!-- Levels Cards -->
   <form [formGroup]="matrixForm">
     <div formArrayName="levels" class="row">
-      @for (level of levelsArray.controls; track $index; let levelIndex = $index) {
+      @for (level of levelsArray.controls; track level; let levelIndex = $index) {
         <div [formGroupName]="levelIndex" class="col-12 mb-5 animate-in">
           <div
             class="card border-0 shadow-sm rounded-4 w-100 level-card"
@@ -160,7 +160,7 @@
                   <!-- 2. Settings: Duration & Weeks -->
                   <div class="col-12 col-lg-12 col-xl-6">
                     <div class="row g-2">
-                      <div class="col-6">
+                      <div class="col-12 col-lg-6">
                         <tm-text
                           formControlName="lessonDuration"
                           label="Duração Aula"
@@ -169,7 +169,7 @@
                           [control]="level.get('lessonDuration')"
                         ></tm-text>
                       </div>
-                      <div class="col-6">
+                      <div class="col-12 col-lg-6">
                         <tm-text
                           formControlName="schoolWeeks"
                           label="Semanas Letivas"
@@ -225,115 +225,284 @@
               </div>
             </div>
 
-            <!-- Card Body: Grid of Subjects -->
-            <div class="card-body p-4">
+            <!-- Card Body: Grid of Modules and Subjects -->
+            <div class="card-body p-4" [formArrayName]="'modules'">
               <div class="row g-3 align-items-center justify-content-between mb-4">
                 <div class="col-12 col-lg-auto">
                   <h6 class="fw-bold mb-0 text-muted text-uppercase tracking-wider small">
-                    <i class="bi bi-list-columns-reverse me-2"></i>Grade de Disciplinas
+                    <i class="bi bi-collection me-2"></i>Módulos da Matriz
                   </h6>
                 </div>
-                <div class="col-12 col-lg-auto">
+                <div class="col-12 col-lg-auto d-flex flex-column flex-lg-row gap-2">
                   <button
                     type="button"
-                    class="btn btn-primary rounded-3 shadow-sm transition-hover d-flex align-items-center justify-content-center w-100"
-                    style="height: 40px; padding: 0 1.5rem"
-                    (click)="addSubjectRow(levelIndex)"
+                    class="btn btn-primary rounded-3 shadow-sm transition-hover d-flex align-items-center justify-content-center flex-grow-1 flex-lg-grow-0"
+                    style="height: 40px; padding: 0 1.25rem"
+                    (click)="addModuleRow(levelIndex, 'common')"
                     [disabled]="isViewMode()"
                   >
-                    <i class="bi bi-plus-lg me-2"></i>
-                    <span class="fw-bold">Adicionar Disciplina</span>
+                    <i class="bi bi-plus-square me-2"></i>
+                    <span class="fw-bold">Módulo Comum</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary rounded-3 shadow-sm transition-hover d-flex align-items-center justify-content-center flex-grow-1 flex-lg-grow-0"
+                    style="height: 40px; padding: 0 1.25rem"
+                    (click)="addModuleRow(levelIndex, 'internship')"
+                    [disabled]="isViewMode()"
+                  >
+                    <i class="bi bi-mortarboard me-2"></i>
+                    <span class="fw-bold">Módulo Estágio</span>
                   </button>
                 </div>
               </div>
 
-              <div class="table-responsive rounded-4 border bg-white shadow-xs">
-                <table class="table table-hover align-middle mb-0">
-                  <thead class="bg-light bg-opacity-50">
-                    <tr class="small text-uppercase fw-bold text-muted">
-                      <th class="ps-4 border-0 py-3">Disciplina</th>
-                      <th class="text-center border-0 py-3" style="width: 150px">Aulas/Sem.</th>
-                      <th class="text-center border-0 py-3" style="width: 120px">Anual</th>
-                      <th class="border-0 py-3">Ambiente Preferencial</th>
-                      <th class="text-end pe-4 border-0 py-3" style="width: 80px">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody [formArrayName]="'subjects'" class="border-top-0">
-                    @for (
-                      subject of getSubjectsArray(levelIndex).controls;
-                      track $index;
-                      let subjectIndex = $index
-                    ) {
-                      <tr [formGroupName]="subjectIndex" class="border-bottom-light">
-                        <td class="ps-4 py-3">
-                          <tm-select
-                            formControlName="subjectId"
-                            placeholder="Selecionar..."
-                            icon="bi-journal-text"
-                            [options]="subjectsList().map(s => ({
-                              value: s.id, 
-                              label: s.name
-                            }))"
-                          ></tm-select>
-                        </td>
-                        <td class="text-center py-3">
-                          <tm-text
-                            formControlName="weeklyLessons"
-                            type="number"
-                            class="text-center"
-                            [control]="subject.get('weeklyLessons')"
-                          ></tm-text>
-                        </td>
-                        <td class="text-center py-3">
-                          @let hours =
-                            getTotalAnnualHours(
-                              subject.get('weeklyLessons')?.value,
-                              level.get('lessonDuration')?.value,
-                              level.get('schoolWeeks')?.value
-                            );
-                          <span class="badge bg-light text-dark fw-bold border px-3 py-2 rounded-3">
-                            {{ hours }}h
-                          </span>
-                        </td>
-                        <td class="py-3">
-                          <div class="d-flex align-items-center gap-2">
-                            <tm-select
-                              formControlName="resourceId"
-                              placeholder="Ambiente..."
-                              icon="bi-building"
-                              [options]="roomTypesList().map(t => ({
-                                value: t.id, 
-                                label: t.name
-                              }))"
-                              class="flex-fill"
-                            ></tm-select>
-                            <button
-                              type="button"
-                              class="btn btn-light border shadow-sm transition-hover d-flex align-items-center justify-content-center flex-shrink-0"
-                              style="height: 48px; width: 48px; border-radius: 8px"
-                              (click)="openRoomTypeManager()"
-                              [disabled]="isViewMode()"
-                              title="Gerenciar Ambientes"
-                            >
-                              <i class="bi bi-building-add text-primary fs-5"></i>
-                            </button>
+              @for (
+                module of getModulesArray(levelIndex).controls;
+                track module;
+                let moduleIndex = $index
+              ) {
+                <div
+                  [formGroupName]="moduleIndex"
+                  class="module-block mb-4 p-4 rounded-4 border bg-light bg-opacity-10"
+                >
+                  <div class="row g-3 align-items-center justify-content-between mb-3">
+                    <div class="col-12 col-lg-auto">
+                      <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <button
+                          type="button"
+                          class="btn btn-link btn-sm p-0 text-primary transition-hover d-flex align-items-center justify-content-center"
+                          style="width: 32px; height: 32px"
+                          (click)="toggleModuleCollapse(levelIndex, moduleIndex)"
+                          [title]="
+                            isModuleCollapsed(levelIndex, moduleIndex) ? 'Expandir' : 'Colapsar'
+                          "
+                        >
+                          <i
+                            class="bi fs-5"
+                            [class.bi-chevron-down]="!isModuleCollapsed(levelIndex, moduleIndex)"
+                            [class.bi-chevron-right]="isModuleCollapsed(levelIndex, moduleIndex)"
+                          ></i>
+                        </button>
+                        <div
+                          class="bg-white border text-primary rounded-3 d-flex align-items-center justify-content-center shadow-xs"
+                          style="width: 32px; height: 32px"
+                        >
+                          <i
+                            class="bi small"
+                            [class.bi-journal-check]="!module.get('isInternship')?.value"
+                            [class.bi-mortarboard]="module.get('isInternship')?.value"
+                          ></i>
+                        </div>
+                        <tm-text
+                          formControlName="name"
+                          placeholder="Nome do Módulo"
+                          [control]="module.get('name')"
+                          class="flex-grow-1"
+                        ></tm-text>
+                        <div
+                          class="d-flex align-items-center gap-2 px-3 py-1 bg-white border border-primary border-opacity-25 rounded-pill shadow-xs flex-shrink-0"
+                          title="Carga horária total do módulo"
+                        >
+                          <i class="bi bi-clock-history text-primary small"></i>
+                          <span class="fw-bold text-primary small"
+                            >{{ getModuleHours(levelIndex, moduleIndex) }}h
+                            <span class="text-muted fw-normal">anual</span></span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12 col-lg-auto d-flex flex-column flex-lg-row gap-2">
+                      @if (!module.get('isInternship')?.value) {
+                      <button
+                        type="button"
+                        class="btn btn-primary btn-sm rounded-3 shadow-sm transition-hover d-flex align-items-center justify-content-center gap-2 w-100 w-lg-auto"
+                        style="height: 32px !important; padding: 0 1rem !important"
+                        (click)="addSubjectRow(levelIndex, moduleIndex)"
+                        [disabled]="isViewMode()"
+                      >
+                        <i class="bi bi-plus-lg"></i>
+                        <span class="fw-bold">Disciplina</span>
+                      </button>
+                      }
+                      <button
+                        type="button"
+                        class="btn btn-danger btn-sm rounded-3 shadow-sm transition-hover d-flex align-items-center justify-content-center gap-2 w-100 w-lg-auto"
+                        style="
+                          height: 32px !important;
+                          padding: 0 1rem !important;
+                          background-color: #ef4444 !important;
+                          border: none !important;
+                          color: white !important;
+                        "
+                        (click)="removeModuleRow(levelIndex, moduleIndex)"
+                        [disabled]="isViewMode() || getModulesArray(levelIndex).length <= 1"
+                        title="Remover Módulo"
+                      >
+                        <i class="bi bi-trash"></i>
+                        <span class="fw-bold">Módulo</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  @if (!isModuleCollapsed(levelIndex, moduleIndex)) {
+
+                  @if (!module.get('isInternship')?.value) {
+                  <tm-table
+                    [cols]="[
+                      { header: 'Disciplina', template: subjectTpl, width: '35%' },
+                      {
+                        header: 'Aulas/Sem.',
+                        template: lessonsTpl,
+                        width: '70px',
+                        headerClass: 'text-center',
+                        class: 'text-center',
+                      },
+                      {
+                        header: 'Anual',
+                        template: annualTpl,
+                        width: '100px',
+                        headerClass: 'text-center',
+                        class: 'text-center',
+                      },
+                      { header: 'Ambiente Preferencial', template: resourceTpl, width: '35%' },
+                      {
+                        header: 'Ações',
+                        template: actionsTpl,
+                        width: '80px',
+                        headerClass: 'text-end',
+                        class: 'text-end',
+                      },
+                    ]"
+                    [data]="getSubjectsArray(levelIndex, moduleIndex).controls"
+                    [isLoading]="false"
+                  ></tm-table>
+                  } @else {
+                  <div class="internship-content p-4 border rounded-4 bg-white shadow-sm mt-3">
+                    <div class="row align-items-center">
+                      <div class="col-12 col-lg-6">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                          <div
+                            class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                            style="width: 40px; height: 40px"
+                          >
+                            <i class="bi bi-mortarboard fs-5"></i>
                           </div>
-                        </td>
-                        <td class="text-end pe-4 py-3">
-                          <div class="d-flex justify-content-end">
-                            <app-button-delete
-                              variant="icon"
-                              [isSolid]="true"
-                              (onClick)="removeSubjectRow(levelIndex, subjectIndex)"
-                              [disabled]="isViewMode()"
-                            ></app-button-delete>
+                          <div>
+                            <h6 class="fw-bold mb-0">Total de Horas de Estágio</h6>
+                            <p class="text-muted small mb-0">
+                              Informe o total de horas anuais para este módulo
+                            </p>
                           </div>
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
+                        </div>
+                      </div>
+                      <div class="col-12 col-lg-4">
+                        <tm-text
+                          formControlName="internshipHours"
+                          label="Horas Anuais"
+                          type="number"
+                          placeholder="Ex: 120"
+                          icon="bi-clock"
+                          [control]="module.get('internshipHours')"
+                        ></tm-text>
+                      </div>
+                    </div>
+                  </div>
+                  }
+
+                  <!-- Templates for Subjects Table -->
+                  <ng-template #subjectTpl let-subjectControl>
+                    <div [formGroup]="subjectControl" class="py-1">
+                      <tm-select
+                        formControlName="subjectId"
+                        placeholder="Selecionar..."
+                        icon="bi-journal-text"
+                        [searchable]="true"
+                        [options]="
+                          subjectsList().map((s) => ({
+                            value: s.id,
+                            label: s.name
+                          }))
+                        "
+                      ></tm-select>
+                    </div>
+                  </ng-template>
+
+                  <ng-template #lessonsTpl let-subjectControl>
+                    <div [formGroup]="subjectControl" class="py-1">
+                      <tm-text
+                        formControlName="weeklyLessons"
+                        type="number"
+                        class="text-center"
+                        [control]="subjectControl.get('weeklyLessons')"
+                      ></tm-text>
+                    </div>
+                  </ng-template>
+
+                  <ng-template #annualTpl let-subjectControl>
+                    @let hours =
+                      getTotalAnnualHours(
+                        subjectControl.get('weeklyLessons')?.value,
+                        level.get('lessonDuration')?.value,
+                        level.get('schoolWeeks')?.value
+                      );
+                    <span class="badge bg-light text-dark fw-bold border px-3 py-2 rounded-3">
+                      {{ hours }}h
+                    </span>
+                  </ng-template>
+
+                  <ng-template #resourceTpl let-subjectControl>
+                    <div [formGroup]="subjectControl" class="d-flex align-items-center gap-2 py-1">
+                      <tm-select
+                        formControlName="resourceId"
+                        placeholder="Ambiente..."
+                        icon="bi-building"
+                        [options]="
+                          roomTypesList().map((t) => ({
+                            value: t.id,
+                            label: t.name
+                          }))
+                        "
+                        class="flex-fill"
+                      ></tm-select>
+                      <button
+                        type="button"
+                        class="btn btn-light border shadow-sm transition-hover d-flex align-items-center justify-content-center flex-shrink-0"
+                        style="height: 48px; width: 48px; border-radius: 8px"
+                        (click)="openRoomTypeManager()"
+                        [disabled]="isViewMode()"
+                        title="Gerenciar Ambientes"
+                      >
+                        <i class="bi bi-building-add text-primary fs-5"></i>
+                      </button>
+                    </div>
+                  </ng-template>
+
+                  <ng-template #actionsTpl let-subjectControl>
+                    <div class="pe-3">
+                      <button
+                        type="button"
+                        class="btn btn-light border shadow-sm transition-hover d-flex align-items-center justify-content-center flex-shrink-0 ms-auto"
+                        style="height: 48px; width: 48px; border-radius: 8px"
+                        (click)="
+                          removeSubjectRow(
+                            levelIndex,
+                            moduleIndex,
+                            getSubjectsArray(levelIndex, moduleIndex).controls.indexOf(
+                              subjectControl
+                            )
+                          )
+                        "
+                        [disabled]="isViewMode()"
+                        title="Remover Disciplina"
+                      >
+                        <i class="bi bi-trash text-danger fs-5"></i>
+                      </button>
+                    </div>
+                  </ng-template>
+                }
+                </div>
+              }
             </div>
           </div>
         </div>
@@ -341,44 +510,20 @@
     </div>
   </form>
 
-  <!-- Empty State -->
-  @if (levelsArray.length === 0) {
-    <div class="text-center py-5 my-5 animate-in">
-      <div
-        class="display-3 text-primary opacity-10 mb-4 d-flex justify-content-center align-items-center mx-auto bg-light rounded-circle"
-        style="width: 120px; height: 120px"
-      >
-        <i class="bi bi-grid-3x3"></i>
-      </div>
-      <h3 class="fw-bold text-dark">Nenhum nível configurado</h3>
-      <p class="text-muted maxWidth-500 mx-auto">
-        Comece adicionando um nível de ensino (ex: Ensino Fundamental I) no seletor acima para
-        configurar a grade horária e as disciplinas.
-      </p>
-      <button
-        class="btn btn-primary px-4 py-2 rounded-pill shadow-sm fw-bold mt-2 transition-hover"
-        (click)="focusLevelSelector()"
-      >
-        <i class="bi bi-plus-lg me-2"></i>
-        Começar Configuração
-      </button>
-    </div>
-  }
+  <!-- Type Manager Modal -->
+  <app-modal-manage-list
+    #typeModal
+    [isOpen]="showTypeManager()"
+    title="Gerenciar Ambientes"
+    subtitle="Configure os tipos de salas disponíveis"
+    labelNew="Novo Tipo"
+    labelEdit="Editar Tipo"
+    inputPlaceholder="Ex: Laboratório de Química"
+    [items]="schoolData.roomTypes()"
+    emptyMessage="Nenhum tipo cadastrado."
+    emptyIcon="bi-building-dash"
+    (close)="closeRoomTypeManager()"
+    (onSave)="saveType($event)"
+    (onDelete)="deleteType($event)"
+  ></app-modal-manage-list>
 </div>
-
-<!-- Type Manager Modal -->
-<app-modal-manage-list
-  #typeModal
-  [isOpen]="showTypeManager()"
-  title="Gerenciar Ambientes"
-  subtitle="Configure os tipos de salas disponíveis"
-  labelNew="Novo Tipo"
-  labelEdit="Editar Tipo"
-  inputPlaceholder="Ex: Laboratório de Química"
-  [items]="schoolData.roomTypes()"
-  emptyMessage="Nenhum tipo cadastrado."
-  emptyIcon="bi-building-dash"
-  (close)="closeRoomTypeManager()"
-  (onSave)="saveType($event)"
-  (onDelete)="deleteType($event)"
-></app-modal-manage-list>

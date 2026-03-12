@@ -186,6 +186,12 @@
   &.dropdown-active {
     overflow: visible !important;
   }
+  // Garantir que nada vaze para fora do card em telas pequenas (exceto dropdowns controlados pelo CDK)
+  @media (max-width: 991px) {
+    &:not(.dropdown-active) {
+      overflow: hidden;
+    }
+  }
 }
 
 .btn-manage {
@@ -198,10 +204,20 @@
 }
 
 // Fix para tm-select + button em telas pequenas
-.d-flex.align-items-start.gap-2 {
+.d-flex.align-items-start.gap-2,
+.d-flex.align-items-end.gap-2,
+.d-flex.align-items-center.gap-2 {
   min-width: 0;
+  flex-wrap: nowrap !important; // Nunca quebrar linha
+
   .flex-fill {
     min-width: 0;
+    flex-basis: 0;
+    
+    // Override do min-width interno do tm-select para não empurrar o botão
+    ::ng-deep .tm-select-container {
+      min-width: 0 !important;
+    }
   }
 }
 

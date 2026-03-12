@@ -9,11 +9,15 @@ import {
   HostListener,
   ElementRef,
   inject,
+  OnDestroy,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { ThemeService } from '../../services/theme.service';
+import { Subject, takeUntil } from 'rxjs';
 
 export interface SelectOption<T = any> {
   value: T;
@@ -78,20 +82,37 @@ export interface SelectOption<T = any> {
         [cdkConnectedOverlayOrigin]="trigger"
         [cdkConnectedOverlayOpen]="isOpen()"
         [cdkConnectedOverlayHasBackdrop]="true"
-        cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
-        (backdropClick)="$event.stopPropagation(); closeDropdown()"
+        [cdkConnectedOverlayBackdropClass]="isMobile() ? 'cdk-overlay-dark-backdrop' : 'cdk-overlay-transparent-backdrop'"
+        (backdropClick)="closeDropdown()"
         (detach)="closeDropdown()"
-        [cdkConnectedOverlayWidth]="overlayWidth()"
+        [cdkConnectedOverlayWidth]="overlayWidthToUse()"
+        [cdkConnectedOverlayPanelClass]="overlayPanelClass()"
       >
         <div
           class="dropdown-panel shadow-lg animate-slide-down shadow-xs"
           [class.dark]="themeService.isDarkMode()"
+          [class.mobile-panel]="isMobile()"
         >
+          @if (searchable) {
+            <div class="search-container p-2 border-bottom">
+              <div class="search-wrapper d-flex align-items-center px-3 rounded-2 bg-light">
+                <i class="bi bi-search text-muted small me-2"></i>
+                <input
+                  #searchInput
+                  type="text"
+                  class="search-input py-2 border-0 bg-transparent w-100 fw-medium small"
+                  placeholder="Pesquisar..."
+                  (input)="onSearchChange($event)"
+                  (click)="$event.stopPropagation()"
+                />
+              </div>
+            </div>
+          }
           <div class="options-list custom-scrollbar">
-            @if (optionsSignal().length === 0) {
+            @if (filteredOptions().length === 0) {
               <div class="p-3 text-muted small text-center italic">Nenhuma opção disponível</div>
             } @else {
-              @for (option of optionsSignal(); track option.value) {
+              @for (option of filteredOptions(); track option.value) {
                 <div
                   class="option-item transition-all d-flex align-items-center justify-content-between"
                   [class.selected]="internalValue() === option.value"
@@ -203,6 +224,18 @@ export interface SelectOption<T = any> {
         box-shadow:
           0 10px 15px -3px rgba(0, 0, 0, 0.1),
           0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+
+        &.mobile-panel {
+          margin-top: 0;
+          border-radius: 16px;
+          max-height: 80vh;
+          display: flex;
+          flex-direction: column;
+
+          .options-list {
+            max-height: 60vh;
+          }
+        }
       }
 
       .options-list {
@@ -298,9 +331,39 @@ export interface SelectOption<T = any> {
         }
       }
 
+      .search-container {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: inherit;
+      }
+
+      .search-wrapper {
+        border: 1px solid var(--border-color);
+        &:focus-within {
+          border-color: var(--bs-primary);
+        }
+      }
+
+      .search-input {
+        outline: none;
+        color: var(--text-primary);
+        &::placeholder {
+          color: rgba(var(--text-secondary-rgb), 0.5);
+        }
+      }
+
       .dropdown-panel.dark {
         background-color: #1e293b; // slate-800
         border: 1px solid rgba(255, 255, 255, 0.1);
+
+        .search-input {
+          color: #ffffff;
+          &::placeholder {
+            color: #ffffff !important;
+            opacity: 0.7;
+          }
+        }
 
         .option-item {
           color: #e2e8f0;
@@ -323,6 +386,29 @@ export interface SelectOption<T = any> {
           }
         }
       }
+
+      /* Global Overlay Class for centering */
+      ::ng-deep .cdk-overlay-pane.tm-select-mobile-overlay {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 90vw !important;
+        max-width: 450px !important;
+        z-index: 1055 !important;
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+
+        /* Reset default CDK absolute positioning */
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+      }
+
+      .mobile-panel {
+        width: 100% !important;
+        margin: 0 !important;
+      }
     `,
   ],
   providers: [
@@ -333,25 +419,32 @@ export interface SelectOption<T = any> {
     },
   ],
 })
-export class SelectComponent implements ControlValueAccessor {
+export class SelectComponent implements ControlValueAccessor, OnInit, OnDestroy {
   @Input() label = '';
   optionsSignal = signal<SelectOption[]>([]);
   @Input() set options(val: SelectOption[]) {
     this.optionsSignal.set(val || []);
   }
   @Input() placeholder = 'Selecione...';
+  @Input() searchable = false;
   @Input() icon = '';
   @Input() control: any;
   @Input() clearable = false;
+  @Input() dropdownWidth: string | number = 'auto';
   @Output() toggle = new EventEmitter<boolean>();
 
+  searchTerm = signal('');
+
   private elementRef = inject(ElementRef);
+  private breakpointObserver = inject(BreakpointObserver);
   themeService = inject(ThemeService);
+  private destroy$ = new Subject<void>();
 
   internalValue = signal<any>(null);
   disabled = false;
   isOpen = signal(false);
   isFocused = signal(false);
+  isMobile = signal(false);
 
   selectedLabel = computed(() => {
     const value = this.internalValue();
@@ -362,6 +455,29 @@ export class SelectComponent implements ControlValueAccessor {
   overlayWidth = computed(() => {
     return this.elementRef.nativeElement.querySelector('.input-wrapper')?.offsetWidth || 200;
   });
+
+  overlayWidthToUse = computed(() => {
+    if (this.isMobile()) return '90vw';
+    return this.dropdownWidth !== 'auto' ? this.dropdownWidth : this.overlayWidth();
+  });
+
+  overlayPanelClass = computed(() => {
+    return this.isMobile() ? 'tm-select-mobile-overlay' : '';
+  });
+
+  filteredOptions = computed(() => {
+    const term = this.normalizeString(this.searchTerm());
+    const options = this.optionsSignal();
+    if (!term) return options;
+    return options.filter((o) => this.normalizeString(o.label).includes(term));
+  });
+
+  private normalizeString(val: string): string {
+    return (val || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+  }
 
   onChange: (value: any) => void = () => {};
   onTouched: () => void = () => {};
@@ -390,8 +506,14 @@ export class SelectComponent implements ControlValueAccessor {
   closeDropdown() {
     if (this.isOpen()) {
       this.isOpen.set(false);
+      this.searchTerm.set('');
       this.toggle.emit(false);
     }
+  }
+
+  onSearchChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.searchTerm.set(input.value);
   }
 
   selectOption(option: SelectOption) {
@@ -405,6 +527,20 @@ export class SelectComponent implements ControlValueAccessor {
     this.internalValue.set(null);
     this.onChange(null);
     this.onTouched();
+  }
+
+  ngOnInit() {
+    this.breakpointObserver
+      .observe(['(max-width: 991px)'])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result) => {
+        this.isMobile.set(result.matches);
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   writeValue(value: any): void {

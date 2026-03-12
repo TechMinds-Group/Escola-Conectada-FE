@@ -126,10 +126,12 @@ export class CadastroTurma implements OnInit {
 
   // For matrix summary preview
   selectedMatrixId = signal<string | null>(null);
+  selectedModulo = signal<string | null>(null);
   subjects = this.schoolData.subjects;
 
   gradeSummary = computed(() => {
     const matrixId = this.selectedMatrixId();
+    const currentModulo = this.selectedModulo();
     if (!matrixId) return [];
     
     const allMatrices = this.matrices();
@@ -151,7 +153,12 @@ export class CadastroTurma implements OnInit {
     }[] = [];
 
     matrix.levels.forEach((level) => {
-      level.subjects.forEach((ms, subjectIndex) => {
+      // Filter subjects by the currently selected module
+      const filteredSubjects = level.subjects.filter(s => 
+        !currentModulo || s.modulo === currentModulo
+      );
+
+      filteredSubjects.forEach((ms, subjectIndex) => {
         const subjectDef = this.subjects().find(
           (s) => s.id.toLowerCase() === ms.subjectId.toLowerCase(),
         );
@@ -190,43 +197,42 @@ export class CadastroTurma implements OnInit {
     this.classForm = this.fb.group({
       nome: ['', [Validators.required, Validators.maxLength(30)]],
 
-      turno: ['Manhã', Validators.required],
       matrizId: [null, Validators.required],
       salaId: [null],
       gradeHorariaId: [null, Validators.required],
       capacidadeMaxima: [30, [Validators.required, Validators.min(1)]],
       professorRegenteId: [null],
+      modulo: [{ value: '', disabled: true }, Validators.required],
     });
 
     this.classForm.get('matrizId')?.valueChanges.subscribe((val) => {
+      const moduloCtrl = this.classForm.get('modulo');
       if (val && val !== this.selectedMatrixId()) {
         this.selectedMatrixId.set(val);
+        this.selectedModulo.set(null); // Reset module on matrix change
         this.allocations.set([]); // Limpar alocações ao trocar matriz REALMENTE
 
         // Sincronizar Ano Letivo com a Matriz (Removido patch de ano)
         const matrix = this.matrices().find((m) => m.id === val);
+        this.classForm.patchValue({ modulo: '' });
       }
+
+      if (val && !this.isViewMode()) {
+        moduloCtrl?.enable();
+      } else {
+        moduloCtrl?.disable();
+      }
+    });
+
+    this.classForm.get('modulo')?.valueChanges.subscribe((val) => {
+      this.selectedModulo.set(val || null);
     });
 
     this.classForm.get('gradeHorariaId')?.valueChanges.subscribe((val) => {
       this.selectedGradeId.set(val);
-      this.syncTurnoFromGrade(val);
     });
   }
 
-  syncTurnoFromGrade(gradeId: string | null) {
-    if (!gradeId) return;
-    const grid = this.timeGrids().find((g) => g.id === gradeId);
-    if (grid) {
-      this.classForm.patchValue({ turno: grid.shift }, { emitEvent: false });
-    }
-  }
-
-  turnoOptions = [
-    { value: 'Manhã', label: 'Manhã' },
-    { value: 'Tarde', label: 'Tarde' },
-    { value: 'Noite', label: 'Noite' },
-  ];
 
   matrixOptions = computed(() =>
     this.matrices().map((m) => ({
@@ -234,6 +240,31 @@ export class CadastroTurma implements OnInit {
       label: this.getMatrixLabel(m),
     })),
   );
+
+  moduleOptions = computed(() => {
+    const matrixId = this.selectedMatrixId();
+    if (!matrixId) return [];
+
+    const matrix = this.matrices().find((m) => m.id.toLowerCase() === matrixId.toLowerCase());
+    if (!matrix) return [];
+
+    // Extract all unique module names across all levels
+    const modules = new Set<string>();
+    matrix.levels.forEach((level) => {
+      level.subjects.forEach((s) => {
+        if (s.modulo) {
+          modules.add(s.modulo);
+        }
+      });
+    });
+
+    return Array.from(modules)
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+      .map((m) => ({
+        value: m,
+        label: m,
+      }));
+  });
 
   disciplineOptions = computed(() => {
     const opts = this.gradeSummary().map((item) => ({
@@ -368,7 +399,7 @@ export class CadastroTurma implements OnInit {
     if (!aloc || !aloc.professorId) return null;
 
     // Normalização para garantir match com o select mesmo em caso de diferença de caixa
-    const found = this.teachers().find((t) => t.id.toLowerCase() === aloc.professorId.toLowerCase());
+    const found = this.teachers().find((t) => t.id.toLowerCase() === (aloc.professorId || '').toLowerCase());
     return found ? found.id : aloc.professorId;
   }
 
@@ -382,20 +413,16 @@ export class CadastroTurma implements OnInit {
       this.allocations.update((current) => {
         const existing = current.find((a) => a.diaDaSemana === dia && a.ordemAula === ordemAula);
 
-        // Auto-select first qualified teacher
-        const qualifiedTeachers = this.getQualifiedTeachers(disciplineId);
-        const professorId = qualifiedTeachers.length > 0 ? qualifiedTeachers[0].id : '';
-
         if (existing) {
           existing.matrizDisciplinaId = disciplineId;
-          existing.professorId = professorId;
+          // Não resetamos nem auto-selecionamos o professor aqui para permitir que o usuário escolha ou deixe vazio
           return [...current];
         } else {
           return [
             ...current,
             {
               matrizDisciplinaId: disciplineId,
-              professorId: professorId,
+              professorId: '', // Começa sem professor
               diaDaSemana: dia,
               ordemAula: ordemAula,
             },
@@ -516,13 +543,14 @@ export class CadastroTurma implements OnInit {
         next: (turma) => {
           this.classForm.patchValue({
             nome: turma.nome,
-            turno: turma.turno,
             matrizId: turma.matrizId,
             salaId: turma.salaId || null,
             gradeHorariaId: turma.gradeHorariaId || null,
+            modulo: turma.modulo || '',
           });
 
           this.selectedMatrixId.set(turma.matrizId);
+          this.selectedModulo.set(turma.modulo || null);
           this.selectedGradeId.set(turma.gradeHorariaId || null);
 
           if (turma.alocacoes) {
@@ -534,6 +562,13 @@ export class CadastroTurma implements OnInit {
             capacidadeMaxima: turma.capacidadeMaxima || 30,
             professorRegenteId: turma.professorRegenteId || null,
           });
+
+          // Se estiver em modo visualização, manter desabilitado
+          if (this.isViewMode()) {
+            this.classForm.disable({ emitEvent: false });
+          } else if (turma.matrizId) {
+            this.classForm.get('modulo')?.enable();
+          }
         },
       });
     }
@@ -542,6 +577,11 @@ export class CadastroTurma implements OnInit {
   onEditClick() {
     this.isViewMode.set(false);
     this.classForm.enable({ emitEvent: false });
+    
+    // Se não tiver matriz, o módulo deve continuar desabilitado
+    if (!this.classForm.get('matrizId')?.value) {
+      this.classForm.get('modulo')?.disable();
+    }
   }
 
   onSubmit() {
@@ -550,13 +590,12 @@ export class CadastroTurma implements OnInit {
     this.isSaving.set(true);
 
     // Para o backend, 'Aula Vaga' é a AUSÊNCIA de alocação no horário.
-    // Filtrar alocações que não são Aula Vaga e possuem professor
+    // Filtrar alocações que não são Aula Vaga
     const backendAllocations = this.allocations()
       .filter(
         (a) =>
           a.matrizDisciplinaId &&
           a.matrizDisciplinaId !== 'AULA_VAGA' &&
-          a.professorId &&
           !a.matrizDisciplinaId.startsWith('sub-'),
       )
       .map((a) => ({
@@ -639,7 +678,6 @@ export class CadastroTurma implements OnInit {
           next: (turma) => {
             this.classForm.patchValue({
               nome: turma.nome,
-              turno: turma.turno,
               matrizId: turma.matrizId,
               salaId: turma.salaId || null,
               gradeHorariaId: turma.gradeHorariaId || null,

@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -147,7 +147,6 @@ export class Topbar implements OnInit {
         this.notificationService.loadNotifications();
       },
       error: (err: any) => {
-        console.error('Erro ao aceitar solicitação', err);
         this.notification.error(err?.error?.message || 'Erro ao aceitar solicitação');
       },
     });

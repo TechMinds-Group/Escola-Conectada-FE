@@ -35,24 +35,15 @@ export class ConsultaTurma implements OnInit {
 
   // Form Controls
   searchText = new FormControl('');
-  filterTurno = new FormControl('Todos');
   filterStatus = new FormControl('Todos');
 
   // Values currently applied to the list
   appliedFilters = signal({
     search: '',
-    turno: 'Todos',
     status: 'Todos',
   });
 
   // Options
-  turnoOptions = [
-    { value: 'Todos', label: 'Todos os Turnos' },
-    { value: 'Manhã', label: 'Manhã' },
-    { value: 'Tarde', label: 'Tarde' },
-    { value: 'Noite', label: 'Noite' },
-    { value: 'Integral', label: 'Integral' },
-  ];
 
   statusOptions = [
     { value: 'Todos', label: 'Todos os Status' },
@@ -74,9 +65,6 @@ export class ConsultaTurma implements OnInit {
           (t.matrizNome || '').toLowerCase().includes(search),
       );
     }
-    if (filters.turno !== 'Todos') {
-      list = list.filter((t) => t.turno === filters.turno);
-    }
     if (filters.status !== 'Todos') {
       list = list.filter((t) => t.statusCronograma === filters.status);
     }
@@ -86,7 +74,6 @@ export class ConsultaTurma implements OnInit {
   isFilterActive = computed(
     () =>
       !!this.appliedFilters().search ||
-      this.appliedFilters().turno !== 'Todos' ||
       this.appliedFilters().status !== 'Todos',
   );
 
@@ -97,14 +84,12 @@ export class ConsultaTurma implements OnInit {
   applyFilters() {
     this.appliedFilters.set({
       search: this.searchText.value || '',
-      turno: this.filterTurno.value || 'Todos',
       status: this.filterStatus.value || 'Todos',
     });
   }
 
   clearFilters() {
     this.searchText.setValue('');
-    this.filterTurno.setValue('Todos');
     this.filterStatus.setValue('Todos');
     this.applyFilters();
   }
@@ -168,16 +153,4 @@ export class ConsultaTurma implements OnInit {
     }
   }
 
-  getTurnoBadgeClass(turno: string): string {
-    switch (turno) {
-      case 'Manhã':
-        return 'bg-info-subtle text-info-emphasis';
-      case 'Tarde':
-        return 'bg-warning-subtle text-warning-emphasis';
-      case 'Noite':
-        return 'bg-secondary-subtle text-secondary-emphasis';
-      default:
-        return 'bg-primary-subtle text-primary';
-    }
-  }
 }

@@ -41,6 +41,7 @@ import { CommonModule } from '@angular/common';
         background-color: #ef4444 !important;
         color: #ffffff !important;
         border: none !important;
+        height: 38px;
 
         i,
         span {
@@ -49,6 +50,12 @@ import { CommonModule } from '@angular/common';
 
         &:hover {
           background-color: #dc2626 !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2) !important;
+        }
+
+        &.btn-sm {
+          height: 32px !important;
         }
       }
 
@@ -75,27 +82,25 @@ export class ButtonDeleteComponent {
   @Input() isSolid: boolean = false;
   @Input() responsiveLabel: boolean = false;
   @Input() disabled: boolean = false;
+  @Input() isSmall: boolean = false;
   @Input() title: string = 'Excluir';
   @Input() size: number = 38;
   @Output() onClick = new EventEmitter<MouseEvent>();
 
   get buttonClass(): string {
-    const base =
-      'btn w-100 d-flex align-items-center justify-content-center py-2 rounded-3 shadow-sm transition-hover';
+    const base = 'btn d-flex align-items-center justify-content-center rounded-3 shadow-sm transition-hover';
+    const widthClass = this.variant === 'icon' ? '' : 'w-100';
     const colorClass = this.isSolid
       ? 'btn-solid-danger'
       : 'btn-outline-danger-custom btn-delete-custom';
-    const variantClass = this.variant === 'icon' ? 'p-0' : 'gap-2 px-3 fw-bold';
-    return `${base} ${colorClass} ${variantClass}`;
+    const sizeClass = this.isSmall ? 'btn-sm px-3' : 'py-2';
+    const variantClass = this.variant === 'icon' ? 'p-0' : 'gap-2 fw-bold';
+    return `${base} ${widthClass} ${colorClass} ${sizeClass} ${variantClass}`;
   }
 
   get iconClass(): string {
     const margin =
-      this.variant === 'full' && this.responsiveLabel
-        ? 'me-2 me-lg-0 me-xl-2'
-        : this.variant === 'full'
-          ? 'me-1'
-          : '';
+      this.variant === 'full' && this.responsiveLabel ? 'me-2 me-lg-0 me-xl-2' : '';
     const baseIcon = this.variant === 'icon' ? 'bi bi-trash fs-5' : `bi bi-trash ${margin}`;
     return baseIcon;
   }

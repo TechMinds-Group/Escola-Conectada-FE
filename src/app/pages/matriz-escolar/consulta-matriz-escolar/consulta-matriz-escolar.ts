@@ -97,8 +97,13 @@ export class ConsultaMatrizEscolarPage {
   // Helpers for Template (Display only)
   getMatrixTotalHours(matrix: SchoolMatrixModel) {
     return matrix.levels.reduce((acc, level) => {
-      const weekly = level.subjects.reduce((sum, s) => sum + s.weeklyLessons, 0);
-      return acc + Math.round((weekly * level.lessonDuration * level.schoolWeeks) / 60);
+      const levelHours = level.subjects.reduce((sum, s) => {
+        if (s.isInternship) {
+          return sum + (s.internshipHours || 0);
+        }
+        return sum + Math.round((s.weeklyLessons * level.lessonDuration * level.schoolWeeks) / 60);
+      }, 0);
+      return acc + levelHours;
     }, 0);
   }
 
