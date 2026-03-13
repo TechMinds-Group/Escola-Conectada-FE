@@ -47,6 +47,10 @@
   overflow: hidden;
 }
 
+.progress-bar-empty {
+  background-color: #6c757d !important;
+}
+
 .border-bottom-light {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
@@ -123,6 +127,10 @@
 
   .compliance-progress {
     background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .progress-bar-empty {
+    background-color: rgba(255, 255, 255, 0.15) !important;
   }
 
   .level-card {

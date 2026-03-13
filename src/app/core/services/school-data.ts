@@ -64,6 +64,7 @@ export interface Teacher {
 export interface MatrixSubject {
   id?: string; // PK of MatrizDisciplina
   subjectId: string; // FK to Materia
+  materiaId?: string; // Optional alias for SubjectId to match backend
   weeklyLessons: number;
   isBaseComum: boolean;
   allowConsecutive: boolean;
@@ -300,11 +301,16 @@ export class SchoolDataService {
 
   async addMatrix(matrix: Omit<SchoolMatrix, 'id'>) {
     const payload = this.mapToMatrixDto(matrix);
-    const result = await firstValueFrom(
-      this.http.post<any>(`${this.apiUrl}/MatrizesEscolares`, payload),
-    );
-    await this.loadMatrices();
-    return result;
+
+    try {
+      const result = await firstValueFrom(
+        this.http.post<any>(`${this.apiUrl}/MatrizesEscolares`, payload),
+      );
+      await this.loadMatrices();
+      return result;
+    } catch (error: any) {
+      throw error;
+    }
   }
 
   async loadRooms() {
@@ -443,11 +449,15 @@ export class SchoolDataService {
   async updateMatrix(id: string, matrixData: Partial<SchoolMatrix>) {
     const dto = this.mapToMatrixDto({ ...matrixData, id });
 
-    const result = await firstValueFrom(
-      this.http.put<any>(`${this.apiUrl}/MatrizesEscolares/${id}`, dto),
-    );
-    await this.loadMatrices();
-    return result;
+    try {
+      const result = await firstValueFrom(
+        this.http.put<any>(`${this.apiUrl}/MatrizesEscolares/${id}`, dto),
+      );
+      await this.loadMatrices();
+      return result;
+    } catch (error: any) {
+      throw error;
+    }
   }
 
   async deleteMatrix(id: string) {
@@ -799,7 +809,7 @@ export class SchoolDataService {
                 m.subjects?.forEach((s: any) => {
                   disciplines.push({
                     Id: s.id || null,
-                    MateriaId: s.subjectId || null,
+                    MateriaId: s.materiaId || s.subjectId || null,
                     AulasSemanais: s.weeklyLessons,
                     IsBaseComum: s.isBaseComum,
                     PermitirConsecutivas: s.allowConsecutive,
@@ -816,14 +826,14 @@ export class SchoolDataService {
             l.subjects?.forEach((s) => {
               disciplines.push({
                 Id: s.id || null,
-                MateriaId: s.subjectId || null,
-                AulasSemanais: s.weeklyLessons,
-                IsBaseComum: s.isBaseComum,
-                PermitirConsecutivas: s.allowConsecutive,
-                SalaTipoId: s.resourceId || null,
+                MateriaId: s.materiaId || s.subjectId || null,
+                AulasSemanais: s.weeklyLessons || 0,
+                IsBaseComum: s.isBaseComum ?? true,
+                PermitirConsecutivas: s.allowConsecutive ?? true,
+                SalaTipoId: s.resourceId && s.resourceId !== 'null' ? s.resourceId : null,
                 Modulo: s.modulo || '',
-                IsInternship: s.isInternship ?? false,
-                InternshipHours: s.internshipHours ?? 0
+                IsInternship: s.isInternship === true,
+                InternshipHours: s.internshipHours || 0
               });
             });
           }
@@ -858,6 +868,7 @@ export class SchoolDataService {
         subjects: (l.disciplinas ?? l.Disciplinas ?? []).map((s: any) => ({
           id: String(s.id ?? s.Id ?? ''),
           subjectId: String(s.materiaId ?? s.MateriaId ?? ''),
+          materiaId: String(s.materiaId ?? s.MateriaId ?? ''),
           weeklyLessons: s.aulasSemanais ?? s.AulasSemanais ?? 1,
           isBaseComum: s.isBaseComum ?? s.IsBaseComum ?? true,
           allowConsecutive: s.permitirConsecutivas ?? s.PermitirConsecutivas ?? true,

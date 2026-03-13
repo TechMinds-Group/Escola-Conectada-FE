@@ -218,9 +218,10 @@
                 <div
                   class="progress-bar progress-bar-striped progress-bar-animated"
                   role="progressbar"
-                  [class.bg-success]="getLevelCompliance(levelIndex).isValid"
-                  [class.bg-danger]="!getLevelCompliance(levelIndex).isValid"
-                  [style.width.%]="getLevelCompliance(levelIndex).percent"
+                  [class.bg-success]="getLevelCompliance(levelIndex).isValid && getLevelCompliance(levelIndex).percent > 0"
+                  [class.bg-danger]="!getLevelCompliance(levelIndex).isValid && getLevelCompliance(levelIndex).percent > 0"
+                  [class.progress-bar-empty]="getLevelCompliance(levelIndex).percent === 0"
+                  [style.width.%]="getLevelCompliance(levelIndex).percent === 0 ? 100 : getLevelCompliance(levelIndex).percent"
                 ></div>
               </div>
             </div>
@@ -418,6 +419,7 @@
                         placeholder="Selecionar..."
                         icon="bi-journal-text"
                         [searchable]="true"
+                        [control]="subjectControl.get('subjectId')"
                         [options]="
                           subjectsList().map((s) => ({
                             value: s.id,
@@ -457,6 +459,7 @@
                         formControlName="resourceId"
                         placeholder="Ambiente..."
                         icon="bi-building"
+                        [control]="subjectControl.get('resourceId')"
                         [options]="
                           roomTypesList().map((t) => ({
                             value: t.id,

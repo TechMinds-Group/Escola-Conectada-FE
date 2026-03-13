@@ -6,6 +6,7 @@ import {
   FormBuilder,
   Validators,
   FormArray,
+  FormGroup,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatMenuModule } from '@angular/material/menu';
@@ -342,7 +343,9 @@ export class CadastroMatrizEscolarPage implements OnInit {
         .map(([name, subjects]) => ({
           name,
           subjects,
-          type: (subjects.some((s) => s.isInternship) ? 'internship' : 'common') as 'common' | 'internship'
+          type: (subjects.some((s) => s.isInternship) ? 'internship' : 'common') as
+            | 'common'
+            | 'internship',
         }))
         .sort((a, b) => {
           // 1. Common modules first
@@ -356,10 +359,6 @@ export class CadastroMatrizEscolarPage implements OnInit {
       sortedModules.forEach((mod) => {
         modulesArray.push(this.createModuleGroup(mod.name, mod.type, mod.subjects));
       });
-    } else {
-      if (!data) {
-        modulesArray.push(this.createModuleGroup('Módulo 1'));
-      }
     }
 
     this.levelsArray.push(levelGroup);
@@ -400,7 +399,10 @@ export class CadastroMatrizEscolarPage implements OnInit {
       const subjects = subjectsArray.getRawValue();
 
       subjects.forEach((s: any, subIdx: number) => {
-        if ((modIdx !== currentModuleIndex || subIdx !== currentSubjectIndex) && s.subjectId === subjectId) {
+        if (
+          (modIdx !== currentModuleIndex || subIdx !== currentSubjectIndex) &&
+          s.subjectId === subjectId
+        ) {
           found = true;
         }
       });
@@ -409,9 +411,15 @@ export class CadastroMatrizEscolarPage implements OnInit {
     return found;
   }
 
-  createModuleGroup(name: string, type: 'common' | 'internship' = 'common', subjects?: MatrixSubject[]) {
-    const isInternshipValue = type === 'internship' || (subjects && subjects.some(s => s.isInternship));
-    const internshipHoursValue = subjects && subjects.length > 0 && isInternshipValue ? subjects[0].internshipHours : 0;
+  createModuleGroup(
+    name: string,
+    type: 'common' | 'internship' = 'common',
+    subjects?: MatrixSubject[],
+  ) {
+    const isInternshipValue =
+      type === 'internship' || (subjects && subjects.some((s) => s.isInternship));
+    const internshipHoursValue =
+      subjects && subjects.length > 0 && isInternshipValue ? subjects[0].internshipHours : 0;
 
     const moduleGroup = this.fb.group({
       name: [name, Validators.required],
@@ -439,7 +447,7 @@ export class CadastroMatrizEscolarPage implements OnInit {
       weeklyLessons: [data?.weeklyLessons || 2, [Validators.required, Validators.min(1)]],
       isBaseComum: [data?.isBaseComum ?? true],
       allowConsecutive: [data?.allowConsecutive ?? true],
-      resourceId: [String(data?.resourceId ?? ''), Validators.required],
+      resourceId: [data?.resourceId || null],
       maxDailyLessons: [data?.maxDailyLessons || 2],
       showAdvanced: [false],
     });
@@ -470,7 +478,9 @@ export class CadastroMatrizEscolarPage implements OnInit {
   }
 
   toggleAdvanced(levelIndex: number, moduleIndex: number, subjectIndex: number) {
-    const control = this.getSubjectsArray(levelIndex, moduleIndex).at(subjectIndex).get('showAdvanced');
+    const control = this.getSubjectsArray(levelIndex, moduleIndex)
+      .at(subjectIndex)
+      .get('showAdvanced');
     control?.setValue(!control.value);
   }
 
@@ -537,7 +547,6 @@ export class CadastroMatrizEscolarPage implements OnInit {
   async onSubmit() {
     this.saveAttempted.set(true);
 
-    // 1. Validação básica do formulário
     if (this.matrixForm.invalid) {
       this.matrixForm.markAllAsTouched();
       this.notification.error('Verifique os campos obrigatórios (destacados em vermelho).');
@@ -559,38 +568,40 @@ export class CadastroMatrizEscolarPage implements OnInit {
     let hasDuplicateSubjects = false;
     let duplicateLevelName = '';
 
-    const allSubjectsValid = this.levelsArray.controls.every((levelControl: any) => {
-      const modulesArray = levelControl.get('modules') as FormArray;
-      
-      let levelSubjectIds: string[] = [];
-      let allModulesValid = true;
+    const allSubjectsValid = this.levelsArray.controls.every(
+      (levelControl: any, lvlIdx: number) => {
+        const modulesArray = levelControl.get('modules') as FormArray;
 
-      modulesArray.controls.forEach((moduleControl: any, modIdx: number) => {
-        const subjectsArray = moduleControl.get('subjects') as FormArray;
-        const isInternship = moduleControl.get('isInternship')?.value;
-        const moduleName = moduleControl.get('name')?.value;
-        
-        const subjects = subjectsArray.getRawValue();
-        const subjectIds = subjects.map((s: any) => s.subjectId).filter((id: string) => id);
-        levelSubjectIds.push(...subjectIds);
+        let levelSubjectIds: string[] = [];
+        let allModulesValid = true;
 
-        if (isInternship) {
-          // Internship modules don't need subjects
-        } else {
-          if (subjectsArray.length === 0 || !subjectsArray.valid) {
-            allModulesValid = false;
+        modulesArray.controls.forEach((moduleControl: any, modIdx: number) => {
+          const subjectsArray = moduleControl.get('subjects') as FormArray;
+          const isInternship = moduleControl.get('isInternship')?.value;
+          const moduleName = moduleControl.get('name')?.value;
+
+          const subjects = subjectsArray.getRawValue();
+          const subjectIds = subjects.map((s: any) => s.subjectId).filter((id: string) => id);
+          levelSubjectIds.push(...subjectIds);
+
+          if (isInternship) {
+            // Internship modules don't need subjects
+          } else {
+            if (subjectsArray.length === 0 || !subjectsArray.valid) {
+              allModulesValid = false;
+            }
           }
+        });
+
+        const uniqueSubjectIds = new Set(levelSubjectIds);
+        if (levelSubjectIds.length !== uniqueSubjectIds.size) {
+          hasDuplicateSubjects = true;
+          duplicateLevelName = levelControl.get('level')?.value;
         }
-      });
 
-      const uniqueSubjectIds = new Set(levelSubjectIds);
-      if (levelSubjectIds.length !== uniqueSubjectIds.size) {
-        hasDuplicateSubjects = true;
-        duplicateLevelName = levelControl.get('level')?.value;
-      }
-
-      return modulesArray.length > 0 && allModulesValid;
-    });
+        return modulesArray.length > 0 && allModulesValid;
+      },
+    );
 
     if (!allSubjectsValid) {
       this.notification.error('Todos os níveis devem ter disciplinas válidas.');
@@ -616,39 +627,40 @@ export class CadastroMatrizEscolarPage implements OnInit {
 
       // 4. Mapeamento de dados com tratamento de IDs para o Backend
       const levelsData: LevelConfiguration[] = (val.levels as any[]).map((l) => ({
-        // Se o ID não for um GUID válido (ex: string vazia), envia null para forçar o backend a tratar como novo se necessário
         id: l.id && l.id.length > 10 ? l.id : null,
         level: l.level,
         lessonDuration: Number(l.lessonDuration),
         schoolWeeks: Number(l.schoolWeeks),
         subjects: ((l as any).modules as any[]).flatMap((mod) => {
           if (mod.isInternship) {
-            // Map internship module to a virtual subject
-            return [{
-              id: null, // Always new or tracked by Modulo if exists
-              subjectId: null,
-              weeklyLessons: 0,
-              isBaseComum: false,
-              allowConsecutive: false,
-              resourceId: null,
-              modulo: mod.name,
-              isInternship: true as boolean,
-              internshipHours: Number(mod.internshipHours),
-              maxDailyLessons: undefined
-            }];
+            return [
+              {
+                id: null,
+                materiaId: null,
+                subjectId: '',
+                weeklyLessons: 0,
+                isBaseComum: false,
+                allowConsecutive: false,
+                resourceId: null,
+                modulo: mod.name,
+                isInternship: true as boolean,
+                internshipHours: Number(mod.internshipHours),
+                maxDailyLessons: 0,
+              },
+            ];
           } else {
-            // Map common module subjects
             return (mod.subjects as any[]).map((s) => ({
               id: s.id && s.id.length > 10 ? s.id : null,
-              subjectId: s.subjectId || null,
+              materiaId: s.subjectId || null,
+              subjectId: s.subjectId || '',
               weeklyLessons: Number(s.weeklyLessons),
               isBaseComum: s.isBaseComum ?? true,
               allowConsecutive: s.allowConsecutive ?? true,
               resourceId: s.resourceId && s.resourceId !== 'null' ? s.resourceId : null,
-              maxDailyLessons: s.maxDailyLessons,
+              maxDailyLessons: s.maxDailyLessons || 0,
               modulo: mod.name,
               isInternship: false as boolean,
-              internshipHours: 0
+              internshipHours: 0,
             }));
           }
         }),
