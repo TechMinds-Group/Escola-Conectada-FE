@@ -147,6 +147,7 @@ export class ModalManageRoomComponent implements OnInit {
     this.ambienteService.save(payload).subscribe({
       next: (res: any) => {
         const savedRoom = res && res.data ? res.data : res;
+        this.schoolData.loadRooms(); // Refresh the signal
         this.onSaved.emit(savedRoom.id);
         this.notification.success('Ambiente salvo com sucesso!');
         this.viewMode.set('list');
@@ -170,10 +171,22 @@ export class ModalManageRoomComponent implements OnInit {
       this.ambienteService.delete(id).subscribe({
         next: () => {
           this.notification.success('Ambiente excluído.');
-          // Refresh list logic would be here if rooms were a signal in schoolData
-          // But since they come from parent, we rely on parent refreshing or local list
+          this.schoolData.loadRooms();
         },
-        error: () => {},
+        error: (err) => {
+          let errorMessage = 'Erro ao excluir ambiente.';
+          if (err.error) {
+            if (typeof err.error === 'string') errorMessage = err.error;
+            else if (err.error.message) errorMessage = err.error.message;
+            else if (err.error.errors) {
+              const firstKey = Object.keys(err.error.errors)[0];
+              if (firstKey && err.error.errors[firstKey].length > 0) {
+                errorMessage = err.error.errors[firstKey][0];
+              }
+            }
+          }
+          this.notification.error(errorMessage);
+        },
       });
     }
   }

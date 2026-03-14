@@ -60,6 +60,13 @@
               icon="bi-activity"
               label="Status"
             ></tm-select>
+            <tm-select
+              [formControl]="filterMatrix"
+              [options]="matrixOptions()"
+              placeholder="Escolher Matriz..."
+              icon="bi-grid-3x3"
+              label="Matriz Escolar"
+            ></tm-select>
           </div>
 
           <div class="pt-3 border-top">

@@ -77,13 +77,16 @@ export class CadastroTurma implements OnInit {
   turmaId: string | null = null;
   activeTab = signal('info');
   isDropdownActive = signal(false);
+  roomCapacityWarning = signal(false);
+  selectedRoomCap = signal(0);
 
   // Track Alocações: AlocacaoDto[]
   allocations = signal<AlocacaoDto[]>([]);
+  hasConflict = signal(false);
+  conflictMessages = signal<string[]>([]);
 
   // Dropdown data
   matrices = this.schoolData.schoolMatrices;
-  rooms = signal<SchoolRoom[]>([]);
   teachers = signal<Professor[]>([]);
 
   // Grade Modal State
@@ -231,6 +234,22 @@ export class CadastroTurma implements OnInit {
     this.classForm.get('gradeHorariaId')?.valueChanges.subscribe((val) => {
       this.selectedGradeId.set(val);
     });
+
+    this.classForm.get('salaId')?.valueChanges.subscribe(() => this.checkRoomCapacityConflict());
+    this.classForm.get('capacidadeMaxima')?.valueChanges.subscribe(() => this.checkRoomCapacityConflict());
+  }
+
+  checkRoomCapacityConflict() {
+    const salaId = this.classForm.get('salaId')?.value;
+    const capTurma = this.classForm.get('capacidadeMaxima')?.value;
+    const room = this.schoolData.schoolRooms().find((r) => r.id === salaId);
+
+    if (room && capTurma > room.capacity) {
+      this.roomCapacityWarning.set(true);
+      this.selectedRoomCap.set(room.capacity);
+    } else {
+      this.roomCapacityWarning.set(false);
+    }
   }
 
 
@@ -296,7 +315,7 @@ export class CadastroTurma implements OnInit {
   );
 
   roomOptions = computed(() =>
-    this.rooms().map((r) => ({
+    this.schoolData.schoolRooms().map((r) => ({
       value: r.id,
       label: `${r.name} — ${r.block} (Cap: ${r.capacity})`,
     })),
@@ -519,11 +538,11 @@ export class CadastroTurma implements OnInit {
   async ngOnInit() {
     // Load all lookup data concurrently and wait
     const initRequired = [
-      firstValueFrom(this.ambienteService.list()).then((data) => this.rooms.set(data)),
       firstValueFrom(this.professorService.getAll()).then((data: any) => this.teachers.set(data)),
       this.schoolData.loadTimeGrids(),
       this.schoolData.loadSubjects(),
       this.schoolData.loadMatrices(),
+      this.schoolData.loadRooms(),
     ];
 
     await Promise.all(initRequired);
@@ -557,6 +576,9 @@ export class CadastroTurma implements OnInit {
             this.allocations.set([...turma.alocacoes]);
           }
 
+          this.hasConflict.set(turma.hasConflict || false);
+          this.conflictMessages.set(turma.conflictMessages || []);
+
           // Ensure extra fields are patched if available in response
           this.classForm.patchValue({
             capacidadeMaxima: turma.capacidadeMaxima || 30,
@@ -569,6 +591,8 @@ export class CadastroTurma implements OnInit {
           } else if (turma.matrizId) {
             this.classForm.get('modulo')?.enable();
           }
+
+          this.checkRoomCapacityConflict();
         },
       });
     }
@@ -746,14 +770,9 @@ export class CadastroTurma implements OnInit {
   }
 
   onRoomSaved(newRoomId: string) {
-    // Refresh rooms list
-    this.ambienteService.list().subscribe({
-      next: (data) => {
-        this.rooms.set(data);
-        this.classForm.patchValue({ salaId: newRoomId });
-        this.closeRoomManager();
-      },
-    });
+    this.classForm.patchValue({ salaId: newRoomId });
+    this.closeRoomManager();
+    this.checkRoomCapacityConflict();
   }
 
   toggleDropdown(isOpen: boolean) {

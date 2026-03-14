@@ -410,14 +410,14 @@ export const TRANSLATIONS: Translation = {
             name: 'Nome da Turma',
             year: 'Ano Letivo',
             shift: 'Turno',
-            matrix: 'Matriz Curricular',
+            matrix: 'Matriz Escolar',
             room: 'Ambiente de Aula Preferencial',
             students: 'Quantidade de Alumnos',
           },
           hints: {
             matrix: 'Define a grade de disciplinas e a carga horária que esta turma seguirá.',
             summary:
-              'Indica as disciplinas e cargas horárias definidas pela Matriz Curricular selecionada.',
+              'Indica as disciplinas e cargas horárias definidas pela Matriz Escolar selecionada.',
             noMatrix:
               'Selecione uma matriz curricular na aba "Informações Básicas" para visualizar a grade.',
           },
@@ -1192,16 +1192,16 @@ export const TRANSLATIONS: Translation = {
             name: 'Nombre de la Clase',
             year: 'Año Escolar',
             shift: 'Turno',
-            matrix: 'Matriz Curricular',
+            matrix: 'Matriz Escolar',
             room: 'Aula Preferida',
             students: 'Cantidad de Alumnos',
           },
           hints: {
             matrix: 'Define la rejilla de materias y carga horaria que seguirá esta clase.',
             summary:
-              'Indica las materias y cargas horarias definidas por la Matriz Curricular seleccionada.',
+              'Indica las materias y cargas horarias definidas por la Matriz Escolar seleccionada.',
             noMatrix:
-              'Seleccione una matriz curricular en la pestaña "Información Básica" para ver la rejilla.',
+              'Seleccione una matriz escolar en la pestaña "Información Básica" para ver la rejilla.',
           },
           sections: {
             basic: 'Definiciones Básicas',

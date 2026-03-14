@@ -18,6 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { LanguageService } from '../../../core/services/language.service';
 import { TranslationService } from '../../../core/services/translation.service';
 import { ConfirmationService } from '../../../core/services/confirmation.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { TableComponent } from '../../../core/components/table/table.component';
 import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
 import { SelectComponent } from '../../../core/components/select/select.component';
@@ -47,7 +48,8 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
   public translation = inject(TranslationService);
   private cdr = inject(ChangeDetectorRef);
   private confirmationService = inject(ConfirmationService);
-  t = this.translation.dictionary;
+  private notification = inject(NotificationService);
+  t: any = this.translation.dictionary;
 
   // Filters State
   isFilterPanelOpen = signal(false);
@@ -155,7 +157,20 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
     if (confirmed) {
       this.ambienteService.delete(id).subscribe({
         next: () => this.loadRooms(),
-        error: () => {},
+        error: (err) => {
+          let errorMessage = 'Erro ao excluir ambiente.';
+          if (err.error) {
+            if (typeof err.error === 'string') errorMessage = err.error;
+            else if (err.error.message) errorMessage = err.error.message;
+            else if (err.error.errors) {
+              const firstKey = Object.keys(err.error.errors)[0];
+              if (firstKey && err.error.errors[firstKey].length > 0) {
+                errorMessage = err.error.errors[firstKey][0];
+              }
+            }
+          }
+          this.notification.error(errorMessage);
+        },
       });
     }
   }

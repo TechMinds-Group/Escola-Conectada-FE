@@ -25,6 +25,8 @@ export interface TurmaDto {
   modulo: string;
   statusCronograma: string;
   alocacoes?: AlocacaoDto[];
+  hasConflict?: boolean;
+  conflictMessages?: string[];
 }
 
 @Injectable({

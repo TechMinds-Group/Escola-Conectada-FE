@@ -36,11 +36,13 @@ export class ConsultaTurma implements OnInit {
   // Form Controls
   searchText = new FormControl('');
   filterStatus = new FormControl('Todos');
+  filterMatrix = new FormControl('Todas');
 
   // Values currently applied to the list
   appliedFilters = signal({
     search: '',
     status: 'Todos',
+    matrix: 'Todas',
   });
 
   // Options
@@ -51,6 +53,13 @@ export class ConsultaTurma implements OnInit {
     { value: 'Incompleto', label: 'Incompleto' },
     { value: 'Conflito', label: 'Conflito' },
   ];
+
+  matrixOptions = computed(() => {
+    return [
+      { value: 'Todas', label: 'Todas as Matrizes' },
+      ...this.schoolData.schoolMatrices().map((m) => ({ value: m.name, label: m.name })),
+    ];
+  });
 
   // Derived
   filteredTurmas = computed(() => {
@@ -68,13 +77,17 @@ export class ConsultaTurma implements OnInit {
     if (filters.status !== 'Todos') {
       list = list.filter((t) => t.statusCronograma === filters.status);
     }
+    if (filters.matrix !== 'Todas') {
+      list = list.filter((t) => t.matrizNome === filters.matrix);
+    }
     return list;
   });
 
   isFilterActive = computed(
     () =>
       !!this.appliedFilters().search ||
-      this.appliedFilters().status !== 'Todos',
+      this.appliedFilters().status !== 'Todos' ||
+      this.appliedFilters().matrix !== 'Todas',
   );
 
   toggleFilterPanel() {
@@ -85,12 +98,14 @@ export class ConsultaTurma implements OnInit {
     this.appliedFilters.set({
       search: this.searchText.value || '',
       status: this.filterStatus.value || 'Todos',
+      matrix: this.filterMatrix.value || 'Todas',
     });
   }
 
   clearFilters() {
     this.searchText.setValue('');
     this.filterStatus.setValue('Todos');
+    this.filterMatrix.setValue('Todas');
     this.applyFilters();
   }
 

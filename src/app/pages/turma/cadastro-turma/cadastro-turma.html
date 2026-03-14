@@ -57,6 +57,21 @@
     class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white"
     [class.dropdown-active]="isDropdownActive()"
   >
+    @if (hasConflict()) {
+      <div class="alert alert-danger d-flex align-items-start gap-3 border-0 shadow-sm mb-4 animate-in">
+        <i class="bi bi-exclamation-triangle-fill fs-4 mt-1"></i>
+        <div>
+          <h6 class="fw-bold mb-1 text-danger">Atenção: Conflito de Professores Detectado</h6>
+          <p class="mb-2 small opacity-75">Os seguintes problemas foram encontrados na alocação desta turma:</p>
+          <ul class="mb-0 small fw-medium text-danger">
+            @for (msg of conflictMessages(); track $index) {
+              <li>{{ msg }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+    }
+
     <!-- Standardized Tabs Navigation -->
     <ul
       class="nav nav-pills flex-column flex-lg-row gap-2 p-1 bg-light rounded-3 mb-4 border"
@@ -149,7 +164,7 @@
             <div class="col-12 col-lg-8">
               <tm-select
                 formControlName="matrizId"
-                label="Matriz Curricular"
+                label="Matriz Escolar"
                 [options]="matrixOptions()"
                 placeholder="Escolha a matriz base..."
                 icon="bi-grid-3x3"
@@ -191,6 +206,13 @@
                   <i class="bi bi-door-open text-primary fs-5"></i>
                 </button>
               </div>
+
+              @if (roomCapacityWarning()) {
+                <div class="mt-2 text-danger small fw-bold animate-in d-flex align-items-center gap-1">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  Aviso: O ambiente selecionado suporta apenas {{selectedRoomCap()}} alunos.
+                </div>
+              }
             </div>
           </div>
         </div>
