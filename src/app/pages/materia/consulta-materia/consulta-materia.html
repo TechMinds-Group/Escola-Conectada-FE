@@ -55,7 +55,7 @@
                 [formControl]="filterName"
                 placeholder="Ex: Matemática, Física..."
                 icon="bi-search"
-                label="Nome/Número"
+                label="Nome da Disciplina"
               ></tm-text>
             </div>
             <div class="col-12 col-md-4">
@@ -65,15 +65,6 @@
                 placeholder="Área"
                 icon="bi-layers"
                 label="Área do Conhecimento"
-              ></tm-select>
-            </div>
-            <div class="col-12 col-md-4">
-              <tm-select
-                [formControl]="filterStatus"
-                [options]="statusOptions"
-                placeholder="Status"
-                icon="bi-check-circle"
-                label="Status"
               ></tm-select>
             </div>
           </div>
@@ -118,13 +109,12 @@
         {
           header: 'Cor',
           template: colorTpl,
-          width: '80px',
+          width: '10%',
           class: 'text-center',
           headerClass: 'text-center',
         },
-        { header: 'Nome da Disciplina', template: nameTpl, width: '45%' },
-        { header: 'Área', key: 'axis', width: '35%' },
-        { header: 'Status', template: statusTpl, width: '15%' },
+        { header: 'Nome da Disciplina', template: nameTpl, width: '60%' },
+        { header: 'Área', key: 'axis', width: '30%' },
       ]"
       [data]="subjects()"
       (rowClick)="navigateToEdit($event.id!)"
@@ -159,13 +149,6 @@
       </div>
     </ng-template>
 
-    <ng-template #statusTpl let-subject>
-      <div class="text-start">
-        <span class="badge bg-success-subtle text-success border-0 px-3 py-1 rounded-pill">
-          Ativo
-        </span>
-      </div>
-    </ng-template>
   </main>
 
   <!-- Mobile View: Cards -->
@@ -195,11 +178,6 @@
               <div class="extra-small text-muted text-uppercase fw-bold">{{ subject.axis }}</div>
             </div>
           </div>
-          <span
-            class="badge bg-success-subtle text-success border-0 px-2 py-1 rounded-pill smaller"
-          >
-            Ativo
-          </span>
         </div>
 
         <div

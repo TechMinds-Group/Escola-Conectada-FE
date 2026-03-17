@@ -52,7 +52,6 @@ export class CadastroMateria implements OnInit {
     axis: ['Outros' as ThematicAxis, Validators.required],
     color: ['#6366f1', Validators.required],
     category: ['Base Comum', Validators.required],
-    status: ['Ativo', Validators.required],
   });
 
   areaOptions = computed(() => {
@@ -65,10 +64,6 @@ export class CadastroMateria implements OnInit {
     { value: 'Técnica', label: 'Técnica' },
   ];
 
-  statusOptions = [
-    { value: 'Ativo', label: 'Ativo' },
-    { value: 'Inativo', label: 'Inativo' },
-  ];
 
   presetColors = [
     '#6366f1',
@@ -106,7 +101,6 @@ export class CadastroMateria implements OnInit {
         axis: subject.axis,
         color: subject.color,
         category: subject.category,
-        status: 'Ativo', // Default to active if not in model
       });
     } else {
       this.notification.error('Disciplina não encontrada.');

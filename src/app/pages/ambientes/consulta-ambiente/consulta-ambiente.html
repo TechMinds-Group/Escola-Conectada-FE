@@ -54,21 +54,14 @@
               [formControl]="filterName"
               placeholder="Ex: 101, Laboratório de Química"
               icon="bi-search"
-              label="Nome ou Número"
+              label="Nome do Ambiente"
             ></tm-text>
             <tm-select
               [formControl]="filterType"
               [options]="typeOptions()"
               placeholder="Tipo"
               icon="bi-building"
-              label="Tipo de Ambiente"
-            ></tm-select>
-            <tm-select
-              [formControl]="filterStatus"
-              [options]="statusOptions"
-              placeholder="Status"
-              icon="bi-check-circle"
-              label="Status"
+              label="Tipo"
             ></tm-select>
           </div>
 
@@ -101,17 +94,16 @@
   <main class="animate-in d-none d-md-block">
     <tm-table
       [cols]="[
-        { header: 'Nome/Identificação', template: nameTpl, width: '30%' },
-        { header: 'Tipo', template: typeTpl, width: '20%' },
+        { header: 'Nome/Identificação', template: nameTpl, width: '50%' },
+        { header: 'Tipo', template: typeTpl, width: '16.67%' },
         {
           header: 'Capacidade',
           template: capacityTpl,
-          width: '15%',
+          width: '16.66%',
           class: 'text-center',
           headerClass: 'text-center',
         },
-        { header: 'Bloco', key: 'block', width: '20%' },
-        { header: 'Status', template: statusTpl, width: '15%' },
+        { header: 'Bloco', key: 'block', width: '16.67%' },
       ]"
       [data]="rooms()"
       (rowClick)="navigateToEdit($event.id!)"
@@ -145,13 +137,6 @@
       </div>
     </ng-template>
 
-    <ng-template #statusTpl let-room>
-      <div class="text-start">
-        <span class="badge bg-success-subtle text-success border-0 px-3 py-1 rounded-pill">
-          Ativo
-        </span>
-      </div>
-    </ng-template>
   </main>
 
   <!-- Mobile View: Cards -->

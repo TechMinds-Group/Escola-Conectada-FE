@@ -27,18 +27,15 @@ export class ConsultaMateria implements OnInit {
   showFilters = signal(false);
   filterName = new FormControl('');
   filterArea = new FormControl('Todas');
-  filterStatus = new FormControl('Todos');
 
   // Multi-select or Badge Filter State
   appliedFilters = computed(() => {
     const filters: { key: string; label: string }[] = [];
     const name = this.filterName.value;
     const area = this.filterArea.value;
-    const status = this.filterStatus.value;
 
     if (name) filters.push({ key: 'name', label: `Nome: ${name}` });
     if (area && area !== 'Todas') filters.push({ key: 'area', label: `Área: ${area}` });
-    if (status && status !== 'Todos') filters.push({ key: 'status', label: `Status: ${status}` });
 
     return filters;
   });
@@ -48,7 +45,6 @@ export class ConsultaMateria implements OnInit {
     let list = this.schoolData.subjects();
     const name = this.filterName.value?.toLowerCase().trim();
     const area = this.filterArea.value;
-    const status = this.filterStatus.value;
 
     if (name) {
       list = list.filter((s) => s.name.toLowerCase().includes(name));
@@ -72,11 +68,6 @@ export class ConsultaMateria implements OnInit {
     ];
   });
 
-  statusOptions = [
-    { value: 'Todos', label: 'Todos os Status' },
-    { value: 'Ativo', label: 'Ativo' },
-    { value: 'Inativo', label: 'Inativo' },
-  ];
 
   ngOnInit() {
     this.schoolData.loadSubjects();
@@ -89,13 +80,11 @@ export class ConsultaMateria implements OnInit {
   clearFilters() {
     this.filterName.setValue('');
     this.filterArea.setValue('Todas');
-    this.filterStatus.setValue('Todos');
   }
 
   removeFilter(key: string) {
     if (key === 'name') this.filterName.setValue('');
     if (key === 'area') this.filterArea.setValue('Todas');
-    if (key === 'status') this.filterStatus.setValue('Todos');
   }
 
   navigateToNew() {

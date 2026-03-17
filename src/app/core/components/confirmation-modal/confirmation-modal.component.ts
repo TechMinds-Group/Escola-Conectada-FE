@@ -18,13 +18,16 @@ import { ConfirmationService } from '../../services/confirmation.service';
               <div
                 class="icon-indicator"
                 [class.danger]="state.options.confirmClass?.includes('danger')"
+                [class.warning]="state.options.confirmClass?.includes('warning') || state.options.confirmClass?.includes('orange')"
               >
                 <i
                   class="bi"
                   [class]="
                     state.options.confirmClass?.includes('danger')
                       ? 'bi-trash3'
-                      : 'bi-question-circle'
+                      : state.options.confirmClass?.includes('warning') || state.options.confirmClass?.includes('orange')
+                        ? 'bi-exclamation-triangle'
+                        : 'bi-question-circle'
                   "
                 ></i>
               </div>
@@ -113,6 +116,22 @@ import { ConfirmationService } from '../../services/confirmation.service';
       .icon-indicator.danger {
         background: rgba(239, 68, 68, 0.1);
         color: #dc2626;
+      }
+
+      .icon-indicator.warning {
+        background: rgba(249, 115, 22, 0.1);
+        color: #ea580c;
+      }
+
+      .btn-orange {
+        background-color: #ea580c !important;
+        color: #ffffff !important;
+        border: none !important;
+
+        &:hover {
+          background-color: #c2410c !important;
+          color: #ffffff !important;
+        }
       }
 
       .modal-title {

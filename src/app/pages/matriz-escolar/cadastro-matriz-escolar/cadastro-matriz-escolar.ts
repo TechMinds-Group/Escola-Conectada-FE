@@ -28,6 +28,7 @@ import { ButtonSaveComponent } from '../../../core/components/buttons/button-sav
 import { ButtonCancelComponent } from '../../../core/components/buttons/button-cancel';
 import { ButtonDeleteComponent } from '../../../core/components/buttons/button-delete';
 import { ButtonEditComponent } from '../../../core/components/buttons/button-edit';
+import { ButtonOrangeComponent } from '../../../core/components/buttons/button-orange';
 import { ModalManageListComponent } from '../../../core/components/modals/modal-manage-list/modal-manage-list.component';
 import { TextInputComponent } from '../../../core/components/text-input/text-input.component';
 import { SelectComponent } from '../../../core/components/select/select.component';
@@ -46,6 +47,7 @@ import { TableComponent } from '../../../core/components/table/table.component';
     ButtonCancelComponent,
     ButtonDeleteComponent,
     ButtonEditComponent,
+    ButtonOrangeComponent,
     ModalManageListComponent,
     TextInputComponent,
     SelectComponent,
@@ -74,6 +76,7 @@ export class CadastroMatrizEscolarPage implements OnInit {
 
   editingId = signal<string | null>(null);
   isViewMode = signal(false);
+  isClosedMatrix = signal(false);
   originalMatrixSnapshot = signal<SchoolMatrixModel | null>(null);
   isSubmitting = signal(false);
   saveAttempted = signal(false);
@@ -127,6 +130,110 @@ export class CadastroMatrizEscolarPage implements OnInit {
     // Let's use a signal that updates on form change.
     return this._complianceStatus();
   });
+
+  availableActions = computed(() => {
+    const actions: { value: string; label: string }[] = [];
+
+    if (this.editingId()) {
+      if (!this.isClosedMatrix()) {
+        actions.push({ value: 'delete', label: 'Excluir Matriz' });
+      }
+    }
+
+    if (this.isViewMode()) {
+      if (this.isClosedMatrix()) {
+        actions.push({ value: 'reopen', label: 'Reabrir Matriz' });
+      } else {
+        actions.push({ value: 'edit', label: 'Editar' });
+        actions.push({ value: 'close', label: 'Encerrar' });
+      }
+    } else {
+      actions.push({ value: 'cancel', label: 'Cancelar' });
+      actions.push({ value: 'save', label: 'Salvar' });
+    }
+
+    return actions;
+  });
+
+  matricesOptions = computed(() => {
+    const currentId = this.editingId();
+    return this.schoolData
+      .schoolMatrices()
+      .filter((m) => m.id !== currentId)
+      .map((m) => ({
+        value: m.id,
+        label: `${m.name} (${m.year})`,
+      }));
+  });
+
+  selectedAction = signal<string>('');
+  selectedCopyMatrixId = signal<string>('');
+
+  executeAction(action: string) {
+    if (!action) return;
+
+    // Execute de forma imediata ou com confirmação
+    if (action === 'edit') this.enableEdit();
+    else if (action === 'delete') this.deleteMatrix();
+    else if (action === 'close') this.closeMatrix();
+    else if (action === 'reopen') this.reopenMatrix();
+    else if (action === 'cancel') this.cancelEdit();
+    else if (action === 'save') this.onSubmit();
+
+    // Reseta o select após execução para ficar limpo
+    setTimeout(() => this.selectedAction.set(''), 100);
+  }
+
+  async copyFromMatrix(sourceId: string) {
+    if (!sourceId) return;
+
+    const hasModules = this.levelsArray.controls.some((level: any) => {
+      const modules = level.get('modules') as FormArray;
+      return modules && modules.length > 0;
+    });
+
+    if (hasModules) {
+      const confirmed = await this.confirmationService.confirm({
+        title: 'Atenção',
+        message: 'Atenção: Esta ação irá substituir todos os dados atuais da matriz pelos dados da matriz selecionada. Deseja continuar?',
+        confirmClass: 'btn-danger',
+        confirmLabel: 'Copiar Estrutura',
+      });
+
+      if (!confirmed) {
+        setTimeout(() => this.selectedCopyMatrixId.set(''), 100);
+        return;
+      }
+    }
+
+    try {
+      const sourceMatrix = this.schoolData.schoolMatrices().find((m) => m.id === sourceId);
+      if (!sourceMatrix) {
+        this.notification.error('Matriz de origem não encontrada.');
+        return;
+      }
+
+      // Deep Clone
+      const clonedMatrix: SchoolMatrixModel = JSON.parse(JSON.stringify(sourceMatrix));
+
+      const levelsArray = this.matrixForm.get('levels') as FormArray;
+      levelsArray.clear();
+
+      clonedMatrix.levels?.forEach((level) => {
+        delete level.id;
+        level.subjects?.forEach((s) => {
+          delete s.id;
+        });
+        this.addLevelRow(level);
+      });
+
+      this.notification.success('Estrutura importada com sucesso!');
+    } catch (error) {
+      this.notification.error('Erro ao importar a matriz.');
+    } finally {
+      setTimeout(() => this.selectedCopyMatrixId.set(''), 100);
+    }
+  }
 
   private _complianceStatus = signal<{ totalHours: number; isValid: boolean; percent: number }>({
     totalHours: 0,
@@ -285,6 +392,8 @@ export class CadastroMatrizEscolarPage implements OnInit {
       },
       { emitEvent: false },
     );
+
+    this.isClosedMatrix.set(matrix.isClosed ?? false);
 
     if (this.editingId()) {
       this.matrixForm.get('year')?.disable();
@@ -697,6 +806,8 @@ export class CadastroMatrizEscolarPage implements OnInit {
   }
 
   enableEdit() {
+    if (this.isClosedMatrix()) return;
+
     this.isViewMode.set(false);
     this.matrixForm.enable();
 
@@ -750,6 +861,51 @@ export class CadastroMatrizEscolarPage implements OnInit {
         } catch (error) {
           this.notification.error('Erro ao excluir matriz escolar.');
         }
+      }
+    }
+  }
+
+  async closeMatrix() {
+    const id = this.editingId();
+    if (!id) return;
+
+    const confirmed = await this.confirmationService.confirm({
+      title: 'Atenção',
+      message: 'Tem certeza que deseja ENCERRAR esta matriz escolar? Ela entrará em modo de apenas consulta.',
+      confirmClass: 'btn-orange',
+      confirmLabel: 'Encerrar',
+    });
+
+    if (confirmed) {
+      try {
+        await this.schoolData.closeMatrix(id);
+        this.notification.success('Matriz escolar fechada com sucesso!');
+        this.isClosedMatrix.set(true);
+        this.isViewMode.set(true);
+        this.matrixForm.disable();
+      } catch (error) {
+        this.notification.error('Erro ao fechar matriz escolar.');
+      }
+    }
+  }
+
+  async reopenMatrix() {
+    const id = this.editingId();
+    if (!id) return;
+
+    const confirmed = await this.confirmationService.confirm({
+      message: 'Deseja realmente REABRIR esta matriz escolar? Edições serão permitidas novamente.',
+      confirmClass: 'btn-primary',
+      confirmLabel: 'Reabrir',
+    });
+
+    if (confirmed) {
+      try {
+        await this.schoolData.reopenMatrix(id);
+        this.notification.success('Matriz escolar reaberta com sucesso!');
+        this.isClosedMatrix.set(false);
+      } catch (error) {
+        this.notification.error('Erro ao reabrir matriz escolar.');
       }
     }
   }

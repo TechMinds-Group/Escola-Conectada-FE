@@ -92,6 +92,7 @@ export interface SchoolMatrix {
   mecAnnualHours: number;
   levels: LevelConfiguration[];
   status: 'Ativa' | 'Rascunho';
+  isClosed?: boolean;
 }
 
 export interface SchoolClass {
@@ -462,6 +463,16 @@ export class SchoolDataService {
 
   async deleteMatrix(id: string) {
     await firstValueFrom(this.http.delete<any>(`${this.apiUrl}/MatrizesEscolares/${id}`));
+    await this.loadMatrices();
+  }
+
+  async closeMatrix(id: string) {
+    await firstValueFrom(this.http.post<any>(`${this.apiUrl}/MatrizesEscolares/${id}/close`, {}));
+    await this.loadMatrices();
+  }
+
+  async reopenMatrix(id: string) {
+    await firstValueFrom(this.http.post<any>(`${this.apiUrl}/MatrizesEscolares/${id}/reopen`, {}));
     await this.loadMatrices();
   }
 
@@ -860,6 +871,7 @@ export class SchoolDataService {
       year: item.ano ?? item.Ano ?? new Date().getFullYear(),
       mecAnnualHours: item.horasAnuaisMec ?? item.HorasAnuaisMec ?? 1200,
       status: item.status ?? item.Status ?? 'Ativa',
+      isClosed: item.isClosed ?? item.IsClosed ?? false,
       levels: (item.niveis ?? item.Niveis ?? []).map((l: any) => ({
         id: String(l.id ?? l.Id ?? ''),
         level: l.nivel ?? l.Nivel ?? EducationLevel.Fundamental,

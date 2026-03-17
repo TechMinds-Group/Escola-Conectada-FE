@@ -161,3 +161,46 @@
     opacity: 0.5;
   }
 }
+
+.actions-dropdown {
+  ::ng-deep {
+    .input-wrapper {
+      background-color: #0d6efd !important; /* Bootstrap primary blue */
+      border: none !important;
+      color: #ffffff !important;
+      
+      .selected-value-container {
+        span, .placeholder-state {
+          color: #ffffff !important;
+          font-weight: 600 !important;
+        }
+      }
+      
+      .arrow-section i {
+        color: #ffffff !important;
+      }
+    }
+  }
+}
+
+.btn-orange {
+  background-color: #ea580c !important; /* Laranja escuro para contraste com branco */
+  color: #ffffff !important;
+  border: none !important;
+
+  &:hover {
+    background-color: #c2410c !important; /* orange-700 */
+    color: #ffffff !important;
+  }
+}
+
+.alert-orange {
+  background-color: #ea580c !important; /* Fundo sólido igual ao botão */
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.bg-orange-light {
+  background-color: rgba(255, 255, 255, 0.2) !important; /* Fundo branco Translúcido para o ícone */
+  color: #ffffff !important;
+}

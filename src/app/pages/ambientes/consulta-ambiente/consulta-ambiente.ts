@@ -55,12 +55,9 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
   isFilterPanelOpen = signal(false);
   filterName = new FormControl('');
   filterType = new FormControl('Todos');
-  filterStatus = new FormControl('Todos');
-
   appliedFilters = signal({
     name: '',
     type: 'Todos',
-    status: 'Todos',
   });
 
   // Data
@@ -84,8 +81,7 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
   isFilterActive = computed(
     () =>
       !!this.appliedFilters().name ||
-      this.appliedFilters().type !== 'Todos' ||
-      this.appliedFilters().status !== 'Todos',
+      this.appliedFilters().type !== 'Todos',
   );
 
   ngOnInit() {
@@ -116,21 +112,18 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
     this.appliedFilters.set({
       name: this.filterName.value || '',
       type: this.filterType.value || 'Todos',
-      status: this.filterStatus.value || 'Todos',
     });
   }
 
   clearFilters() {
     this.filterName.setValue('');
     this.filterType.setValue('Todos');
-    this.filterStatus.setValue('Todos');
     this.applyFilters();
   }
 
   removeFilter(key: string) {
     if (key === 'name') this.filterName.setValue('');
     if (key === 'type') this.filterType.setValue('Todos');
-    if (key === 'status') this.filterStatus.setValue('Todos');
     this.applyFilters();
   }
 
@@ -183,11 +176,6 @@ export class ConsultaAmbiente implements OnInit, AfterViewInit {
     ];
   });
 
-  statusOptions = [
-    { value: 'Todos', label: 'Todos os Status' },
-    { value: 'Ativo', label: 'Ativo' },
-    { value: 'Inativo', label: 'Inativo' },
-  ];
 
   completeTutorial() {
     this.ambienteService.completeTutorial();
