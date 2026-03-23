@@ -1,0 +1,263 @@
+<div class="container-fluid py-4 pb-5">
+  <!-- Header -->
+  <header class="mb-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md-auto">
+        <h2 class="fw-bold mb-0 text-primary fs-3">Equipamentos</h2>
+        <p class="text-muted mb-0 small opacity-75">Gerenciamento de equipamentos e eletrônicos</p>
+      </div>
+
+      <div class="col-12 col-md-auto ms-auto">
+        <button
+          class="btn btn-primary d-flex align-items-center justify-content-center gap-2 px-4 py-2 shadow-sm fw-bold transition-hover rounded-3 w-100"
+          (click)="navigateToNew()"
+        >
+          <i class="bi bi-plus-lg fs-5"></i>
+          Novo Equipamento
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filters Button Row -->
+  <div class="row mb-3 animate-in">
+    <div class="col-12 col-md-auto ms-auto d-flex gap-2">
+      @if (isAdmin()) {
+        <button
+          class="btn d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 transition-hover border shadow-xs w-100"
+          [class.btn-primary]="isConsultarPanelOpen()"
+          [class.btn-light]="!isConsultarPanelOpen()"
+          (click)="toggleConsultarPanel()"
+        >
+          <i class="bi" [class.bi-calendar-check]="!isConsultarPanelOpen()" [class.bi-chevron-up]="isConsultarPanelOpen()"></i>
+          <span class="fw-bold">Consultar</span>
+        </button>
+      }
+
+      <button
+        class="btn d-flex align-items-center justify-content-center gap-2 px-3 py-2 rounded-3 transition-hover border shadow-xs w-100"
+        [class.btn-primary]="isFilterPanelOpen()"
+        [class.btn-light]="!isFilterPanelOpen()"
+        (click)="toggleFilterPanel()"
+      >
+        <i class="bi" [class.bi-funnel]="!isFilterPanelOpen()" [class.bi-chevron-up]="isFilterPanelOpen()"></i>
+        <span class="fw-bold">Filtros</span>
+        @if (isFilterActive()) {
+          <span class="badge rounded-circle bg-primary p-1 ms-1" style="width: 8px; height: 8px"></span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- Retractable Consultar Panel (Admin Only) -->
+  @if (isAdmin() && isConsultarPanelOpen()) {
+    <section class="filters-panel mb-4 animate-in">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-surface">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-2 text-dark">Equipamentos Agendados</h5>
+          <p class="text-muted small mb-3">Lista de reservas ativas para controle de fluxo.</p>
+ 
+          <!-- Filter Search Inside Panel -->
+          <div class="mb-3" style="max-width: 320px;">
+            <tm-text
+              [formControl]="filterReservaName"
+              placeholder="Buscar por equipamento ou solicitante..."
+              icon="bi-search"
+            ></tm-text>
+          </div>
+
+          <!-- Desktop View for Reservas -->
+          <div class="d-none d-lg-block">
+            <tm-table
+              [cols]="[
+                { header: 'Equipamento', key: 'equipamentoNome', width: '25%' },
+                { header: 'Solicitante', key: 'nomeCompleto', width: '25%' },
+                { header: 'Data/Turno', template: dataTpl, width: '20%' },
+                { header: 'Horas', template: horasTpl, width: '20%' },
+                { header: 'Ações', template: acoesTpl, width: '10%' }
+              ]"
+              [data]="reservasFiltradas()"
+            ></tm-table>
+          </div>
+
+          <!-- Mobile Cards View for Reservas -->
+          <div class="d-lg-none d-flex flex-column gap-3 mt-2">
+            @for (res of reservasFiltradas(); track res.id) {
+              <div class="card border-0 shadow-sm rounded-4 p-3 bg-white animate-in">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div>
+                    <h6 class="fw-bold text-dark mb-1">{{ res.equipamentoNome }}</h6>
+                    <div class="small text-muted">{{ res.nomeCompleto }}</div>
+                  </div>
+                  <button class="btn btn-link link-danger p-0 shadow-none" (click)="cancelarReserva(res.id)" title="Cancelar Reserva">
+                    <i class="bi bi-trash fs-5 text-danger"></i>
+                  </button>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-light">
+                  <div class="small d-flex align-items-center gap-2">
+                    <span class="badge bg-light text-dark border-0 px-2 py-1 rounded-pill smaller">{{ res.turno }}</span>
+                    <span class="text-muted smaller">{{ res.horas }}</span>
+                  </div>
+                  <span class="fw-bold text-primary smaller">{{ res.dataReserva | date: 'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+            } @empty {
+              <div class="text-center py-4 text-muted bg-white rounded-4 shadow-sm border mt-2">
+                <i class="bi bi-calendar-x fs-2 d-block mb-2 opacity-25"></i>
+                <p class="mb-0 small">Nenhum agendamento encontrado</p>
+              </div>
+            }
+          </div>
+
+          <!-- Templates -->
+          <ng-template #dataTpl let-res>
+            <div class="text-start">
+               <div class="fw-bold text-dark">{{ res.dataReserva | date: 'dd/MM/yyyy' }}</div>
+               <span class="badge bg-light text-dark border smaller">{{ res.turno }}</span>
+            </div>
+          </ng-template>
+
+          <ng-template #acoesTpl let-res>
+            <div class="text-start">
+              <button class="btn btn-link link-danger p-0 shadow-none" (click)="cancelarReserva(res.id)" title="Cancelar Reserva">
+                <i class="bi bi-trash fs-5 text-danger"></i>
+              </button>
+            </div>
+          </ng-template>
+
+          <ng-template #horasTpl let-res>
+            <div class="d-flex flex-wrap gap-1 text-start">
+              @for (hour of res.horas.split(','); track hour) {
+                <span class="badge bg-light text-primary border border-primary-subtle rounded-pill px-2 py-1 smaller fw-bold">
+                   {{ hour.trim() }}
+                </span>
+              }
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Retractable Filter Panel -->
+  @if (isFilterPanelOpen()) {
+    <section class="filters-panel mb-4 animate-in">
+      <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-surface">
+        <div class="card-body p-4">
+          <div class="grid-layout mb-4">
+            <tm-text
+              [formControl]="filterName"
+              placeholder="Ex: Notebook, Projetor Epson"
+              icon="bi-search"
+              label="Nome do Equipamento"
+            ></tm-text>
+            <tm-select
+              [formControl]="filterType"
+              [options]="typeOptions()"
+              placeholder="Tipo"
+              icon="bi-laptop"
+              label="Tipo"
+            ></tm-select>
+          </div>
+
+          <div class="pt-3 border-top">
+            <div class="row g-2 justify-content-end">
+              <div class="col-12 col-lg-auto">
+                <button
+                  class="btn btn-light rounded-3 px-4 py-2 fw-bold text-muted transition-hover border w-100"
+                  (click)="clearFilters()"
+                >
+                  Limpar Filtros
+                </button>
+              </div>
+              <div class="col-12 col-lg-auto">
+                <button
+                  class="btn btn-primary rounded-3 px-4 py-2 fw-bold transition-hover shadow-sm w-100"
+                  (click)="applyFilters()"
+                >
+                  Aplicar Filtros
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Desktop Table (tm-table) -->
+  <main class="animate-in d-none d-lg-block">
+    <tm-table
+      [cols]="[
+        { header: 'Nome/Identificação', template: nameTpl, width: '50%' },
+        { header: 'Tipo', template: typeTpl, width: '25%' },
+        { header: 'Quantidade', key: 'quantidade', width: '25%' }
+      ]"
+      [data]="equipamentos()"
+      (rowClick)="navigateToEdit($event.id!)"
+    ></tm-table>
+
+    <!-- Templates for Table Columns -->
+    <ng-template #nameTpl let-eq>
+      <div class="d-flex align-items-center gap-3 ps-3 text-start">
+        <div class="rounded-3 bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px">
+          <i class="bi bi-laptop fs-5"></i>
+        </div>
+        <div>
+          <div class="fw-bold text-dark">{{ eq.nome }}</div>
+          <small class="text-muted">{{ eq.descricao }}</small>
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #typeTpl let-eq>
+      <div class="text-start">
+        <span class="badge bg-light text-dark border px-3 py-1 rounded-pill fw-normal">
+          {{ eq.tipo }}
+        </span>
+      </div>
+    </ng-template>
+
+  </main>
+
+  <!-- Mobile ViewLayout -->
+  <div class="d-lg-none d-flex flex-column gap-3">
+    @for (eq of equipamentos(); track eq.id) {
+      <div
+        class="card border-0 shadow-sm rounded-4 p-3 animate-in"
+        (click)="navigateToEdit(eq.id!)"
+      >
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div class="d-flex align-items-center gap-3">
+            <div
+              class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+              style="width: 48px; height: 48px"
+            >
+              <i class="bi bi-laptop fs-4"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold text-dark mb-0">{{ eq.nome }}</h6>
+              <div class="small text-muted">{{ eq.tipo }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-light"
+        >
+          <div class="d-flex align-items-center gap-2 text-muted small">
+            <i class="bi bi-123"></i>
+            <span class="fw-bold">{{ eq.quantidade }}</span>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="text-center py-5 text-muted bg-white rounded-4 shadow-sm border">
+        <i class="bi bi-laptop-fill fs-1 d-block mb-3 opacity-25"></i>
+        <p class="mb-0">Nenhum equipamento encontrado</p>
+      </div>
+    }
+  </div>
+
+  <!-- Mobile View Layout omitted for brevity unless strictly needed -->
+</div>

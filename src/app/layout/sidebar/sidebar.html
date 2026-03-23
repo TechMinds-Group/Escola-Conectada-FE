@@ -132,6 +132,21 @@
           @if (auth.hasRole(ROLES.ADMIN)) {
             <li>
               <a
+                routerLink="/equipamentos"
+                routerLinkActive="active"
+                class="nav-link d-flex align-items-center py-2 text-nowrap"
+                [title]="isCollapsed ? 'Equipamentos' : ''"
+              >
+                <div class="icon-wrapper sub-icon d-flex justify-content-center align-items-center">
+                  <i class="bi bi-laptop"></i>
+                </div>
+                <span class="transition-label ms-2">Equipamentos</span>
+              </a>
+            </li>
+          }
+          @if (auth.hasRole(ROLES.ADMIN)) {
+            <li>
+              <a
                 routerLink="/subjects"
                 routerLinkActive="active"
                 class="nav-link d-flex align-items-center py-2 text-nowrap"
@@ -286,7 +301,6 @@
       </li>
     }
 
-    <hr class="mx-3 mt-1 opacity-25" />
   </ul>
 
   <!-- User Profile (Profile & Admin Menu) -->

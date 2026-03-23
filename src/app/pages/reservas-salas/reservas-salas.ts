@@ -162,13 +162,13 @@ export class ReservasSalas implements OnInit {
 
   selectedTurno = signal<string>('Manhã');
   selectedTimeId = signal<string>('07:00');
-  selectedDate = signal<string>(new Date().toISOString().split('T')[0]); // YYYY-MM-DD
+  selectedDate = signal<string>(format(new Date(), 'yyyy-MM-dd')); // YYYY-MM-DD
   selectedResources = signal<string[]>([]);
 
   appliedFilters = signal({
     turno: 'Manhã',
     timeId: '07:00',
-    date: new Date().toISOString().split('T')[0],
+    date: format(new Date(), 'yyyy-MM-dd'),
     resources: [] as string[],
   });
 
@@ -240,6 +240,27 @@ export class ReservasSalas implements OnInit {
   isSubmitting = signal(false);
   errorMessage = signal<string | null>(null);
 
+  getAutoTurno(): string {
+    const settings = this.schoolData.tvSettings();
+    const triggers = settings.shiftTriggers;
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+
+    const toMinutes = (timeStr: string) => {
+      if (!timeStr) return 0;
+      const [h, m] = timeStr.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    const morningMins = toMinutes(triggers.morning);
+    const afternoonMins = toMinutes(triggers.afternoon);
+    const nightMins = toMinutes(triggers.night);
+
+    if (currentMins >= nightMins) return 'Noite';
+    if (currentMins >= afternoonMins) return 'Tarde';
+    return 'Manhã';
+  }
+
   constructor() {
     // Auto-select first shift
     effect(() => {
@@ -253,7 +274,8 @@ export class ReservasSalas implements OnInit {
     effect(() => {
       const turnoFilter = this.selectedTurno();
       const times = this.horariosMenu()[turnoFilter] || [];
-      if (times.length > 0 && !times.some((t) => t.id === this.selectedTimeId())) {
+      const currentId = this.selectedTimeId();
+      if (times.length > 0 && currentId && !times.some((t) => t.id === currentId)) {
         this.selectedTimeId.set(times[0].id);
       }
     });
@@ -269,6 +291,16 @@ export class ReservasSalas implements OnInit {
   ngOnInit() {
     this.schoolData.loadClasses();
 
+    const autoTurno = this.getAutoTurno();
+    this.selectedTurno.set(autoTurno);
+    const times = this.horariosMenu()[autoTurno] || [];
+    if (times.length > 0) {
+      this.selectedTimeId.set(times[0].id);
+    } else {
+      this.selectedTimeId.set('');
+    }
+    this.applyFilters();
+
     this.ambienteService.list().subscribe({
       next: (salas) => this.schoolRoomsApi.set(salas),
       error: () => {},
@@ -281,8 +313,7 @@ export class ReservasSalas implements OnInit {
 
     // Initial loads
     this.loadReservas();
-    const applied = this.appliedFilters();
-    this.loadAvailability(applied.date, applied.timeId || applied.turno);
+    // loadAvailability será executado pelo effect de appliedFilters
 
     // Check for reservaId in query params
     this.route.queryParams.subscribe((params) => {
@@ -366,12 +397,16 @@ export class ReservasSalas implements OnInit {
   }
 
   clearFilters() {
-    const today = new Date().toISOString().split('T')[0];
+    const today = format(new Date(), 'yyyy-MM-dd');
     this.selectedDate.set(today);
-    this.selectedTurno.set('Manhã');
-    const available = this.horariosMenu()['Manhã'];
+    
+    const autoTurno = this.getAutoTurno();
+    this.selectedTurno.set(autoTurno);
+    
+    const available = this.horariosMenu()[autoTurno];
     if (available?.length > 0) this.selectedTimeId.set(available[0].id);
     else this.selectedTimeId.set('07:00');
+    
     this.selectedResources.set([]);
     this.applyFilters();
   }

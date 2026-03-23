@@ -51,7 +51,7 @@ export class ConsultaMatrizEscolarPage {
     }
 
     if (status && status !== 'Todos') {
-      list = list.filter((m) => m.status === status);
+      list = list.filter((m) => status === 'Fechada' ? m.isClosed : !m.isClosed);
     }
 
     return list;
@@ -59,8 +59,8 @@ export class ConsultaMatrizEscolarPage {
 
   statusOptions = [
     { value: 'Todos', label: 'Todos os Status' },
-    { value: 'Ativa', label: 'Ativa' },
-    { value: 'Inativa', label: 'Inativa' },
+    { value: 'Aberta', label: 'Aberta' },
+    { value: 'Fechada', label: 'Fechada' },
   ];
 
   toggleFilters() {

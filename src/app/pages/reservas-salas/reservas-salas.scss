@@ -40,6 +40,11 @@
   .bg-surface {
     background-color: var(--surface-color) !important;
   }
+
+  .bg-light-subtle {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
 }
 
 /* 3. Layout de Filtros */

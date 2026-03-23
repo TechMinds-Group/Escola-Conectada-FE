@@ -1,0 +1,366 @@
+<div class="container-fluid p-0 bg-light min-vh-100">
+  <!-- Navbar Header -->
+  <nav class="navbar navbar-expand bg-surface px-4 py-3 border-bottom shadow-sm mb-4">
+    <div class="container-fluid p-0">
+      <!-- Left Side (Back button & Title) -->
+      <div class="d-flex align-items-center gap-3">
+        <button
+          class="btn transition-hover border-0 shadow-sm bg-white btn-back-responsive"
+          (click)="onCancel()"
+          title="Voltar"
+        >
+          <i class="bi bi-arrow-left fs-5 text-primary"></i>
+        </button>
+        <div>
+          <h2 class="fw-bold mb-0 text-dark fs-5 text-truncate">Agendar Equipamento</h2>
+          <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75" style="font-size: 0.65rem;">
+            Identificação do Aluno
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Side (Language & Theme) -->
+      <div class="d-flex align-items-center ms-auto gap-2">
+        <!-- Language Selector -->
+        <div class="dropdown d-none d-md-block">
+          <button class="btn btn-header-action shadow-none border" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="d-flex align-items-center justify-content-center">
+              @for (lang of availableLanguages; track lang.code) {
+                @if (translation.lang() === lang.code) {
+                  <img [src]="lang.flag" width="20" class="rounded-1" />
+                }
+              }
+            </span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end glass-dropdown language-dropdown border-0 shadow-lg py-2 mt-2">
+            @for (lang of availableLanguages; track lang.code) {
+              <li>
+                <button class="dropdown-item d-flex align-items-center justify-content-center py-2 px-3 position-relative" (click)="translation.setLang(lang.code)">
+                  <img [src]="lang.flag" width="22" class="rounded-1" />
+                </button>
+              </li>
+            }
+          </ul>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="btn btn-header-action shadow-none border" type="button" (click)="theme.toggleTheme()" title="Alternar tema">
+          <i class="bi" [class.bi-moon-stars-fill]="!theme.isDarkMode()" [class.bi-sun-fill]="theme.isDarkMode()"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Wrapper -->
+  <div class="px-3 px-md-4 py-3 pb-5">
+    <!-- Card Colapsável Consulta Histórico (Bloco 1) -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-white mx-auto" style="max-width: 600px">
+    <div class="accordion accordion-flush" id="accordionHistorico">
+       <div class="accordion-item bg-transparent">
+         <h2 class="accordion-header">
+           <button class="accordion-button collapsed fw-bold text-primary bg-transparent d-flex align-items-center py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false">
+             <i class="bi bi-clock-history me-2 fs-5"></i> Consultar Equipamentos Solicitados
+           </button>
+         </h2>
+         <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionHistorico">
+           <div class="accordion-body p-2 bg-white border-top border-light">
+              <div class="row g-2 align-items-end">
+                 <div class="col">
+                    <tm-text
+                       [formControl]="matriculaConsultaControl"
+                       [control]="matriculaConsultaControl"
+                       label="Matrícula"
+                       placeholder="Sua matrícula"
+                       icon="bi-hash"
+                       (keyup.enter)="consultarHistorico()"
+                    ></tm-text>
+                 </div>
+                 <div class="col-auto">
+                    <!-- Botão com style height para alinhar com o input -->
+                    <button class="btn btn-primary d-flex align-items-center gap-1 shadow-sm px-3 fw-bold rounded-3" style="height: 38px; margin-bottom: 4px;" (click)="consultarHistorico()">
+                       <i class="bi bi-search"></i> Consultar
+                    </button>
+                 </div>
+              </div>
+
+              <!-- Tabela Condicional -->
+              @if (historicoList().length > 0) {
+                 <div class="mt-3 border-top pt-2">
+                    <h6 class="small fw-bold text-dark mb-2">Solicitações Recentes (30 dias):</h6>
+                    <tm-table 
+                       [cols]="colsHistorico" 
+                       [data]="historicoList()" 
+                       [paginated]="false"
+                    ></tm-table>
+                 </div>
+              } @else if (matriculaConsultaControl.value && !historicoList().length) {
+                 <div class="text-muted small mt-2">Nenhum agendamento encontrado nos últimos 30 dias.</div>
+              }
+           </div>
+         </div>
+       </div>
+    </div>
+  </div>
+
+  <!-- Main Content (Bloco 2) -->
+  <main class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white mx-auto" style="max-width: 600px">
+    <div class="text-center mb-4">
+      <div
+        class="icon-circle bg-success-subtle text-success mx-auto mb-2 d-flex align-items-center justify-content-center glow"
+        style="width: 60px; height: 60px; border-radius: 50%"
+      >
+        <i class="bi bi-calendar-check fs-3"></i>
+      </div>
+      <h5 class="fw-bold text-dark mb-1">Dados de Acesso</h5>
+      <p class="text-muted small">Preencha suas informações para continuar</p>
+    </div>
+
+    <form [formGroup]="agendaForm" (ngSubmit)="onSubmit()">
+      <div class="row g-3">
+        <!-- Tipo de Usuário -->
+        <div class="col-12 col-md-6">
+          <tm-select
+            formControlName="tipoUsuario"
+            label="Solicitante"
+            [options]="tipoUsuarioOptions"
+            placeholder="Selecione seu tipo"
+            icon="bi-person-badge"
+            [control]="agendaForm.get('tipoUsuario')"
+          ></tm-select>
+        </div>
+
+        <!-- Data do Agendamento -->
+        <div class="col-12 col-md-6">
+          <tm-date
+            formControlName="data"
+            label="Data do Agendamento"
+            [includeTime]="false"
+            placeholder="DD/MM/AAAA"
+          ></tm-date>
+        </div>
+
+        <!-- Turno -->
+        <div class="col-12 col-md-6">
+          <tm-select
+            formControlName="turno"
+            label="Turno"
+            [options]="turnoOptions()"
+            placeholder="Selecione o turno"
+            icon="bi-clock"
+            [control]="agendaForm.get('turno')"
+          ></tm-select>
+        </div>
+
+        <!-- Turma -->
+        <div class="col-12 col-md-12">
+          <tm-select
+            formControlName="turmaId"
+            label="Sua Turma"
+            [options]="turmasFiltradasByTurno()"
+            placeholder="Selecione sua turma"
+            icon="bi-door-open"
+            [control]="agendaForm.get('turmaId')"
+          ></tm-select>
+          @if (agendaForm.get('turno')?.value && turmasFiltradasByTurno().length === 0) {
+            <div class="text-danger small mt-1">
+              <i class="bi bi-exclamation-circle-fill me-1"></i>
+              Não há turmas disponíveis para o turno selecionado.
+            </div>
+          }
+        </div>
+
+        <!-- Horários -->
+        @if (horariosDinamicos().length > 0) {
+          <div class="col-12 mt-2">
+            <label class="form-label fw-bold text-dark mb-2">Horários Solicitados</label>
+            <div class="d-flex flex-wrap gap-2">
+              @for (h of horariosDinamicos(); track h.id) {
+                <div>
+                  <input 
+                    type="checkbox" 
+                    [id]="'hora-' + h.id" 
+                    [checked]="selectedHoras().includes(h.horaInicio + ' - ' + h.horaFim)"
+                    (change)="toggleHora(h.horaInicio + ' - ' + h.horaFim, $any($event.target).checked)"
+                    class="btn-check"
+                  >
+                  <label 
+                    [for]="'hora-' + h.id" 
+                    class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 fw-bold"
+                  >
+                    {{ h.horaInicio }} - {{ h.horaFim }}
+                  </label>
+                </div>
+              }
+            </div>
+            @if (agendaForm.get('horas')?.invalid && saveAttempted()) {
+              <div class="text-danger small mt-1">Selecione pelo menos um horário.</div>
+            }
+          </div>
+        }
+
+        <!-- Lista de Equipamentos -->
+        <div class="col-12 mt-3">
+          <label class="form-label fw-bold text-dark mb-2">Selecione o Equipamento</label>
+          
+          <!-- Templates para a Tabela -->
+          <ng-template #qtyTemplate let-item>
+            <input 
+              type="number" 
+              [value]="item.currentQty"
+              (input)="item.currentQty = +$any($event.target).value"
+              class="form-control form-control-sm text-center fw-bold bg-white" 
+              style="width: 70px; height: 32px;" 
+              min="0"
+            />
+          </ng-template>
+
+          <!-- Desktop View -->
+          <div class="d-none d-lg-block">
+            <tm-table 
+              [cols]="cols()" 
+              [data]="equipamentosFiltrados()" 
+              [paginated]="true" 
+              [pageSize]="5" 
+            ></tm-table>
+          </div>
+ 
+          <!-- Mobile Cards View -->
+          <div class="d-flex d-lg-none flex-column gap-2 mb-3 p-2 bg-light border border-light-subtle rounded-3 custom-scrollbar" style="max-height: 320px; overflow-y: auto; overflow-x: hidden;">
+            @for (item of equipamentosFiltrados(); track item.id) {
+              <div class="border rounded-4 p-3 bg-white shadow-sm transition-all" 
+                   [class.border-success]="itensSelecionados().some(i => i.id === item.id)">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h6 class="fw-bold text-dark mb-0">{{ item.nome }}</h6>
+                    <span class="badge bg-light text-muted border px-2 py-1 rounded-2 small mt-1">
+                      {{ item.tipo }}
+                    </span>
+                  </div>
+                  <div class="text-end">
+                    <span class="text-muted extra-small d-block">DISPONÍVEL</span>
+                    <strong class="text-primary fs-5">{{ item.quantidade }}</strong>
+                  </div>
+                </div>
+                
+                <div class="border-top pt-2 mt-2 d-flex align-items-center justify-content-end gap-3">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="small fw-bold text-muted">Qtd:</span>
+                    <input 
+                      type="number" 
+                      [value]="item.currentQty"
+                      (input)="item.currentQty = +$any($event.target).value"
+                      class="form-control form-control-sm text-center fw-bold bg-white shadow-none" 
+                      style="width: 60px; height: 34px; padding: 0.25rem;" 
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+ 
+          <!-- Botão Adicionar -->
+          <div class="d-flex justify-content-end mt-2">
+            <button 
+              type="button" 
+              class="btn btn-primary d-flex align-items-center gap-1 shadow-sm px-4 py-2 fw-bold rounded-3"
+              style="height: 38px;"
+              (click)="adicionarItem()"
+            >
+              <i class="bi bi-plus-circle-fill"></i> Adicionar
+            </button>
+          </div>
+ 
+          <!-- Resumo de Itens Adicionados -->
+          @if (itensSelecionados().length > 0) {
+            <div class="mt-3 p-3 bg-light border border-light-subtle rounded-3 d-flex flex-column gap-2 animate-in">
+              <h6 class="fw-bold text-dark mb-1 small">Itens Adicionados:</h6>
+              @for (item of itensSelecionados(); track item.id) {
+                <div class="d-flex align-items-center justify-content-between p-2 bg-white rounded-3 border @if($last){} shadow-xs">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">
+                      <i class="bi bi-check-lg small"></i>
+                    </div>
+                    <div>
+                      <span class="fw-bold text-dark small">{{ item.nome }}</span>
+                      <span class="badge bg-light text-primary border ms-1">{{ item.quantidade }}x</span>
+                    </div>
+                  </div>
+                  <button type="button" class="btn btn-link text-danger p-0 shadow-none" (click)="removerItem(item.id)" title="Remover item">
+                    <i class="bi bi-trash fs-6 text-danger"></i>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+          
+          @if (itensSelecionados().length === 0 && saveAttempted()) {
+            <div class="text-danger small mt-1">Por favor, adicione pelo menos um equipamento à lista.</div>
+          }
+        </div>
+
+        <!-- Identificação -->
+        <div class="col-12 mt-4">
+          <hr class="text-muted opacity-25">
+          <h6 class="fw-bold text-dark mb-2">Sua Identificação</h6>
+        </div>
+
+        <div class="col-12">
+          <tm-text
+            formControlName="matricula"
+            label="Matrícula"
+            placeholder="Ex: 202400123"
+            icon="bi-hash"
+            [control]="agendaForm.get('matricula')"
+          ></tm-text>
+        </div>
+
+        <div class="col-12">
+          <tm-text
+            formControlName="nomeCompleto"
+            label="Nome Completo"
+            placeholder="Ex: João Silva"
+            icon="bi-person"
+            [control]="agendaForm.get('nomeCompleto')"
+          ></tm-text>
+        </div>
+
+        <div class="col-12">
+          <tm-text
+            formControlName="celular"
+            label="Número de Celular"
+            placeholder="(11) 99999-9999"
+            icon="bi-telephone"
+            mask="phone"
+            [control]="agendaForm.get('celular')"
+          ></tm-text>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="col-12 mt-4">
+          <div class="d-flex gap-2 justify-content-end">
+            <button
+              type="button"
+              class="btn btn-light border px-4 fw-bold text-muted rounded-3"
+              (click)="onCancel()"
+              [disabled]="isSubmitting()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary px-4 fw-bold shadow-sm rounded-3 d-flex align-items-center gap-2"
+              [disabled]="isSubmitting()"
+            >
+              @if (isSubmitting()) {
+                <span class="spinner-border spinner-border-sm" role="status"></span>
+              }
+              Continuar
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </main>
+    </div> <!-- Closes Main Content Wrapper -->
+</div> <!-- Closes Container Fluid -->

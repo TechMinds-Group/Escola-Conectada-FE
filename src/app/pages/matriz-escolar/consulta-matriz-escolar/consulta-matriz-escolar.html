@@ -174,13 +174,14 @@
     <ng-template #statusTpl let-matrix>
       <span
         class="badge rounded-pill px-3 py-2 border-0"
-        [class.bg-success-subtle]="matrix.status === 'Ativa'"
-        [class.text-success]="matrix.status === 'Ativa'"
-        [class.bg-light]="matrix.status !== 'Ativa'"
-        [class.text-muted]="matrix.status !== 'Ativa'"
+        [class.bg-success-subtle]="!matrix.isClosed"
+        [class.text-success]="!matrix.isClosed"
+        [class.bg-warning-subtle]="matrix.isClosed"
+        [class.text-warning]="matrix.isClosed"
       >
-        <i class="bi bi-check-circle-fill me-1" *ngIf="matrix.status === 'Ativa'"></i>
-        {{ matrix.status === 'Ativa' ? t().admin.matrices.badges.active : matrix.status }}
+        <i class="bi bi-check-circle-fill me-1" *ngIf="!matrix.isClosed"></i>
+        <i class="bi bi-lock-fill me-1" *ngIf="matrix.isClosed"></i>
+        {{ !matrix.isClosed ? 'Aberta' : 'Fechada' }}
       </span>
     </ng-template>
   </div>
@@ -222,12 +223,12 @@
           </div>
           <span
             class="badge rounded-pill px-3 py-2 border-0 small"
-            [class.bg-success-subtle]="matrix.status === 'Ativa'"
-            [class.text-success]="matrix.status === 'Ativa'"
-            [class.bg-light]="matrix.status !== 'Ativa'"
-            [class.text-muted]="matrix.status !== 'Ativa'"
+            [class.bg-success-subtle]="!matrix.isClosed"
+            [class.text-success]="!matrix.isClosed"
+            [class.bg-warning-subtle]="matrix.isClosed"
+            [class.text-warning]="matrix.isClosed"
           >
-            {{ matrix.status === 'Ativa' ? t().admin.matrices.badges.active : matrix.status }}
+            {{ !matrix.isClosed ? 'Aberta' : 'Fechada' }}
           </span>
         </div>
       </div>

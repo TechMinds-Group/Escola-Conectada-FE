@@ -1,0 +1,154 @@
+<div class="container-fluid py-4 pb-5">
+  <!-- Sticky Header SaaS Style -->
+  <header
+    class="sticky-top bg-transparent backdrop-blur mb-4 py-3 z-3 sticky-header border-bottom border-light"
+  >
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-lg-auto">
+        <div class="d-flex align-items-center gap-3">
+          <button
+            class="btn transition-hover border-0 shadow-sm bg-white btn-back-responsive"
+            (click)="onCancel()"
+            title="Voltar"
+          >
+            <i class="bi bi-arrow-left fs-5 text-primary"></i>
+          </button>
+          <div>
+            <h2 class="fw-bold mb-0 text-dark fs-4 text-truncate" style="max-width: 300px">
+              {{
+                equipamentoId()
+                  ? isViewMode()
+                    ? 'Visualizar Equipamento'
+                    : 'Editar Equipamento'
+                  : 'Novo Equipamento'
+              }}
+            </h2>
+            <p class="text-muted mb-0 small text-uppercase fw-semibold tracking-wider opacity-75">
+              {{ equipamentoId() ? 'Gerenciamento de equipamento' : 'Cadastro de novo equipamento' }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-auto ms-auto">
+        <div class="row g-2 justify-content-end align-items-center">
+          @if (equipamentoId()) {
+            <div class="col-12 col-lg-auto order-3 order-lg-1">
+              <app-button-delete (onClick)="deleteEquipamento()" [isSolid]="true"></app-button-delete>
+            </div>
+            <div class="col-auto d-none d-lg-block order-2">
+              <div class="vr opacity-25" style="height: 30px"></div>
+            </div>
+          }
+
+          @if (isViewMode()) {
+            <div class="col-12 col-lg-auto order-1 order-lg-3">
+              <app-button-edit (onClick)="enableEdit()"></app-button-edit>
+            </div>
+          } @else {
+            <div class="col-12 col-lg-auto order-2 order-lg-2">
+              <app-button-cancel
+                (onClick)="isEditMode() ? cancelEdit() : onCancel()"
+              ></app-button-cancel>
+            </div>
+            <div class="col-12 col-lg-auto order-1 order-lg-3">
+              <app-button-save
+                (onClick)="onSubmit()"
+                [isSubmitting]="isSubmitting()"
+              ></app-button-save>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Card Container -->
+  <main class="card border-0 shadow-sm rounded-4 p-3 p-md-4 mb-4 bg-white overflow-hidden animate-in">
+    <form [formGroup]="equipamentoForm" (ngSubmit)="onSubmit()">
+      <div class="row g-4">
+          <!-- Nome -->
+          <div class="col-12 col-md-6">
+            <tm-text
+              formControlName="nome"
+              label="Nome do Equipamento"
+              placeholder="Ex: Dell Latitude 3420"
+              icon="bi-laptop"
+              [control]="equipamentoForm.get('nome')"
+            ></tm-text>
+          </div>
+
+          <!-- Tipo -->
+          <div class="col-12 col-md-6">
+            <div class="d-flex align-items-end gap-2">
+              <tm-select
+                formControlName="tipo"
+                label="Tipo de Equipamento"
+                [options]="typeOptions()"
+                placeholder="Selecione o tipo"
+                icon="bi-tag"
+                class="flex-fill"
+              ></tm-select>
+              <button
+                type="button"
+                class="btn btn-light border shadow-sm transition-hover d-flex align-items-center justify-content-center"
+                style="height: 48px; width: 48px; border-radius: 8px; margin-bottom: 2px"
+                (click)="openTypeManager()"
+                [disabled]="isViewMode()"
+                title="Gerenciar Tipos"
+              >
+                <i class="bi bi-plus-lg text-primary fs-5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quantidade -->
+          <div class="col-12 col-md-6">
+            <tm-text
+              formControlName="quantidade"
+              label="Quantidade"
+              placeholder="Ex: 10"
+              icon="bi-123"
+              [control]="equipamentoForm.get('quantidade')"
+            ></tm-text>
+          </div>
+
+
+          <!-- Solicitante -->
+          <div class="col-12 col-md-6">
+            <tm-select
+              formControlName="solicitante"
+              label="Solicitante / Quem pode agendar"
+              [options]="solicitanteOptions"
+              placeholder="Selecione quem pode agendar"
+              icon="bi-person"
+            ></tm-select>
+          </div>
+
+          <!-- Descrição -->
+          <div class="col-12">
+            <tm-text
+              formControlName="descricao"
+              label="Descrição / Observações"
+              placeholder="Ex: Localizado no armário 2 da sala de informática."
+              icon="bi-card-text"
+              [textarea]="true"
+              [rows]="3"
+              [control]="equipamentoForm.get('descricao')"
+            ></tm-text>
+          </div>
+        </div>
+    </form>
+  </main>
+</div>
+
+<app-modal-manage-list
+  #typeModal
+  [isOpen]="showTypeManager()"
+  (close)="closeTypeManager()"
+  (onSave)="saveType($event)"
+  (onDelete)="deleteType($event)"
+  [items]="equipamentoTypes()"
+  title="Tipos de Equipamento"
+  inputPlaceholder="Ex: Notebook, Projetor..."
+></app-modal-manage-list>

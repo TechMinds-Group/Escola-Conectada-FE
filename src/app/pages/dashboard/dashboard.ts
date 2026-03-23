@@ -305,7 +305,7 @@ export class Dashboard implements AfterViewInit, OnInit {
   }
 
   copyLink() {
-    const url = window.location.origin + '/view';
+    const url = window.location.origin + '/public';
     navigator.clipboard.writeText(url).then(() => {
       const msg = this.t().admin.dashboard.quickAccess.copyUrl || 'Link Copiado';
       alert(msg + ': ' + url);

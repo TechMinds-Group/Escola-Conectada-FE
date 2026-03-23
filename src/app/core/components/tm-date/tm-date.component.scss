@@ -128,6 +128,22 @@
   }
 }
 
+:host-context([data-theme='dark']) {
+  .input-wrapper {
+    background: var(--input-bg) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+
+    .custom-input {
+      color: #ffffff !important;
+
+      &::placeholder {
+        color: #ffffff !important;
+        opacity: 0.8 !important;
+      }
+    }
+  }
+}
+
 // Dark Mode Overrides (Global for Overlay and inner components)
 // We use ::ng-deep combined with the global [data-theme='dark'] selector
 ::ng-deep [data-theme='dark'] {

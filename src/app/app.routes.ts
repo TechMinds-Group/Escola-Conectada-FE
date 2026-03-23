@@ -110,6 +110,33 @@ export const routes: Routes = [
       { path: 'ambientes', component: ConsultaAmbiente, data: { roles: [ROLES.ADMIN] } },
       { path: 'ambientes/new', component: CadastroAmbiente, data: { roles: [ROLES.ADMIN] } },
       { path: 'ambientes/edit/:id', component: CadastroAmbiente, data: { roles: [ROLES.ADMIN] } },
+      
+      // Equipamentos
+      {
+        path: 'equipamentos',
+        data: { roles: [ROLES.ADMIN] },
+        loadComponent: () =>
+          import('./pages/equipamentos/consulta-equipamento/consulta-equipamento').then(
+            (m) => m.ConsultaEquipamento
+          )
+      },
+      {
+        path: 'equipamentos/new',
+        data: { roles: [ROLES.ADMIN] },
+        loadComponent: () =>
+          import('./pages/equipamentos/cadastro-equipamento/cadastro-equipamento').then(
+            (m) => m.CadastroEquipamento
+          )
+      },
+      {
+        path: 'equipamentos/edit/:id',
+        data: { roles: [ROLES.ADMIN] },
+        loadComponent: () =>
+          import('./pages/equipamentos/cadastro-equipamento/cadastro-equipamento').then(
+            (m) => m.CadastroEquipamento
+          )
+      },
+
       { path: 'events', component: ConsultaCalendario, data: { roles: [ROLES.ADMIN] } },
       // Avisos
       {
@@ -188,6 +215,18 @@ export const routes: Routes = [
     ],
   },
   { path: 'view', component: PublicView },
+  {
+    path: 'public',
+    loadComponent: () =>
+      import('./pages/public/public-menu/public-menu').then((m) => m.PublicMenu),
+  },
+  {
+    path: 'agendar-equipamento',
+    loadComponent: () =>
+      import('./pages/public/agendar-equipamento/agendar-equipamento').then(
+        (m) => m.AgendarEquipamento,
+      ),
+  },
   {
     path: 'ativar-licenca',
     loadComponent: () =>

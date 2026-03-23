@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, TemplateRef, Output, EventEmitter, computed } from '@angular/core';
+import { Component, Input, TemplateRef, Output, EventEmitter, computed, signal } from '@angular/core';
 
 export interface TableColumn<T = any> {
   header: string;
@@ -45,10 +45,11 @@ export interface TableColumn<T = any> {
                 </tr>
               }
             } @else {
-              @for (row of data; track $index) {
+              @for (row of paginatedData(); track $index) {
                 <tr
                   class="row-item transition-all"
                   [class.cursor-pointer]="rowClick.observed"
+                  [class.table-active]="selectedId && getCellValue(row, 'id') === selectedId"
                   (click)="onRowClick(row)"
                 >
                   @for (col of cols; track col.header) {
@@ -82,6 +83,40 @@ export interface TableColumn<T = any> {
           </tbody>
         </table>
       </div>
+      
+      @if (paginated && _data().length > 0) {
+        <div class="table-footer d-flex justify-content-between align-items-center px-4 py-2 border-top">
+          <div class="text-secondary" style="font-size: 0.85rem;">
+            Mostrando <span class="fw-bold text-dark">{{ (currentPage() - 1) * pageSize + 1 }}</span> - 
+            <span class="fw-bold text-dark">{{ Math.min(currentPage() * pageSize, _data().length) }}</span> de 
+            <span class="fw-bold text-dark">{{ _data().length }}</span>
+          </div>
+          
+          <div class="d-flex align-items-center gap-1">
+            <button class="pagination-btn" [disabled]="currentPage() === 1" (click)="prevPage()">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+
+            @for (page of pages(); track $index) {
+              @if (page === '...') {
+                <span class="pagination-dots">...</span>
+              } @else {
+                <button 
+                  class="pagination-btn" 
+                  [class.active]="currentPage() === page" 
+                  (click)="setPage(page)"
+                >
+                  {{ page }}
+                </button>
+              }
+            }
+
+            <button class="pagination-btn" [disabled]="currentPage() >= totalPages()" (click)="nextPage()">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [
@@ -98,11 +133,15 @@ export interface TableColumn<T = any> {
       }
 
       .header-cell {
-        background-color: var(--input-bg);
+        background-color: var(--input-bg, #f8fafc);
         color: var(--text-secondary);
         font-size: 0.75rem;
         border-bottom: 2px solid var(--border-color);
         white-space: nowrap;
+      }
+
+      .table-footer {
+        background-color: var(--input-bg, #f8fafc);
       }
 
       .cell-item {
@@ -215,6 +254,51 @@ export interface TableColumn<T = any> {
         }
       }
 
+      .pagination-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--text-secondary, #64748b);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.22s ease-in-out;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+          background-color: var(--hover-bg, rgba(0, 0, 0, 0.03));
+          color: var(--text-primary);
+        }
+
+        &:disabled {
+          opacity: 0.35;
+          cursor: not-allowed;
+        }
+
+        &.active {
+          background: linear-gradient(135deg, var(--bs-primary, #0d6efd), #0a58ca);
+          color: white !important;
+          font-weight: 600;
+          box-shadow: 0 2px 5px rgba(13, 110, 253, 0.25);
+        }
+      }
+
+      .pagination-dots {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        padding: 0 4px;
+        align-self: center;
+      }
+
+      :host-context([data-theme='dark']) {
+        .pagination-btn:hover:not(:disabled) {
+          background-color: rgba(255, 255, 255, 0.06);
+        }
+      }
+
       :host-context([data-theme='dark']) .custom-scrollbar::-webkit-scrollbar-thumb {
         background: rgba(255, 255, 255, 0.1);
       }
@@ -223,9 +307,69 @@ export interface TableColumn<T = any> {
 })
 export class TableComponent<T> {
   @Input() cols: TableColumn<T>[] = [];
-  @Input() data: T[] = [];
+  
+  _data = signal<T[]>([]);
+  @Input() set data(value: T[]) {
+    this._data.set(value || []);
+    this.currentPage.set(1);
+  }
+
+  @Input() paginated = false;
+  @Input() pageSize = 5;
+  @Input() selectedId: any = null;
+
   @Input() isLoading = false;
   @Output() rowClick = new EventEmitter<T>();
+
+  currentPage = signal(1);
+  protected Math = Math;
+
+  paginatedData = computed(() => {
+    if (!this.paginated) return this._data();
+    const start = (this.currentPage() - 1) * this.pageSize;
+    return this._data().slice(start, start + this.pageSize);
+  });
+
+  totalPages = computed(() => Math.ceil(this._data().length / this.pageSize));
+
+  pages = computed(() => {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    const pages: (number | string)[] = [];
+
+    if (total <= 5) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (current > 3) pages.push('...');
+      
+      let start = Math.max(2, current - 1);
+      let end = Math.min(total - 1, current + 1);
+
+      if (current <= 3) end = 4;
+      if (current >= total - 2) start = total - 3;
+
+      for (let i = start; i <= end; i++) pages.push(i);
+
+      if (current < total - 2) pages.push('...');
+      pages.push(total);
+    }
+    return pages;
+  });
+
+  setPage(page: number | string) {
+    if (typeof page === 'number') {
+      this.currentPage.set(page);
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage() > 1) this.currentPage.update(p => p - 1);
+  }
+
+  nextPage() {
+    if (this.currentPage() < this.totalPages()) this.currentPage.update(p => p + 1);
+  }
 
   onRowClick(row: T) {
     if (this.rowClick.observed) {

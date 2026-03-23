@@ -56,6 +56,17 @@ export class TmDateComponent implements ControlValueAccessor, OnInit {
   @Input() placeholder = 'DD/MM/AAAA HH:mm';
   @Input() disabled = false;
 
+  private _includeTime = true;
+  @Input() set includeTime(val: boolean) {
+    this._includeTime = val;
+    if (!val && this.placeholder === 'DD/MM/AAAA HH:mm') {
+      this.placeholder = 'DD/MM/AAAA';
+    }
+  }
+  get includeTime(): boolean {
+    return this._includeTime;
+  }
+
   // Estado Interno (Sinalizado para máxima reatividade)
   internalDate = signal<Date | null>(null);
   currentViewDate = signal<Date>(new Date());
@@ -118,7 +129,8 @@ export class TmDateComponent implements ControlValueAccessor, OnInit {
   displayValue = computed(() => {
     const date = this.internalDate();
     if (!date) return '';
-    return format(date, 'dd/MM/yyyy HH:mm', { locale: ptBR });
+    const formatStr = this.includeTime ? 'dd/MM/yyyy HH:mm' : 'dd/MM/yyyy';
+    return format(date, formatStr, { locale: ptBR });
   });
 
   // Tempo (Horas e Minutos)
@@ -147,7 +159,14 @@ export class TmDateComponent implements ControlValueAccessor, OnInit {
   // ============================
   writeValue(value: any): void {
     if (value) {
-      const parsedDate = new Date(value);
+      let parsedDate: Date;
+      if (typeof value === 'string' && value.includes('-') && value.length === 10) {
+        const [year, month, day] = value.split('-').map(Number);
+        parsedDate = new Date(year, month - 1, day);
+      } else {
+        parsedDate = new Date(value);
+      }
+
       if (!isNaN(parsedDate.getTime())) {
         this.internalDate.set(parsedDate);
         this.currentViewDate.set(parsedDate);

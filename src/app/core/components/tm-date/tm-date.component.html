@@ -80,34 +80,36 @@
         }
       </div>
 
-      <hr class="opacity-25 my-3" />
+      @if (includeTime) {
+        <hr class="opacity-25 my-3" />
 
-      <!-- Time Selectors -->
-      <div class="time-section d-flex justify-content-center align-items-center gap-2 mb-2">
-        <i class="bi bi-clock text-muted"></i>
+        <!-- Time Selectors -->
+        <div class="time-section d-flex justify-content-center align-items-center gap-2 mb-2">
+          <i class="bi bi-clock text-muted"></i>
 
-        <select
-          class="form-select form-select-sm fw-bold border-0 shadow-xs time-select text-center"
-          style="width: 70px; border-radius: 8px"
-          [value]="selectedHour()"
-          (change)="selectHour($any($event.target).value)"
-        >
-          @for (h of hours; track h) {
-            <option [value]="h">{{ h }}</option>
-          }
-        </select>
-        <span class="fw-bold colon-separator">:</span>
-        <select
-          class="form-select form-select-sm fw-bold border-0 shadow-xs time-select text-center"
-          style="width: 70px; border-radius: 8px"
-          [value]="selectedMinute()"
-          (change)="selectMinute($any($event.target).value)"
-        >
-          @for (m of minutes; track m) {
-            <option [value]="m">{{ m }}</option>
-          }
-        </select>
-      </div>
+          <select
+            class="form-select form-select-sm fw-bold border-0 shadow-xs time-select text-center"
+            style="width: 70px; border-radius: 8px"
+            [value]="selectedHour()"
+            (change)="selectHour($any($event.target).value)"
+          >
+            @for (h of hours; track h) {
+              <option [value]="h">{{ h }}</option>
+            }
+          </select>
+          <span class="fw-bold colon-separator">:</span>
+          <select
+            class="form-select form-select-sm fw-bold border-0 shadow-xs time-select text-center"
+            style="width: 70px; border-radius: 8px"
+            [value]="selectedMinute()"
+            (change)="selectMinute($any($event.target).value)"
+          >
+            @for (m of minutes; track m) {
+              <option [value]="m">{{ m }}</option>
+            }
+          </select>
+        </div>
+      }
     </div>
 
     <!-- Footer Actions -->
