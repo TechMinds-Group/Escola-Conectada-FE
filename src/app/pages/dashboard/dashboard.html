@@ -271,15 +271,16 @@
               </a>
             </div>
             <div class="col-6">
-              <button
-                (click)="copyLink()"
-                class="btn btn-light w-100 p-3 h-100 d-flex flex-column align-items-center gap-2 rounded-4 hover-lift border-theme bg-surface"
+              <a
+                routerLink="/public"
+                target="_blank"
+                class="btn btn-light w-100 p-3 h-100 d-flex flex-column align-items-center gap-2 rounded-4 hover-lift border-theme bg-surface text-decoration-none"
               >
                 <i class="bi bi-link-45deg text-info fs-3"></i>
                 <small class="fw-bold text-muted">{{
                   t().admin.dashboard.quickAccess.publicLink
                 }}</small>
-              </button>
+              </a>
             </div>
           </div>
         </div>

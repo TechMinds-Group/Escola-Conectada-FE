@@ -14,7 +14,9 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SchoolDataService, SchoolClass } from '../../../core/services/school-data';
+import { ThemeService } from '../../../core/services/theme.service';
 import { TranslationService } from '../../../core/services/translation.service';
+import { TRANSLATIONS } from '../../../core/data/translations';
 import { MatIconModule } from '@angular/material/icon';
 import { debounceTime } from 'rxjs';
 
@@ -28,9 +30,23 @@ import { debounceTime } from 'rxjs';
 export class PublicView implements OnInit, OnDestroy {
   private schoolData = inject(SchoolDataService);
   public translationService = inject(TranslationService);
+  public theme = inject(ThemeService);
 
   // Translation Helper for Template
   t = this.translationService.dictionary;
+
+  availableLanguages = Object.keys(TRANSLATIONS).map((code) => ({
+    code: code as 'pt' | 'es' | 'en',
+    flag: this.getFlagForLanguage(code as 'pt' | 'es' | 'en'),
+    name: code,
+  }));
+
+  getFlagForLanguage(lang: 'pt' | 'es' | 'en'): string {
+    const flagMap = { pt: 'br', es: 'es', en: 'us' };
+    return 'assets/flags/' + flagMap[lang] + '.svg';
+  }
+
+  isLanguageSheetOpen = false;
 
   // Mode detection
   isMobile = signal(window.innerWidth < 992);
@@ -530,5 +546,18 @@ export class PublicView implements OnInit, OnDestroy {
       (a: { dayOfWeek?: number; slotIndex?: number }) =>
         String(a.dayOfWeek) === String(adjustedDay) && String(a.slotIndex) === String(slot.index),
     );
+  }
+
+  openLanguageSheet() {
+    this.isLanguageSheetOpen = true;
+  }
+
+  closeLanguageSheet() {
+    this.isLanguageSheetOpen = false;
+  }
+
+  selectLanguageMobile(lang: 'pt' | 'es' | 'en') {
+    this.translationService.setLang(lang);
+    this.closeLanguageSheet();
   }
 }

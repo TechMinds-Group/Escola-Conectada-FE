@@ -304,13 +304,7 @@ export class Dashboard implements AfterViewInit, OnInit {
     return 'Noite';
   }
 
-  copyLink() {
-    const url = window.location.origin + '/public';
-    navigator.clipboard.writeText(url).then(() => {
-      const msg = this.t().admin.dashboard.quickAccess.copyUrl || 'Link Copiado';
-      alert(msg + ': ' + url);
-    });
-  }
+
 
   ngAfterViewInit() {
     // Auto-scroll to today in the monthly preview card

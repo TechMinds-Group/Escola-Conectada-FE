@@ -13,7 +13,7 @@ import { ThemeService } from '../../../core/services/theme.service';
 import { TranslationService } from '../../../core/services/translation.service';
 import { TRANSLATIONS } from '../../../core/data/translations';
 import { TmDateComponent } from '../../../core/components/tm-date/tm-date.component';
-import { combineLatest, startWith, forkJoin } from 'rxjs';
+import { combineLatest, startWith, forkJoin, debounceTime } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
@@ -305,6 +305,16 @@ export class AgendarEquipamento implements OnInit, AfterViewInit {
     this.loadEquipamentos();
     this.loadTurmas();
     this.loadGradesHorarias();
+
+    this.matriculaConsultaControl.valueChanges
+      .pipe(debounceTime(400))
+      .subscribe((val) => {
+        if (val && val.trim() !== '') {
+          this.consultarHistorico();
+        } else {
+          this.historicoList.set([]);
+        }
+      });
 
     this.agendaForm.get('turmaId')!.valueChanges.subscribe(() => {
       this.selectedHoras.set([]);

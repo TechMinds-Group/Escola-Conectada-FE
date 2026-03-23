@@ -1,6 +1,4 @@
-.public-menu-container {
-  background: radial-gradient(circle at top, rgba(13, 110, 253, 0.05), #f8f9fa);
-}
+
 
 .transition-hover {
   transition: all 0.3s ease-in-out;
@@ -12,6 +10,135 @@
   }
 }
 
-.bg-surface {
-  background-color: #ffffff;
+
+
+/* Estilos copiados de topbar.scss para botões e dropdowns */
+.btn-header-action {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+
+  i {
+    font-size: 1.1rem;
+  }
+
+  &:hover {
+    background-color: #f9fafb !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    color: #000000 !important;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.glass-dropdown {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 12px !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  padding: 0.5rem;
+  min-width: 200px;
+}
+
+.glass-dropdown.language-dropdown {
+  min-width: 60px !important;
+  width: auto !important;
+
+  .dropdown-item {
+    padding: 0.5rem !important;
+    justify-content: center !important;
+
+    .bi-check-lg {
+      display: none !important;
+    }
+  }
+}
+
+.dropdown-item {
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  &.active-lang {
+    background-color: rgba(139, 92, 246, 0.08);
+  }
+}
+
+.mobile-sheet-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2099;
+  backdrop-filter: blur(4px);
+}
+
+.mobile-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2100;
+  background-color: #fff;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+:host-context([data-theme='dark']) {
+  .btn-header-action {
+    background-color: #000000 !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff !important;
+
+    &:hover {
+      background-color: #1a1a1a !important;
+      border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+  }
+
+  .glass-dropdown {
+    background: rgba(0, 0, 0, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+  }
+
+  .dropdown-item {
+    color: #f3f4f6 !important;
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+  }
+
+  .mobile-sheet {
+    background-color: #0b0b0f !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+  }
 }
