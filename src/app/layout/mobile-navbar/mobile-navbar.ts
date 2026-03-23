@@ -5,6 +5,7 @@ import { filter } from 'rxjs/operators';
 import { TranslationService } from '../../core/services/translation.service';
 import { ProfessorService } from '../../core/services/professor.service';
 import { AmbienteService } from '../../core/services/ambiente.service';
+import { AuthService, ROLES } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-mobile-navbar',
@@ -18,6 +19,17 @@ export class MobileNavbar implements OnInit {
   public t = inject(TranslationService).dictionary;
   private professorService = inject(ProfessorService);
   private ambienteService = inject(AmbienteService);
+  public auth = inject(AuthService);
+  public ROLES = ROLES;
+
+  get user() {
+    return this.auth.getCurrentUser();
+  }
+
+  logout(event: Event) {
+    event.preventDefault();
+    this.auth.logout();
+  }
   isCadastrosOpen = false;
   isConfigOpen = false;
   isProfileOpen = false;

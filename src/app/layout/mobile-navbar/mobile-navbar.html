@@ -17,6 +17,7 @@
     <div class="panel-body p-2">
       <div class="row g-2 text-center">
         <!-- Professores -->
+        @if (auth.hasRole(ROLES.ADMIN)) {
         <div class="col-4">
           <a
             (click)="closeMenu()"
@@ -27,7 +28,9 @@
             <span class="small fw-bold">{{ t().admin.sidebar.teachers }}</span>
           </a>
         </div>
+        }
         <!-- Turmas -->
+        @if (auth.hasRole(ROLES.ADMIN)) {
         <div class="col-4">
           <a
             (click)="closeMenu()"
@@ -38,7 +41,9 @@
             <span class="small fw-bold">{{ t().admin.sidebar.classes }}</span>
           </a>
         </div>
+        }
         <!-- Salas (Ambientes) -->
+        @if (auth.hasRole(ROLES.ADMIN)) {
         <div class="col-4">
           <a
             (click)="closeMenu()"
@@ -49,7 +54,22 @@
             <span class="small fw-bold">{{ t().admin.sidebar.rooms }}</span>
           </a>
         </div>
+        }
+        <!-- Equipamentos -->
+        @if (auth.hasRole(ROLES.ADMIN)) {
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/equipamentos"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-laptop fs-3 mb-1 text-info"></i>
+            <span class="small fw-bold">Equipamentos</span>
+          </a>
+        </div>
+        }
         <!-- Matriz -->
+        @if (auth.hasRole(ROLES.ADMIN)) {
         <div class="col-4">
           <a
             (click)="closeMenu()"
@@ -60,7 +80,9 @@
             <span class="small fw-bold">{{ t().admin.sidebar.matrix }}</span>
           </a>
         </div>
+        }
         <!-- Matérias -->
+        @if (auth.hasRole(ROLES.ADMIN)) {
         <div class="col-4">
           <a
             (click)="closeMenu()"
@@ -71,18 +93,22 @@
             <span class="small fw-bold">{{ t().admin.sidebar.subjects }}</span>
           </a>
         </div>
+        }
         <!-- Calendário -->
+        @if (auth.hasRole(ROLES.ADMIN)) {
         <div class="col-4">
           <a
             (click)="closeMenu()"
-            routerLink="/calendar"
+            routerLink="/events"
             class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
           >
             <i class="bi bi-calendar-event fs-3 mb-1 text-info"></i>
             <span class="small fw-bold">{{ t().admin.sidebar.calendar }}</span>
           </a>
         </div>
+        }
         <!-- Avisos -->
+        @if (auth.hasRole(ROLES.ADMIN)) {
         <div class="col-4">
           <a
             (click)="closeMenu()"
@@ -93,6 +119,7 @@
             <span class="small fw-bold">{{ t().admin.sidebar.notices }}</span>
           </a>
         </div>
+        }
         <!-- Reservas -->
         <div class="col-4">
           <a
@@ -102,6 +129,17 @@
           >
             <i class="bi bi-calendar-check fs-3 mb-1 text-primary"></i>
             <span class="small fw-bold">{{ t().admin.sidebar.reservasSalas }}</span>
+          </a>
+        </div>
+        <!-- Calendário do Professor -->
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/calendario-professor"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-calendar-week fs-3 mb-1 text-success"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.professorCalendar }}</span>
           </a>
         </div>
       </div>
@@ -158,19 +196,18 @@
       <button class="btn-close ms-auto" style="font-size: 0.8rem" (click)="closeMenu()"></button>
     </div>
     <div class="panel-body p-2">
-      <!-- User Info Mini Header -->
-      <div class="d-flex align-items-center gap-3 p-3 mb-2 bg-light-alpha rounded-3 border-theme">
-        <img
-          src="https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff"
-          class="rounded-circle border border-theme"
-          width="48"
-          height="48"
-        />
-        <div>
-          <div class="fw-bold text-main">Admin User</div>
-          <div class="small text-muted">admin@escola.com.br</div>
+        <div class="d-flex align-items-center gap-3 p-3 mb-2 bg-light-alpha rounded-3 border-theme">
+          <img
+            [src]="'https://ui-avatars.com/api/?name=' + (user?.nome || 'User') + '&background=0D8ABC&color=fff'"
+            class="rounded-circle border border-theme"
+            width="48"
+            height="48"
+          />
+          <div>
+            <div class="fw-bold text-main">{{ user?.nome || 'Usuário' }}</div>
+            <div class="small text-muted">{{ user?.email || 'email@escola.com.br' }}</div>
+          </div>
         </div>
-      </div>
 
       <!-- Action Grid -->
       <div class="row g-2 text-center">
@@ -187,6 +224,7 @@
         </div>
 
         <!-- Config Escola -->
+        @if (auth.hasRole(ROLES.ADMIN)) {
         <div class="col-4">
           <a
             (click)="closeMenu()"
@@ -197,8 +235,10 @@
             <span class="small fw-bold">{{ t().admin.sidebar.schoolSettings }}</span>
           </a>
         </div>
+        }
 
         <!-- Gestão Usuários -->
+        @if (auth.hasRole(ROLES.ADMIN)) {
         <div class="col-4">
           <a
             (click)="closeMenu()"
@@ -209,12 +249,28 @@
             <span class="small fw-bold">{{ t().admin.sidebar.users }}</span>
           </a>
         </div>
+        }
+
+        <!-- Licenciamento -->
+        @if (auth.hasRole(ROLES.ADMIN)) {
+        <div class="col-4">
+          <a
+            (click)="closeMenu()"
+            routerLink="/licensing"
+            class="panel-item text-decoration-none text-dark d-flex flex-column align-items-center p-2 rounded hover-bg"
+          >
+            <i class="bi bi-shield-lock fs-3 mb-1 text-warning"></i>
+            <span class="small fw-bold">{{ t().admin.sidebar.licensing }}</span>
+          </a>
+        </div>
+        }
 
         <!-- Sair -->
         <div class="col-4">
           <a
             (click)="closeMenu()"
             href="#"
+            (click)="logout($event)"
             class="panel-item text-decoration-none text-danger d-flex flex-column align-items-center p-2 rounded hover-bg"
           >
             <i class="bi bi-box-arrow-right fs-3 mb-1"></i>
@@ -230,6 +286,7 @@
     class="nav-bar-container d-flex align-items-center justify-content-around pb-2 pt-2 bg-surface border-top border-theme"
   >
     <!-- 1. Home -->
+    @if (auth.hasRole(ROLES.ADMIN)) {
     <a
       routerLink="/dashboard"
       routerLinkActive="active"
@@ -238,6 +295,7 @@
       <i class="bi bi-house-door fs-4"></i>
       <span class="xx-small mt-1">{{ t().admin.sidebar.dashboard }}</span>
     </a>
+    }
 
     <!-- 2. Registros (Toggle) -->
     <button
@@ -250,6 +308,7 @@
     </button>
 
     <!-- 3. Config (Toggle) -->
+    @if (auth.hasRole(ROLES.ADMIN)) {
     <button
       class="nav-item border-0 bg-transparent text-decoration-none d-flex flex-column align-items-center text-muted"
       (click)="toggleConfig($event)"
@@ -258,6 +317,7 @@
       <i class="bi bi-gear fs-4"></i>
       <span class="xx-small mt-1">{{ t().admin.sidebar.settings }}</span>
     </button>
+    }
 
     <!-- 4. Perfil (Toggle) -->
     <button
